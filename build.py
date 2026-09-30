@@ -8,13 +8,14 @@ from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
 RAW, OUT = ROOT / "art" / "raw", ROOT / "art" / "out"
-CELL = 2.0                  # TTS units per grid square
-MAP_W = 44.0                # map width in units (22 squares)
-TILE_UNIT = 2.0             # ponytail: Custom_Tile at scale 1 is ~2 units wide; adjust if maps come out the wrong size
+COLS, ROWS = 22, 22 / 1.5   # grid squares across/down the 3:2 scene art
+TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
+ART_FRAC = 0.64             # share of the table width the scene art covers; the wooden border holds the player kits
+# measured-at-load layout knobs, passed to game.lua (fractions of the table's measured width/depth)
+LAYOUT = {"cols": COLS, "rows": ROWS, "art_w": ART_FRAC, "surface": 1.0,
+          "kit_x": 0.41, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0}
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSerif{}.ttf"
 RGB = {"Red": (150, 35, 35), "Blue": (35, 70, 150), "Green": (35, 115, 55), "Purple": (100, 45, 135)}
-# hands sit behind the sheets, bottom pair faces north, top pair faces south
-SEATS = {"Red": (-14, -1), "Blue": (14, -1), "Green": (14, 1), "Purple": (-14, 1)}
 
 
 def font(size, bold=False):
@@ -79,13 +80,20 @@ def build_images():
         make_sheet(h).save(OUT / f"sheet_{h['key']}.jpg", quality=90)
         Image.open(RAW / f"portrait_{h['key']}.png").convert("RGB").resize((256, 256)).save(OUT / f"portrait_{h['key']}.jpg")
     Image.open(RAW / "card_back.png").convert("RGB").resize((500, 700)).save(OUT / "card_back.jpg", quality=90)
+    wood = Image.open(RAW / "table_wood.png").convert("RGB").resize(TABLE_PX)
+    aw = int(TABLE_PX[0] * ART_FRAC)
+    ah = int(aw / 1.5)
     for s in SCENES:
         im = Image.open(RAW / f"map_{s['key']}.png").convert("RGB")
         if s["key"] == "title":
             d = ImageDraw.Draw(im)
             d.text((768, 470), s["title"], font=font(110, True), fill=(250, 235, 200), anchor="mm",
                    stroke_width=6, stroke_fill=(40, 20, 10))
-        im.save(OUT / f"map_{s['key']}.jpg", quality=88)
+        table = wood.copy()
+        x0, y0 = (TABLE_PX[0] - aw) // 2, (TABLE_PX[1] - ah) // 2
+        ImageDraw.Draw(table).rectangle((x0 - 14, y0 - 14, x0 + aw + 13, y0 + ah + 13), fill=(150, 115, 50))
+        table.paste(im.resize((aw, ah), Image.LANCZOS), (x0, y0))
+        table.save(OUT / f"table_{s['key']}.jpg", quality=85)
 
 
 # ---------------------------------------------------------------- TTS objects
@@ -109,13 +117,15 @@ def tile(url, transform, **kw):
         "CustomTile": {"Type": 0, "Thickness": 0.2, "Stackable": False, "Stretch": False}}, **kw)
 
 
+# Everything on the table is positioned by grid square; game.lua measures the table at load and turns
+# "grid" into a world transform (TTS table sizes aren't documented, guessing them made things fall off).
 def npc(key, x, z, n, scene, hp=None):
     t = NPCS[key]
     hp = hp or t["hp"]
     attacks = [dict(name=a, hit=b, dmg=c, note=d) for a, b, c, d in t["attacks"]]
     ry = (270.0 if x > 0 else 90.0) + (180.0 if t.get("flip") else 0.0)   # flip: model faces backwards
-    o = obj(t["fig"], tf(x * CELL, 3.0, z * CELL, ry=ry),
-            GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"])
+    o = obj(t["fig"], tf(ry=ry), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"],
+            grid={"x": x, "z": z, "k": "fig"})
     if t.get("dead"):
         o["RPGdead"] = True
     if t.get("tint"):
@@ -127,29 +137,38 @@ def npc(key, x, z, n, scene, hp=None):
     return o
 
 
-def scene_data(s, base):
-    spawns = [tile(f"{base}art/out/map_{s['key']}.jpg", tf(y=1.0, s=MAP_W / TILE_UNIT), Tags=["scene", "pin"],
-                   GUID=guid(s["key"], "map"), Nickname=s["title"])]
+def prop(spec, n, scene, base, textures):
+    name, x, z, *rest = spec
+    rot, scale = (list(rest) + [0, 1][len(rest):])[:2]      # optional rot, scale
+    s = list(scale) if isinstance(scale, (list, tuple)) else [scale] * 3
+    common = dict(GUID=guid(scene, "prop", n), Tags=["scene", "pin"], Tooltip=False)
+    if name.startswith("Tileset_"):                       # built-in TTS tileset piece
+        return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
+    return obj("Custom_Model", tf(ry=rot), grid={"x": x, "z": z, "k": "model", "s": s}, Nickname="", **common,
+               CustomMesh={"MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{textures[name]}",
+                           "NormalURL": "", "ColliderURL": f"{base}props/collider_flat.obj", "Convex": True,
+                           "MaterialIndex": 1, "TypeIndex": 0, "CastShadows": True})
+
+
+def scene_data(s, base, textures):
+    spawns = []
     if s["fog"]:
-        spawns.append(obj("FogOfWar", {**tf(y=3.0), "scaleX": MAP_W + 2, "scaleY": 6.0, "scaleZ": MAP_W * 2 / 3 + 2},
-                          GUID=guid(s["key"], "fog"), Tags=["scene", "fog", "pin"],
-                          FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0}))
+        spawns.append(obj("FogOfWar", tf(), GUID=guid(s["key"], "fog"), Tags=["scene", "fog"],
+                          FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0}, grid={"k": "fog"}))
+    for n, spec in enumerate(s.get("props", [])):
+        spawns.append(prop(spec, n, s["key"], base, textures))
     for n, spec in enumerate(s["npcs"]):
         spawns.append(npc(*spec[:3], n, s["key"], *spec[3:]))
-    if s["key"] == "den":   # Rat's Bones dice on the gambling table
-        spawns += [obj("Die_6", tf(-2.0 + i, 2.0, -1.5), GUID=guid("den", "die", i), Tags=["scene"]) for i in range(3)]
-    return dict(title=s["title"], spawns=spawns,
-                heroes=[[x * CELL, 4.0, z * CELL] for x, z in s["heroes"]],
-                music=dict(url=f"{base}music/{s['music']}", title=s["title"]))
+    if s["key"] == "den":   # Baron's Bones dice on the gambling table
+        spawns += [obj("Die_6", tf(), GUID=guid("den", "die", i), Tags=["scene"], grid={"x": -0.6 + 0.6 * i, "z": 0, "k": "fig"})
+                   for i in range(3)]
+    return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
+                table=f"{base}art/out/table_{s['key']}.jpg", music=dict(url=f"{base}music/{s['music']}", title=s["title"]))
 
 
 def hero_objects(h, n, base):
-    """Figure on the title map, plus sheet/counter/d20/deck in front of the seat."""
+    """Figure plus sheet/counter/d20/deck; game.lua puts the kit in the player's corner of the table ("role")."""
     c = h["color"]
-    sx, side = SEATS[c]
-    ry = 0.0 if side < 0 else 180.0
-    z = side * 21.0                       # sheet row between map edge (±14.7) and hands (±29)
-    dx = 1 if side < 0 else -1            # keep left/right the same from the player's point of view
     face = f"{base}art/out/cards_{h['key']}.jpg"
     cdeck = {"FaceURL": face, "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 3, "NumHeight": 2,
              "BackIsHidden": True, "UniqueBack": False, "Type": 0}
@@ -157,18 +176,20 @@ def hero_objects(h, n, base):
     cards = [obj("Card", tf(), CardID=cid, Hands=True, Nickname=title, Description=text, Tags=["kit", f"card_{c}"],
                  CustomDeck={str(n + 1): cdeck}, GUID=guid(c, "card", i))
              for i, (cid, (title, text, _)) in enumerate(zip(ids, h["cards"]))]
-    dice = [obj("Die_20", tf(sx + dx * 9, 2.0, z - 2), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=dict(zip("rgb", [v / 255 for v in RGB[c]])))]
+    colour = dict(zip("rgb", [v / 255 for v in RGB[c]]))
     return [
-        obj(h["fig"], tf(SCENES[0]["heroes"][n][0] * CELL, 3.0, SCENES[0]["heroes"][n][1] * CELL, ry=ry),
-            GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
-            FogOfWarRevealer={"Active": True, "Range": 10.0, "Color": "All"}),
-        tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(sx, 1.2, z, ry=ry, s=12 / TILE_UNIT), GUID=guid(c, "sheet"),
-             Nickname=h["name"], Locked=True, Tags=["kit"]),
-        obj("Counter", tf(sx + dx * 9, 1.5, z + 2, ry=ry), GUID=guid(c, "counter"), Nickname=f"{h['name']} HP",
-            Counter={"value": h["hp"]}, Tags=["kit", f"counter_{c}"]),
-        obj("Deck", tf(sx - dx * 9, 2.0, z, ry=ry, rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards",
-            DeckIDs=ids, CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True),
-    ] + dice
+        obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
+            FogOfWarRevealer={"Active": True, "Range": 10.0, "Color": "All"},
+            grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig"}),
+        tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=True,
+             Tags=["kit"], grid={"role": "sheet", "color": c}),
+        obj("Counter", tf(), GUID=guid(c, "counter"), Nickname=f"{h['name']} HP", Counter={"value": h["hp"]},
+            Tags=["kit", f"counter_{c}"], grid={"role": "counter", "color": c}),
+        obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
+        obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
+            CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
+            grid={"role": "deck", "color": c}),
+    ]
 
 
 def xml_ui(base):
@@ -239,7 +260,7 @@ def gm_guide():
             "3. Click each scene: map + NPCs + fog + music change.",
             "4. On a giant: type 20 in the damage box -> bar drops. Attack button -> roll whispered to you.",
             "5. Play a card onto the table, press REST -> card returns to hand, counters reset.",
-            "6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua.",
+            "6. If things sit off the art or the kits overlap it: LAYOUT in build.py; health bars: UI_POS in npc.lua.",
             "",
             "Updates: Holst.json is only a loader. It downloads game.json + controller.lua from GitHub on every load, so pushed fixes",
             "arrive without replacing the save. Offline, a save you made yourself keeps the last version it loaded."]
@@ -248,14 +269,16 @@ def gm_guide():
 
 def main(base):
     build_images()
+    textures = dict(l.split() for l in (ROOT / "props" / "textures.txt").read_text().splitlines())
     heroes, kits = {}, []
     for n, h in enumerate(HEROES):
         kits += hero_objects(h, n, base)
         heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"])
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
-    data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook,
-                scenes=[scene_data(s, base) for s in SCENES], battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
+    data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
+                scenes=[scene_data(s, base, textures) for s in SCENES],
+                battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
     data["version"] = hashlib.md5((json.dumps(data, sort_keys=True) + (ROOT / "game.lua").read_text()).encode()).hexdigest()[:8]
     # DATA goes in as a Lua table literal: TTS's JSON.decode takes minutes on a payload this size
@@ -264,23 +287,30 @@ def main(base):
     (ROOT / "controller.lua").write_text(lua)
     (ROOT / "game.json").write_text(json.dumps(dict(version=data["version"], xml=xml, assets=assets)))
 
-    # Holst.json: just the loader. Only rebuild/redistribute it if loader.lua, the table or the hands change.
-    hands = [{"Color": c, "Transform": tf(x, 4.0, side * 29.0, ry=0.0 if side < 0 else 180.0, s=1.0)
-              | {"scaleX": 11.0, "scaleY": 5.0, "scaleZ": 4.0}} for c, (x, side) in SEATS.items()]
+    if "--save" not in sys.argv:
+        print("wrote controller.lua version", data["version"], "-", len(kits), "kit objects,",
+              sum(len(s["spawns"]) for s in data["scenes"]), "scene spawns (Holst.json untouched; --save rebuilds it)")
+        (ROOT / "GM_GUIDE.md").write_text(gm_guide())
+        return
+    # Holst.json: just the loader. Only rebuild/redistribute it if loader.lua changes: game.lua switches to the
+    # custom table, moves the hands and swaps the table image itself, so older copies of the save keep working.
+    hands = [{"Color": c, "Transform": tf(x, 4.0, z, ry=0.0 if z < 0 else 180.0) | {"scaleX": 11.0, "scaleY": 5.0, "scaleZ": 4.0}}
+             for c, x, z in [("Red", -25, -25), ("Blue", 25, -25), ("Green", 25, 25), ("Purple", -25, 25)]]
     save = {"SaveName": "The Giants of Holst", "GameMode": "The Giants of Holst", "Gravity": 0.5, "PlayArea": 0.5,
-            "Date": "", "Table": "Table_RPG", "Sky": "Sky_Museum", "Note": "", "Rules": RULES,
-            "XmlUI": "", "LuaScript": (ROOT / "loader.lua").read_text().replace("--@CONTROLLER@", CONTROLLER),
-            "LuaScriptState": "",
+            "Date": "", "Table": "Table_Custom", "TableURL": f"{base}art/out/table_title.jpg", "Sky": "Sky_Museum",
+            "Note": "", "Rules": RULES, "XmlUI": "",
+            "LuaScript": (ROOT / "loader.lua").read_text().replace("--@CONTROLLER@", CONTROLLER), "LuaScriptState": "",
             "Grid": {"Type": 0, "Lines": False, "Color": {"r": 0, "g": 0, "b": 0}, "Opacity": 0.75, "ThickLines": False,
-                     "Snapping": False, "Offset": False, "BothSnapping": False, "xSize": CELL, "ySize": CELL,
+                     "Snapping": False, "Offset": False, "BothSnapping": False, "xSize": 2.0, "ySize": 2.0,
                      "PosOffset": {"x": 0.0, "y": 1.0, "z": 0.0}},
             "Hands": {"Enable": True, "DisableUnused": False, "Hiding": 0, "HandTransforms": hands},
             "TabStates": {}, "ObjectStates": [], "VersionNumber": "v13.2.2"}
     (ROOT / "Holst.json").write_text(json.dumps(save, indent=1))
     (ROOT / "GM_GUIDE.md").write_text(gm_guide())
-    print("wrote game.json version", data["version"], "-", len(kits), "kit objects,",
+    print("wrote controller.lua version", data["version"], "-", len(kits), "kit objects,",
           sum(len(s["spawns"]) for s in data["scenes"]), "scene spawns")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else (ROOT.resolve().as_uri() + "/"))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0] if args else (ROOT.resolve().as_uri() + "/"))

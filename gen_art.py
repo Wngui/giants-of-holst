@@ -16,6 +16,7 @@ def jobs():
         yield f"portrait_{h['key']}", f"portrait of {h['portrait']}, {STYLE}", 768, 768
         for i, (_, _, prompt) in enumerate(h["cards"]):
             yield f"card_{h['key']}_{i}", f"{prompt}, {STYLE}", 768, 640
+    yield "table_wood", f"top-down view of a dark old oak tavern tabletop, long wooden planks, worn, scratches, candle wax, no objects, {STYLE}", 1536, 1024
     yield "card_back", f"ornate symmetrical celtic knotwork pattern, gold filigree on deep crimson leather, no symbols, {STYLE}", 640, 896
 
 

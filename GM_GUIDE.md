@@ -63,13 +63,13 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Cyclops raider** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Leash yank (no roll, -, pulls its thrall back next to it). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
 - **Hill giant** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Grab (+6, -, target is held: Might DC 14 to break free, 1d6 each turn). WICKER SHIELD: ranged -5. Slow, moves 6.
 - **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off.
-- **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Rat Count.
+- **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
 - **Sewer hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. Trade food for their Wolf-tooth Charm.
 - **Fresh carcass** HP 1, Def 1. . Food.
-- **Grev Vasko, the Rat Count** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Rat's Bones: roll 3d6 (no roll, 3d6, dice game roll); Rat's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
-- **Count's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
+- **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
+- **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
 - **Grask the Log-Thrower** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
 - **Hrothgul, dying giant** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes.
@@ -98,8 +98,8 @@ Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprin
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
 STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
-  - Give them ANY gold or food -> note it. Later the Rat Count's crew vouches for the party (scene 3:
-    Vasko starts friendly, first Rat's Bones round is won automatically) and the kids give the party the
+  - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
+    Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Reveal the fog on the east side. Four giants round the
@@ -118,19 +118,19 @@ FOOD SCENE: two rough hunters drag in carcasses. A noblewoman (Lady Oriska) pays
 Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favour.
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
-  - Sharing food with a refugee family: an old man tells them "the Rat Count knows everything in the drains".
+  - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
-  "A lady in blue with glowing hands? The Rat Count's boys brought her through a week ago."
-Anyone who asks around gets pointed to the Rat Count's den (east). If they paid the kids, a kid appears and leads them.
+  "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."
+Anyone who asks around gets pointed to the Bandit Baron's den (east). If they paid the kids, a kid appears and leads them.
 REST here is allowed (press REST): full HP, all cards back to hand.
 ```
 
-## 3. The Rat Count's Den
+## 3. The Bandit Baron's Den
 
 ```
 Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
-out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Grev Vasko,
-the Rat Count. The street kids sit around him like cats."
+out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Vasko,
+the Bandit Baron. The street kids sit around him like cats."
 He speaks broken Common: "Information is food. You want food, you play."
 RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
@@ -213,7 +213,7 @@ THE END. (Optional epilogue: she promises to return the Hearthstone and renew th
 3. Click each scene: map + NPCs + fog + music change.
 4. On a giant: type 20 in the damage box -> bar drops. Attack button -> roll whispered to you.
 5. Play a card onto the table, press REST -> card returns to hand, counters reset.
-6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua.
+6. If things sit off the art or the kits overlap it: LAYOUT in build.py; health bars: UI_POS in npc.lua.
 
 Updates: Holst.json is only a loader. It downloads game.json + controller.lua from GitHub on every load, so pushed fixes
 arrive without replacing the save. Offline, a save you made yourself keeps the last version it loaded.

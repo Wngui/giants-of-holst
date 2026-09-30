@@ -1,6 +1,7 @@
 """All game content for "The Giants of Holst". build.py turns this into the TTS save + GM guide,
 gen_art.py renders the art prompts. Positions are grid squares from the map centre (x right, z up/north).
 Map is 22 x 14 squares."""
+import math
 
 STYLE = ("painterly dark fantasy illustration, muted earthy colours, dramatic light, "
          "hand-painted texture, highly detailed, no text, no letters")
@@ -101,7 +102,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 # ---------------------------------------------------------------- npcs
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
-    "giant_club": dict(name="Giant raider", fig="rpg_OGRE", hp=60, defense=12, attacks=[
+    "giant_club": dict(name="Giant raider", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Hurl rubble", 5, "2d6+2", "range 10"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
@@ -110,7 +111,7 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Leash yank", None, None, "pulls its thrall back next to it"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Hill giant", fig="rpg_TROLL", hp=65, defense=11, attacks=[
+    "giant_troll": dict(name="Hill giant", fig="rpg_CYCLOP", hp=65, defense=11, attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
         ("Grab", 6, None, "target is held: Might DC 14 to break free, 1d6 each turn"),
     ], notes="WICKER SHIELD: ranged -5. Slow, moves 6."),
@@ -119,7 +120,7 @@ NPCS = {
     ], notes="Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
-    ], notes="Speaks only Dravic. Works for the Rat Count."),
+    ], notes="Speaks only Dravic. Works for the Bandit Baron."),
     "refugee": dict(name="Refugee", fig="Figurine_Mara", hp=6, defense=10, attacks=[], notes="Hungry and scared."),
     "noble": dict(name="Lady Oriska (noble)", fig="Figurine_Sir_Loin", flip=True, hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
@@ -127,23 +128,23 @@ NPCS = {
         ("Short bow", 4, "1d8", "range 10"),
     ], notes="Rough, proud. Trade food for their Wolf-tooth Charm."),
     "carcass": dict(name="Fresh carcass", fig="rpg_WOLF", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
-    "rat_count": dict(name="Grev Vasko, the Rat Count", fig="Figurine_Mara", hp=25, defense=13, attacks=[
+    "rat_count": dict(name="Vasko, the Bandit Baron", fig="Figurine_Mara", hp=25, defense=13, attacks=[
         ("Rapier", 5, "1d8+2", "melee"),
-        ("Rat's Bones: roll 3d6", None, "3d6", "dice game roll"),
-        ("Rat's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
+        ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
+        ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
         ("Lucky Ring reroll", None, "1d6", "extra reroll from the ring, once per round"),
     ], notes="Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks."),
-    "guard": dict(name="Count's bruiser", fig="Figurine_Knil", hp=20, defense=14, attacks=[
+    "guard": dict(name="Baron's bruiser", fig="Figurine_Knil", hp=20, defense=14, attacks=[
         ("Axe", 4, "1d10+2", "melee"),
     ], notes="Two of them. Loyal while Vasko is winning."),
-    "log_giant": dict(name="Grask the Log-Thrower", fig="rpg_OGRE", hp=70, defense=12, attacks=[
+    "log_giant": dict(name="Grask the Log-Thrower", fig="rpg_CYCLOP", hp=70, defense=12, attacks=[
         ("Log throw", None, "3d6", "2x2 area, Agility DC 14 for half; opening move"),
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Roar", None, None, "all heroes within 6: Wits DC 12 or lose next move"),
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
     "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
                       notes="Thieves' guild. Search: 3 gold, a guild token, cart keys.", dead=True),
-    "dying_giant": dict(name="Hrothgul, dying giant", fig="rpg_OGRE", hp=6, defense=8, attacks=[
+    "dying_giant": dict(name="Hrothgul, dying giant", fig="rpg_CYCLOP", hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
     ], notes="Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes."),
     "dead_human": dict(name="Fallen guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
@@ -159,6 +160,42 @@ NPCS = {
 
 # ---------------------------------------------------------------- scenes
 # npcs: (npc key, x, z) ; heroes: 4 entry squares ; music: file in music/
+def wall_line(prop, x1, z1, x2, z2, scale=1):
+    """One prop per grid square from (x1, z1) to (x2, z2), turned to run along the line."""
+    n = max(abs(x2 - x1), abs(z2 - z1))
+    rot = math.degrees(math.atan2(-(z2 - z1), x2 - x1))       # TTS: rotY turns local +x clockwise seen from above
+    return [(prop, x1 + (x2 - x1) * i / n, z1 + (z2 - z1) * i / n, rot, scale) for i in range(int(n) + 1)]
+
+
+def rocks(x1, z1, x2, z2, seed, spacing=1.1, big=1.5):
+    """Irregular low rock wall from (x1, z1) to (x2, z2): mixed rocks, jittered, random turn and size."""
+    import random
+    rnd = random.Random(seed)
+    n = max(1, int(math.hypot(x2 - x1, z2 - z1) / spacing))
+    out = []
+    for i in range(n + 1):
+        x = x1 + (x2 - x1) * i / n + rnd.uniform(-0.25, 0.25)
+        z = z1 + (z2 - z1) * i / n + rnd.uniform(-0.25, 0.25)
+        piece = rnd.choice(["rock_big", "rock_big", "rock_town", "rubble"])
+        size = big * rnd.uniform(0.8, 1.2) * (0.7 if piece in ("rock_town", "rubble") else 1)
+        out.append((piece, round(x, 2), round(z, 2), rnd.randrange(360), round(size, 2)))
+    return out
+
+
+def ring(prop, rx, rz, count, gap=None, scale=1):
+    """Ellipse of props (walls turned along it); gap=(from, to) in degrees (0 = east) is left open."""
+    out = []
+    for i in range(count):
+        a = 360 * i / count
+        if gap and (gap[0] <= a <= gap[1] or gap[0] <= a - 360 <= gap[1]):
+            continue
+        t = math.radians(a)
+        x, z = rx * math.cos(t), rz * math.sin(t)
+        tangent = (-rx * math.sin(t), rz * math.cos(t))
+        out.append((prop, round(x, 2), round(z, 2), math.degrees(math.atan2(-tangent[1], tangent[0])), scale))
+    return out
+
+
 SCENES = [
     dict(key="title", title="The Giants of Holst", fog=False, music="title.mp3",
          map_prompt="a royal parchment map of a mountainous fantasy kingdom with a walled city in a valley, giants' mountains to the north",
@@ -176,15 +213,20 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
     dict(key="outskirts", title="1. The Outskirts of Holst", fog=True, music="outskirts.mp3", battle=True,
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
          heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
+         props=[("ruin_3x3", -8.5, 5.3), ("ruin_2x3", -10, 0.5), ("ruin_3x2", -9.5, -5.5), ("ruin_2x2", -2.5, 6.3),
+                ("ruin_3x3", 6.3, 5.3), ("ruin_3x2", 9.5, 1.2, 90), ("ruin_4x2", 9.8, -4.5, 90),
+                ("broken_cart", -6, 2.2, 20, 2), ("rubble", 0, 1.2, 0, 1.3), ("rubble", 2.3, -1.8, 40, 1.1),
+                ("debris_wood", -6.3, -3.5, 0, 2), ("debris", 3.5, -5.5, 0, 2),
+                ("Tileset_Barrel", -7, -3), ("Tileset_Barrel", -6.3, -2.6), ("Tileset_Chest", 1.5, 4.5)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
-               ("giant_club", 5, 3), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
+               ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
                ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3)],
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
 STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
-  - Give them ANY gold or food -> note it. Later the Rat Count's crew vouches for the party (scene 3:
-    Vasko starts friendly, first Rat's Bones round is won automatically) and the kids give the party the
+  - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
+    Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Reveal the fog on the east side. Four giants round the
@@ -195,28 +237,41 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
 
     dict(key="sewer", title="2. The Sewer Warren", fog=True, music="sewer.mp3", rest=True,
          map_prompt="underground stone sewer cavern with a refugee camp, tents made of rags, small fires, a central channel of dark water, crates",
-         heroes=[(-7, 4), (-7, 3), (-6, 4), (-6, 3)],
-         npcs=[("refugee", -4, 2), ("refugee", -3, -1), ("refugee", 0, 3), ("refugee", 2, -4),
-               ("noble", 4, 1), ("hunter", 8, 3), ("hunter", 8, 0), ("carcass", 6, 3), ("carcass", 6, 0)],
+         heroes=[(-3, 1), (-3, 2), (-2, 1), (-2, 2)],
+         props=[(("stone_wall_broken" if i % 3 == 1 else p), *rest) for i, (p, *rest) in enumerate(
+                   wall_line("stone_wall", -6, 5, 6, 5) + wall_line("stone_wall", -8.5, -4, -8.5, 3.5)
+                   + wall_line("stone_wall", 8.5, -4, 8.5, 3.5))]
+               + [("tent", -5.5, 0.2, 0, 3), ("tent", -2.5, -1.3, 20, 2.6), ("tent", 5.3, 1.8, -10, 3.2),
+                  ("campfire", -4, 3.3, 0, 2.5), ("campfire", -6, -2.5, 0, 2.5), ("campfire", 8, -3.2, 0, 2.5),
+                  ("bedroll", -7, -1.5, 90, 2), ("bedroll", -1, -4.5, 30, 2), ("bedroll", 2, 2.8, 0, 2),
+                  ("crate", -2, 3.6, 0, 2), ("crate", -1, 3.6, 90, 2), ("crate", 1.5, 3.6, 0, 2),
+                  ("Tileset_Barrel", 2.6, 3.8), ("Tileset_Barrel", 5.2, -5.5), ("Tileset_Chest", 4.5, -0.6)],
+         npcs=[("refugee", -4, 2), ("refugee", -4, -1.8), ("refugee", 0, 2.5), ("refugee", 2, -4),
+               ("noble", 3, -1.5), ("hunter", 7.5, -0.5), ("hunter", 6.8, -2.6), ("carcass", 5, -2.5), ("carcass", 6.3, -1.4)],
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
 FOOD SCENE: two rough hunters drag in carcasses. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
 Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favour.
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
-  - Sharing food with a refugee family: an old man tells them "the Rat Count knows everything in the drains".
+  - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
-  "A lady in blue with glowing hands? The Rat Count's boys brought her through a week ago."
-Anyone who asks around gets pointed to the Rat Count's den (east). If they paid the kids, a kid appears and leads them.
+  "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."
+Anyone who asks around gets pointed to the Bandit Baron's den (east). If they paid the kids, a kid appears and leads them.
 REST here is allowed (press REST): full HP, all cards back to hand."""),
 
-    dict(key="den", title="3. The Rat Count's Den", fog=True, music="den.mp3",
+    dict(key="den", title="3. The Bandit Baron's Den", fog=True, music="den.mp3",
          map_prompt="a smugglers den in an old underground cistern, a large round gambling table with candles, stolen furniture, rugs, crates of loot, a hidden door in the stone wall",
-         heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
-         npcs=[("rat_count", 2, 0), ("guard", 4, 2), ("guard", 4, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
+         heroes=[(-6, -1), (-6, 0), (-5, -1), (-5, 0)],
+         props=ring("stone_wall", 9.3, 6.9, 50, gap=(-12, 12))
+               + [("stall", 5.4, 0, 90, 1.4), ("lantern", 8.4, 1.4, 0, 1.2), ("lantern", 8.4, -1.4, 0, 1.2),
+                  ("Tileset_Chest", 3.6, -4.6), ("Tileset_Chest", -6, -5), ("Tileset_Chest", 6.5, 4.2),
+                  ("crate", -7, 2.5, 20, 2), ("crate", -7.4, 1.4, 70, 2), ("Tileset_Barrel", 5.3, 5),
+                  ("Tileset_Barrel", -3.5, 5), ("debris_wood", -4, -5.5, 0, 2)],
+         npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
          notes="""Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
-out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Grev Vasko,
-the Rat Count. The street kids sit around him like cats."
+out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Vasko,
+the Bandit Baron. The street kids sit around him like cats."
 He speaks broken Common: "Information is food. You want food, you play."
 RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
@@ -239,8 +294,11 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
 
     dict(key="passage", title="4. The Smugglers' Passage", fog=True, music="passage.mp3",
          map_prompt="a long stone dungeon corridor three squares wide crossing the entire image from left to right, rough cave rock filling the areas above and below the corridor, cracked flagstones, a skeleton, puddles, torch sconces on the walls",
-         heroes=[(-8, 0), (-8, 1), (-7, 0), (-7, 1)],
-         npcs=[("giant_rat", 8, 1), ("giant_rat", 8, -1)],
+         heroes=[(-8, -0.5), (-8, 0.5), (-7, -0.5), (-7, 0.5)],
+         props=rocks(-10, 2.2, 10, 2.2, 1) + rocks(-10, -2.2, 10, -2.2, 2) + rocks(-10.3, -1.2, -10.3, 1.2, 3)
+               + [("rock_small", -4, 1.3, 0, 1.5), ("rock_small", 5, -1.3, 70, 1.5), ("debris", 2, 1.2, 0, 2),
+                  ("lantern", 9.3, 1.3, 0, 1)],
+         npcs=[("giant_rat", 8, 0.8), ("giant_rat", 8, -0.8)],
          notes="""Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
 FOUR TRAPS, west to east. Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
@@ -256,9 +314,17 @@ Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks i
 
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True,
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
-         heroes=[(-10, -1), (-10, 0), (-10, 1), (-9, 0)],
-         npcs=[("dead_thug", 0, 1), ("dead_thug", 1, -1), ("dead_thug", -1, -2),
-               ("log_giant", 9, 5, 45), ("giant_club", 10, -2, 35), ("giant_eye", 8, -6, 35)],
+         heroes=[(-8, 0), (-8, 1), (-7, 0), (-7, 1)],
+         props=[("broken_cart", 0.3, 0.3, 60, 3), ("log_large", 1.2, -4.1, -23, (7, 2.2, 2.2)),
+                ("crate", -4.5, 3.1, 10, 2.2), ("crate", -2.4, 2.6, 40, 2.2), ("crate", 5.9, 0.4, 0, 2),
+                ("stump", -3, 6, 0, 2), ("stump", 3, -6.2, 0, 2), ("rock_small", -5.5, -6, 0, 1.5)]
+               + [("pine", x, z, (x * 37 + z * 11) % 360, 1.7) for x, z in [
+                   (4, 6), (5.5, 5), (7, 6.5), (6, 3.8), (8.5, 3.2), (10.5, 3.5), (10.5, 6.8), (7.5, 1.5),
+                   (9.5, 0), (10.5, -4), (9, -3.7), (10.5, -6.5), (6.8, -7), (-10.5, 0.5), (-9.5, -1.5),
+                   (-10.5, -4), (-9, -6.5), (-10.5, -6.8), (-5, 6.5), (-3.8, 7)]]
+               + [("oak", -10, 6, 0, 1.8), ("bush", -8, 4, 0, 1.5), ("bush", 3.2, 4.2, 0, 1.3)],
+         npcs=[("dead_thug", -2, 1.5), ("dead_thug", 2, -1.5), ("dead_thug", -1, -2.5),
+               ("log_giant", 8.8, 5, 45), ("giant_club", 10, -1.8, 35), ("giant_eye", 8.2, -5.5, 35)],
          notes="""Read aloud: "The tracks lead north into the pines. An hour later you find the cart - or what's
 left of it. It's been stamped flat. So have the men who drove it."
 INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the cart - empty, bent
@@ -274,8 +340,15 @@ After: tracks and blood lead to a cave in the hillside."""),
 
     dict(key="cave", title="6. The Last Stand Cave", fog=True, music="cave.mp3",
          map_prompt="inside a large dark natural cave, rocky floor, a tall shaft in the far wall rising into darkness, fallen weapons, a broken wicker shield, faint light from a crack above",
-         heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
-         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0, 0), ("dying_giant", 8, -4),
+         heroes=[(0, -6), (1, -6), (0, -5), (1, -5)],
+         props=rocks(-10, 6.8, -1.5, 6.8, 4) + rocks(2, 6.8, 10, 6.8, 5) + rocks(-10, -6.8, -2, -6.8, 6)
+               + rocks(3, -6.8, 10, -6.8, 7) + rocks(-10.3, -5.8, -10.3, 5.8, 8) + rocks(10.3, -5.8, 10.3, 5.8, 9)
+               + [("rock_tall", x, z, (x * 53 + z * 29) % 360, 2) for x, z in [
+                   (-8, 4), (-7, 1.5), (-8, -2), (-7, -5), (-5.5, 5), (8, 4), (8.3, 1), (8.5, -1.5),
+                   (-3, 5.2), (3.5, 5.2), (-5.5, -6), (5.2, -6.3)]]
+               + [("rock_big", 2.8, -2.4, 30, 1.6), ("rock_big", 2.8, -0.4, 80, 1.3),
+                  ("campfire_cold", -1.3, 0.8, 0, 2.5), ("debris_wood", -1, 1.5, 0, 2), ("debris", 4, 2.5, 0, 2)],
+         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 6, -4.8),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, slumped against the rock, a giant. Still breathing."

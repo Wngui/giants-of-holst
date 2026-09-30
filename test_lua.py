@@ -1,7 +1,8 @@
 """Runs the TTS scripts against a stubbed TTS API (lupa): loader.lua from Holst.json downloads game.json,
 spawns the controller (game.lua), whose scenes spawn NPCs running npc.lua. Each object script gets its own
 environment, like in TTS. Catches Lua errors and logic slips before a trip to the TTS PC.  python test_lua.py"""
-import json
+import json, os
+dump = []
 from lupa import LuaRuntime
 
 save = json.load(open("Holst.json"))
@@ -55,6 +56,13 @@ UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) en
          UIxml, UIassets = x, assets
        end }
 tabs = {}
+-- a 70 x 41 custom table whose top sits at y = 1
+Tables = { getTableObject = function() return { getBounds = function()
+             return { center = Vector(0, 0.5, 0), size = Vector(70, 1, 41) } end } end,
+           setCustomURL = function(u) tableURL = u end,
+           getTable = function() return tableName end, setTable = function(n) tableName = n end }
+tableName = "Table_RPG"   -- the published Holst.json still starts on the RPG table
+hands = {}
 Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do r[i] = {index = i - 1, title = t.title} end return r end,
           removeNotebookTab = function(i) table.remove(tabs, i + 1) end,
           addNotebookTab = function(t) tabs[#tabs + 1] = t end }
@@ -115,6 +123,7 @@ for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
     if k == "steam_name" then return seated[c] end
     if k == "getHandObjects" then return function() local r = {} for _, o in pairs(objects) do if o.inHand == c then r[#r+1] = o end end return r end end
     if k == "getHandTransform" then return function() return {position = Vector(0, 0, 0), rotation = {0, 0, 0}} end end
+    if k == "setHandTransform" then return function(t) hands[c] = t end end
   end})
 end
 function mkplayer(name, color)
@@ -137,16 +146,61 @@ c = ctl.env
 assert 'onClick="%s/pick"' % CTL in g.UIxml
 assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
-assert count("scene") == 1 and count("kit") == 20, (count("scene"), count("kit"))   # title map + 4 hero kits
+assert count("scene") == 0 and count("kit") == 20, (count("scene"), count("kit"))   # title: no props, 4 hero kits
+assert g.tableURL.endswith("table_title.jpg") and g.tableName == "Table_Custom"
+W, D, TOP = 70, 41, 1.0
+L = to_py(c.DATA.layout)
+SQ = W * L["art_w"] / L["cols"]
+ART = (L["cols"] * SQ / 2, L["rows"] * SQ / 2)       # half-extents of the scene art on the table
+
+
+def rect(o):
+    t = o.data.Transform
+    return t.posX, t.posZ, t.scaleX, t.scaleZ
+
+
+# kits: on the table, above its surface, in the wooden border (not on the scene art), not on top of each other
+boxes = []
+for o in g.getObjectsWithTag("kit").values():
+    t = o.data.Transform
+    assert abs(t.posX) < W / 2 and abs(t.posZ) < D / 2 and t.posY >= TOP, (o.data.Nickname, t.posX, t.posZ)
+    if o.data.Name == "Card" or any(k.startswith("fig_") for k in o.tags.keys()):
+        continue
+    hx, hz = (t.scaleX * L["tile_unit"] / 2, t.scaleX * L["tile_unit"] / 3) if o.data.Name == "Custom_Tile" else (0.8, 0.8)
+    assert abs(t.posX) - hx > ART[0] or abs(t.posZ) - hz > ART[1], ("kit on the art", o.data.Nickname, t.posX, t.posZ)
+    boxes.append((o.data.Nickname or o.data.Name, t.posX, t.posZ, hx, hz))
+for i, a in enumerate(boxes):
+    for b in boxes[i + 1:]:
+        assert abs(a[1] - b[1]) >= a[3] + b[3] or abs(a[2] - b[2]) >= a[4] + b[4], ("kit overlap", a, b)
+assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple"}
+for col, t in to_py(g.hands).items():
+    assert abs(t["position"][2]) > D / 2, (col, "hand zone should sit past the table edge")
 
 scenes = to_py(c.DATA.scenes)
 for i, s in enumerate(scenes, 1):
     c.setScene(i)
     assert count("scene") == len(s["spawns"]), (i, count("scene"))
+    assert g.tableURL == s["table"]
+    if os.environ.get("DUMP"):          # object list for preview.py (Blender)
+        dump.append({"title": s["title"], "key": s["table"].rsplit("_", 1)[1][:-4], "objects": [
+            {"name": o.data.Name, "nick": o.data.Nickname, "mesh": (to_py(o.data.CustomMesh) or {}).get("MeshURL", ""),
+             "tex": (to_py(o.data.CustomMesh) or {}).get("DiffuseURL", ""), "t": to_py(o.data.Transform),
+             "dead": bool(o.data.RPGdead)} for o in g.getObjectsWithTag("scene").values()] + [
+            {"name": "hero", "nick": col, "t": {"posX": h.pos[1], "posY": h.pos[2], "posZ": h.pos[3]}}
+            for col in ("Red", "Blue", "Green", "Purple") for h in g.getObjectsWithTag("fig_" + col).values()]})
+    for o in g.getObjectsWithTag("scene").values():
+        t = o.data.Transform
+        assert "grid" not in dict(o.data), "grid must be stripped before spawnObjectData"
+        if o.data.Name != "FogOfWar":
+            assert abs(t.posX) <= ART[0] + 1e-6 and abs(t.posZ) <= ART[1] + 1e-6, (s["title"], o.data.Name, t.posX, t.posZ)
+            assert t.posY >= TOP, (s["title"], o.data.Name)
+            assert min(t.scaleX, t.scaleY, t.scaleZ) > 0, (s["title"], o.data.Name, "zero scale")
     assert g.MusicPlayer.url == s["music"]["url"]
     assert g.UIattr["sceneTitle.text"] == s["title"]
 fig = list(g.getObjectsWithTag("fig_Red").values())[0]
-assert fig.pos[3] == scenes[-1]["heroes"][0][2]                       # heroes moved to the last scene
+assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
+if os.environ.get("DUMP"):
+    json.dump({"W": W, "D": D, "TOP": TOP, "SQ": SQ, "scenes": dump}, open(os.environ["DUMP"], "w"))
 c.revealAll()
 assert count("fog") == 0
 
