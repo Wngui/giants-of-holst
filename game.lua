@@ -1,22 +1,46 @@
 -- The Giants of Holst: GM panel, scene switching, class pick, rest.
+-- Runs on the hidden controller object that loader.lua downloads and (re)spawns; the save file itself never changes.
 -- build.py replaces the DATA line with the generated scene/hero data.
 DATA = {} --@DATA@
+VERSION = DATA.version
 
 local scene, setupDone = 1, {}
 
 function onLoad(saved)
-    local s = saved ~= "" and JSON.decode(saved) or nil
-    if s then
+    local s = saved ~= "" and JSON.decode(saved) or {}
+    MusicPlayer.repeat_track = true
+    if s.version == VERSION then
         scene, setupDone = s.scene, s.setupDone
     else
-        setScene(1)
+        install(s.scene or 1)
     end
-    MusicPlayer.repeat_track = true
-    refreshPick()
+    Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
 end
 
 function onSave()
-    return JSON.encode({ scene = scene, setupDone = setupDone })
+    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone })
+end
+
+-- First load or a new version: fresh hero kits and notebook, same scene, re-deal to seated players.
+function install(sceneIndex)
+    for _, o in ipairs(getObjectsWithTag("kit")) do o.destruct() end
+    for _, d in ipairs(DATA.kits) do spawnObjectData({ data = d }) end
+    local tabs = Notes.getNotebookTabs()
+    for i = #tabs, 1, -1 do Notes.removeNotebookTab(tabs[i].index) end
+    for _, t in ipairs(DATA.notebook) do Notes.addNotebookTab(t) end
+    setupDone = {}
+    -- destroyed objects linger until the frame ends, so let the new kits settle before looking them up by tag
+    Wait.frames(function()
+        setScene(sceneIndex)
+        for _, color in ipairs(DATA.colors) do onPlayerChangeColor(color) end
+    end, 10)
+end
+
+-- Kit objects are found by tag, not GUID: respawning right after a destroy makes TTS hand out new GUIDs.
+function kit(tag, typ)
+    for _, o in ipairs(getObjectsWithTag(tag)) do
+        if not typ or o.type == typ then return o end
+    end
 end
 
 -- ---------------------------------------------------------------- scenes
@@ -35,7 +59,7 @@ function setScene(i)
         end })
     end
     for n, color in ipairs(DATA.colors) do
-        local fig = getObjectFromGUID(DATA.heroes[color].fig)
+        local fig = kit("fig_" .. color)
         if fig then
             fig.setPositionSmooth(s.heroes[n], false, true)
             fig.setRotationSmooth({ 0, 90, 0 })   -- face east, into the scene
@@ -92,7 +116,7 @@ end
 -- Sheet, counter and d20 already sit at the seat; deal the 6 cards into the hand.
 function setupHero(color)
     local h = DATA.heroes[color]
-    local deck = getObjectFromGUID(h.deck)
+    local deck = kit("card_" .. color, "Deck")
     if deck then deck.deal(6, color) end
     broadcastToAll(Player[color].steam_name .. " is " .. h.name .. ".", { 0.94, 0.85, 0.63 })
 end
@@ -102,7 +126,7 @@ end
 function rest()
     for _, color in ipairs(DATA.colors) do
         local h = DATA.heroes[color]
-        local counter = getObjectFromGUID(h.counter)
+        local counter = kit("counter_" .. color)
         if counter then counter.Counter.setValue(h.hp) end
         if Player[color].seated then
             local inHand = {}

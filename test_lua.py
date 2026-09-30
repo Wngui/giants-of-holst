@@ -1,11 +1,14 @@
-"""Runs global.lua and npc.lua from the built save against a stubbed TTS API (lupa).
-Catches Lua errors and logic slips before a trip to the TTS PC.  python test_lua.py"""
+"""Runs the TTS scripts against a stubbed TTS API (lupa): loader.lua from Holst.json downloads game.json,
+spawns the controller (game.lua), whose scenes spawn NPCs running npc.lua. Each object script gets its own
+environment, like in TTS. Catches Lua errors and logic slips before a trip to the TTS PC.  python test_lua.py"""
 import json
 from lupa import LuaRuntime
 
 save = json.load(open("Holst.json"))
+game = json.load(open("game.json"))
 lua = LuaRuntime(unpack_returned_tuples=True)
 g = lua.globals()
+lua_type = lua.eval("type")
 
 
 def to_lua(v):
@@ -25,24 +28,40 @@ def to_py(t):
     return {k: to_py(t[k]) for k in keys}
 
 
-lua_type = lua.eval("type")
 g.JSON = to_lua({})
 g.JSON.decode = lambda s: to_lua(json.loads(s))
 g.JSON.encode = lambda t: json.dumps(to_py(t))
+g.GAME_TEXT = json.dumps(game)
 
 lua.execute("""
 log = {}
 function broadcastToAll(m) log[#log+1] = m end
 function broadcastToColor(m, c) log[#log+1] = c .. ": " .. m end
+local _tonumber = tonumber
+function tonumber(v, base)   -- MoonSharp (TTS) throws where real Lua returns nil when a base is given
+  if base then assert(tostring(v):match("^%d+$"), "MoonSharp tonumber throws on " .. tostring(v)) end
+  return _tonumber(v, base)
+end
 UIattr = {}
-UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) end }
+UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) end,
+       setXml = function(x, assets) UIxml, UIassets = x, assets end }
+tabs = {}
+Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do r[i] = {index = i - 1, title = t.title} end return r end,
+          removeNotebookTab = function(i) table.remove(tabs, i + 1) end,
+          addNotebookTab = function(t) tabs[#tabs + 1] = t end }
 MusicPlayer = { setCurrentAudioclip = function(t) MusicPlayer.url = t.url end, pause = function() end,
                 play = function() end, player_status = "Ready" }
-Wait = { time = function(f) f() end, condition = function(f, c) if c() then f() end end }
+Wait = { time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
+WebRequest = { get = function(url, cb) requested = url; cb({ text = GAME_TEXT, response_code = 200, is_error = false }) end }
 function Vector(x, y, z) return setmetatable({x=x, y=y, z=z}, {__add = function(a, b) return Vector(a.x+b.x, a.y+b.y, a.z+b.z) end}) end
 objects = {}
+function run(code, self)   -- a script with its own globals, falling back to the shared API
+  local env = setmetatable({ self = self }, { __index = _G })
+  assert(load(code, "script", "t", env))()
+  return env
+end
 function makeObj(d)
-  local o = {data = d, tags = {}, type = d.Name == "Deck" and "Deck" or (d.Name == "Card" and "Card" or "Other"), dealt = {}}
+  local o = {data = d, tags = {}, type = d.Name == "Deck" and "Deck" or (d.Name == "Card" and "Card" or "Other")}
   for _, t in ipairs(d.Tags or {}) do o.tags[t] = true end
   function o.getGUID() return d.GUID end
   function o.hasTag(t) return o.tags[t] == true end
@@ -52,17 +71,29 @@ function makeObj(d)
   function o.setRotation(r) end
   function o.setRotationSmooth(r) end
   function o.getObjects() return d.ContainedObjects end
+  function o.getVar(k) return o.env and o.env[k] end
+  function o.call(f, a) return o.env[f](a) end
   function o.deal(n, c)
     for _, cd in ipairs(d.ContainedObjects) do local k = makeObj(cd); k.inHand = c end
     objects[d.GUID] = nil
   end
   o.Counter = { setValue = function(v) o.counter = v end }
+  o.UI = { setXml = function(x) o.xml = x end, setAttribute = function() end }
+  o.RPGFigurine = { die = function() end, attack = function() end }
   objects[d.GUID] = o
+  if d.LuaScript and d.LuaScript ~= "" then
+    o.env = run(d.LuaScript, o)
+    if o.env.onLoad then o.env.onLoad(d.LuaScriptState or "") end
+  end
   return o
 end
 function spawnObjectData(p) local o = makeObj(p.data); if p.callback_function then p.callback_function(o) end; return o end
 function getObjectFromGUID(g) return objects[g] end
 function getObjectsWithTag(t) local r = {} for _, o in pairs(objects) do if o.hasTag(t) then r[#r+1] = o end end return r end
+function emit(ev, ...)   -- universal events reach every script
+  if loader[ev] then loader[ev](...) end
+  for _, o in pairs(objects) do if o.env and o.env[ev] then o.env[ev](...) end end
+end
 seated = {}
 Player = {}
 for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
@@ -76,45 +107,71 @@ end
 function mkplayer(name, color)
   seated[color] = name
   local p = {color = color, steam_name = name}
-  function p.changeColor(c) seated[p.color] = nil; seated[c] = name; p.color = c; onPlayerChangeColor(c) end
+  function p.changeColor(c) seated[p.color] = nil; seated[c] = name; p.color = c; emit("onPlayerChangeColor", c) end
   return p
 end
 """)
 
-for o in save["ObjectStates"]:
-    g.makeObj(to_lua(o))
-lua.execute(save["LuaScript"])
-g.onLoad("")
+# ---- loader: fresh save downloads and installs the game
+assert save["ObjectStates"] == [] and "WebRequest.get" in save["LuaScript"]
+g.loader = g.run(save["LuaScript"], None)
+g.loader.onLoad("")
+assert g.requested.startswith("https://raw.githubusercontent.com/Wngui/giants-of-holst/main/game.json?t=")
+ctl = g.getObjectFromGUID(game["controller"]["GUID"])
+assert ctl and ctl.getVar("VERSION") == game["version"]
+c = ctl.env
+assert 'onClick="%s/pick"' % game["controller"]["GUID"] in g.UIxml
+assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
-assert count("scene") == 1, count("scene")          # title: just the map
+assert count("scene") == 1 and count("kit") == 20, (count("scene"), count("kit"))   # title map + 4 hero kits
 
-for i, s in enumerate(save["LuaScript"] and json.loads(save["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"], 1):
-    g.setScene(i)
+scenes = json.loads(game["controller"]["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"]
+for i, s in enumerate(scenes, 1):
+    c.setScene(i)
     assert count("scene") == len(s["spawns"]), (i, count("scene"))
     assert g.MusicPlayer.url == s["music"]["url"]
     assert g.UIattr["sceneTitle.text"] == s["title"]
-g.revealAll()
+fig = list(g.getObjectsWithTag("fig_Red").values())[0]
+assert fig.pos[3] == scenes[-1]["heroes"][0][2]                       # heroes moved to the last scene
+c.revealAll()
 assert count("fog") == 0
 
 bob = g.mkplayer("bob", "White")
-g.pick(bob, None, "pick_Red")
+c.pick(bob, None, "pick_Red")
 assert bob.color == "Red" and g.UIattr["pick_Red.interactable"] == "false"
-hand = lambda c: len(list(g.Player[c].getHandObjects().values()))
+hand = lambda col: len(list(g.Player[col].getHandObjects().values()))
 assert hand("Red") == 6
 eve = g.mkplayer("eve", "White")
-g.pick(eve, None, "pick_Red")                        # taken -> refused
+c.pick(eve, None, "pick_Red")                        # taken -> refused
 assert eve.color == "White" and "taken" in g.log[len(g.log)]
 
 played = next(o for o in g.getObjectsWithTag("card_Red").values() if o.inHand == "Red")
 played.inHand = None                                  # card played on the table
 assert hand("Red") == 5
-g.rest()
+c.rest()
 assert played.pos is not None                          # sent back toward the hand
 assert "HP back to full" in g.log[len(g.log)]
 
+# ---- same version on reload: nothing reinstalled
+ctl.marker = "original"
+g.loader.onLoad("")
+assert g.getObjectFromGUID(game["controller"]["GUID"]).marker == "original"
+
+# ---- new version pushed: controller replaced, scene kept, kits respawned, Red re-dealt, no duplicates
+c.setScene(3)
+game["version"] = "newer"
+game["controller"]["LuaScript"] = game["controller"]["LuaScript"].replace(
+    'VERSION = DATA.version', 'VERSION = "newer"')
+g.GAME_TEXT = json.dumps(game)
+g.loader.onLoad("")
+ctl2 = g.getObjectFromGUID(game["controller"]["GUID"])
+assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
+assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
+assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6
+assert len(list(g.tabs.values())) == 1 + len(scenes)
+
 # ---- npc.lua on a giant
-giant = next(o for o in save["LuaScript"] and json.loads(save["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"][1]["spawns"]
-             if o.get("Nickname") == "Giant raider")
+giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant raider")
 npc = LuaRuntime(unpack_returned_tuples=True)
 ng = npc.globals()
 ng.JSON = npc.table_from({})
@@ -154,7 +211,6 @@ for n in range(20):
     assert 6 <= t <= 20 and detail.endswith("+4")
 
 # princess starts lying down at 4 HP; healing stands her up (one die() toggle), not the other way round
-scenes = json.loads(save["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"]
 isolde = next(o for s in scenes for o in s["spawns"] if o.get("Nickname") == "Princess Isolde")
 assert isolde["RPGdead"]
 npc.execute("died, log = 0, {}")

@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC
 
 ROOT = Path(__file__).parent
+CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
 RAW, OUT = ROOT / "art" / "raw", ROOT / "art" / "out"
 CELL = 2.0                  # TTS units per grid square
 MAP_W = 44.0                # map width in units (22 squares)
@@ -153,39 +154,40 @@ def hero_objects(h, n, base):
     cdeck = {"FaceURL": face, "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 3, "NumHeight": 2,
              "BackIsHidden": True, "UniqueBack": False, "Type": 0}
     ids = [(n + 1) * 100 + i for i in range(6)]
-    cards = [obj("Card", tf(), CardID=cid, Hands=True, Nickname=title, Description=text, Tags=[f"card_{c}"],
+    cards = [obj("Card", tf(), CardID=cid, Hands=True, Nickname=title, Description=text, Tags=["kit", f"card_{c}"],
                  CustomDeck={str(n + 1): cdeck}, GUID=guid(c, "card", i))
              for i, (cid, (title, text, _)) in enumerate(zip(ids, h["cards"]))]
-    dice = [obj("Die_20", tf(sx + dx * 9, 2.0, z - 2), GUID=guid(c, "d20"), ColorDiffuse=dict(zip("rgb", [v / 255 for v in RGB[c]])))]
+    dice = [obj("Die_20", tf(sx + dx * 9, 2.0, z - 2), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=dict(zip("rgb", [v / 255 for v in RGB[c]])))]
     return [
         obj(h["fig"], tf(SCENES[0]["heroes"][n][0] * CELL, 3.0, SCENES[0]["heroes"][n][1] * CELL, ry=ry),
-            GUID=guid(c, "fig"), Nickname=h["name"], Tags=["hero"],
+            GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
             FogOfWarRevealer={"Active": True, "Range": 10.0, "Color": "All"}),
         tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(sx, 1.2, z, ry=ry, s=12 / TILE_UNIT), GUID=guid(c, "sheet"),
-             Nickname=h["name"], Locked=True),
+             Nickname=h["name"], Locked=True, Tags=["kit"]),
         obj("Counter", tf(sx + dx * 9, 1.5, z + 2, ry=ry), GUID=guid(c, "counter"), Nickname=f"{h['name']} HP",
-            Counter={"value": h["hp"]}),
+            Counter={"value": h["hp"]}, Tags=["kit", f"counter_{c}"]),
         obj("Deck", tf(sx - dx * 9, 2.0, z, ry=ry, rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards",
-            DeckIDs=ids, CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=[f"card_{c}"], Hands=True),
+            DeckIDs=ids, CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True),
     ] + dice
 
 
 def xml_ui(base):
     btn = 'fontSize="16" preferredHeight="34" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0"'
-    scenes = "".join(f'<Button id="scene_{i + 1}" onClick="onSceneButton" {btn}>{s["title"]}</Button>'
+    on = f'onClick="{CONTROLLER}/'   # UI lives in Global, handlers live on the controller object
+    scenes = "".join(f'<Button id="scene_{i + 1}" {on}onSceneButton" {btn}>{s["title"]}</Button>'
                      for i, s in enumerate(SCENES))
     gm = f"""<Panel id="gm" visibility="Black|Host" rectAlignment="UpperRight" offsetXY="-10 -80" width="260"
  height="{80 + 38 * (len(SCENES) + 4)}" color="#1b1410ee" padding="8 8 8 8">
 <VerticalLayout spacing="4" childForceExpandHeight="false">
 <Text id="sceneTitle" fontSize="18" color="#f0d9a0" fontStyle="Bold" preferredHeight="40">GM</Text>
 {scenes}
-<HorizontalLayout spacing="4" preferredHeight="34"><Button onClick="musicScene" {btn}>Scene music</Button>
-<Button onClick="musicBattle" {btn}>Battle</Button><Button onClick="musicStop" {btn}>Stop</Button></HorizontalLayout>
-<Button onClick="revealAll" {btn}>Reveal all fog</Button>
-<Button onClick="rest" {btn}>REST (cards + full HP)</Button>
+<HorizontalLayout spacing="4" preferredHeight="34"><Button {on}musicScene" {btn}>Scene music</Button>
+<Button {on}musicBattle" {btn}>Battle</Button><Button {on}musicStop" {btn}>Stop</Button></HorizontalLayout>
+<Button {on}revealAll" {btn}>Reveal all fog</Button>
+<Button {on}rest" {btn}>REST (cards + full HP)</Button>
 </VerticalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image image="portrait_{h['key']}" preserveAspect="true"/>
-<Button id="pick_{h['color']}" onClick="pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
+<Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
     pick = f"""<Panel id="pick" visibility="White|Brown|Orange|Yellow|Teal|Pink|Grey" rectAlignment="UpperCenter"
  offsetXY="0 -60" width="760" height="260" color="#1b1410ee" padding="10 10 10 10">
@@ -220,40 +222,49 @@ def gm_guide():
             "3. Click each scene: map + NPCs + fog + music change.",
             "4. On a giant: type 20 in the damage box -> bar drops. Attack button -> roll whispered to you.",
             "5. Play a card onto the table, press REST -> card returns to hand, counters reset.",
-            "6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua."]
+            "6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua.",
+            "",
+            "Updates: Holst.json is only a loader. It downloads game.json from GitHub on every load, so pushed fixes",
+            "arrive without replacing the save. Offline, a save you made yourself keeps the last version it loaded."]
     return "\n".join(out) + "\n"
 
 
 def main(base):
     build_images()
-    heroes, objs = {}, []
+    heroes, kits = {}, []
     for n, h in enumerate(HEROES):
-        objs += hero_objects(h, n, base)
-        heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"],
-                                  fig=guid(h["color"], "fig"), deck=guid(h["color"], "deck"),
-                                  counter=guid(h["color"], "counter"))
-    data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, scenes=[scene_data(s, base) for s in SCENES],
-                battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
-    lua = (ROOT / "global.lua").read_text().replace(
+        kits += hero_objects(h, n, base)
+        heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"])
+    notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
+               [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
+    data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook,
+                scenes=[scene_data(s, base) for s in SCENES], battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
+    # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
+    data["version"] = hashlib.md5((json.dumps(data, sort_keys=True) + (ROOT / "game.lua").read_text()).encode()).hexdigest()[:8]
+    lua = (ROOT / "game.lua").read_text().replace(
         "DATA = {} --@DATA@", "DATA = JSON.decode([==[" + json.dumps(data) + "]==])")
     xml, assets = xml_ui(base)
-    tabs = {"0": {"title": "Rules", "body": RULES, "color": "Grey", "visibleColor": {"r": 0.5, "g": 0.5, "b": 0.5}, "id": 0}}
-    for i, s in enumerate(SCENES, 1):
-        tabs[str(i)] = {"title": s["title"], "body": s["notes"], "color": "Black",
-                        "visibleColor": {"r": 0.25, "g": 0.25, "b": 0.25}, "id": i}
+    controller = obj("BlockSquare", tf(0.0, -3.0, 0.0, s=0.5), GUID=CONTROLLER, Locked=True,
+                     Nickname="Game controller (don't delete)", LuaScript=lua)
+    game = dict(version=data["version"], xml=xml, assets=assets, controller=controller)
+    (ROOT / "game.json").write_text(json.dumps(game))
+
+    # Holst.json: just the loader. Only rebuild/redistribute it if loader.lua, the table or the hands change.
     hands = [{"Color": c, "Transform": tf(x, 4.0, side * 29.0, ry=0.0 if side < 0 else 180.0, s=1.0)
               | {"scaleX": 11.0, "scaleY": 5.0, "scaleZ": 4.0}} for c, (x, side) in SEATS.items()]
     save = {"SaveName": "The Giants of Holst", "GameMode": "The Giants of Holst", "Gravity": 0.5, "PlayArea": 0.5,
             "Date": "", "Table": "Table_RPG", "Sky": "Sky_Museum", "Note": "", "Rules": RULES,
-            "XmlUI": xml, "CustomUIAssets": assets, "LuaScript": lua, "LuaScriptState": "",
+            "XmlUI": "", "LuaScript": (ROOT / "loader.lua").read_text().replace("--@CONTROLLER@", CONTROLLER),
+            "LuaScriptState": "",
             "Grid": {"Type": 0, "Lines": False, "Color": {"r": 0, "g": 0, "b": 0}, "Opacity": 0.75, "ThickLines": False,
                      "Snapping": False, "Offset": False, "BothSnapping": False, "xSize": CELL, "ySize": CELL,
                      "PosOffset": {"x": 0.0, "y": 1.0, "z": 0.0}},
             "Hands": {"Enable": True, "DisableUnused": False, "Hiding": 0, "HandTransforms": hands},
-            "TabStates": tabs, "ObjectStates": objs, "VersionNumber": "v13.2.2"}
+            "TabStates": {}, "ObjectStates": [], "VersionNumber": "v13.2.2"}
     (ROOT / "Holst.json").write_text(json.dumps(save, indent=1))
     (ROOT / "GM_GUIDE.md").write_text(gm_guide())
-    print("wrote Holst.json,", len(objs), "objects,", sum(len(s["spawns"]) for s in data["scenes"]), "scene spawns")
+    print("wrote game.json version", data["version"], "-", len(kits), "kit objects,",
+          sum(len(s["spawns"]) for s in data["scenes"]), "scene spawns")
 
 
 if __name__ == "__main__":
