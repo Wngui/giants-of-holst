@@ -133,7 +133,7 @@ def scene_data(s, base):
     if s["fog"]:
         spawns.append(obj("FogOfWar", {**tf(y=3.0), "scaleX": MAP_W + 2, "scaleY": 6.0, "scaleZ": MAP_W * 2 / 3 + 2},
                           GUID=guid(s["key"], "fog"), Tags=["scene", "fog", "pin"],
-                          FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0, "RevealedLocations": {}}))
+                          FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0}))
     for n, spec in enumerate(s["npcs"]):
         spawns.append(npc(*spec[:3], n, s["key"], *spec[3:]))
     if s["key"] == "den":   # Rat's Bones dice on the gambling table
@@ -193,8 +193,25 @@ def xml_ui(base):
  offsetXY="0 -60" width="760" height="260" color="#1b1410ee" padding="10 10 10 10">
 <VerticalLayout spacing="6"><Text fontSize="24" color="#f0d9a0" fontStyle="Bold" preferredHeight="36">Choose your adventurer</Text>
 <HorizontalLayout spacing="10">{picks}</HorizontalLayout></VerticalLayout></Panel>"""
-    assets = [{"Type": 0, "Name": f"portrait_{h['key']}", "URL": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES]
+    # Lua's UI.setXml wants lowercase name/url (the save-file format's Name/URL gives a null-reference error)
+    assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES]
     return gm + pick, assets
+
+
+def lua_lit(v):
+    """Python data -> Lua table constructor (string keys always bracketed, so {"1": ...} stays a string key)."""
+    if isinstance(v, dict):
+        return "{" + ",".join(f"[{lua_lit(str(k))}]={lua_lit(x)}" for k, x in v.items() if x is not None) + "}"
+    if isinstance(v, (list, tuple)):
+        assert None not in v, "nil inside a Lua array would cut it short"
+        return "{" + ",".join(lua_lit(x) for x in v) + "}"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    out = json.dumps(v, ensure_ascii=False)   # raw UTF-8; \n \t \" \\ mean the same in Lua
+    assert "\\u" not in out, f"control character in {v!r}: Lua has no \\uXXXX escape"
+    return out
 
 
 def gm_guide():
@@ -224,7 +241,7 @@ def gm_guide():
             "5. Play a card onto the table, press REST -> card returns to hand, counters reset.",
             "6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua.",
             "",
-            "Updates: Holst.json is only a loader. It downloads game.json from GitHub on every load, so pushed fixes",
+            "Updates: Holst.json is only a loader. It downloads game.json + controller.lua from GitHub on every load, so pushed fixes",
             "arrive without replacing the save. Offline, a save you made yourself keeps the last version it loaded."]
     return "\n".join(out) + "\n"
 
@@ -241,13 +258,11 @@ def main(base):
                 scenes=[scene_data(s, base) for s in SCENES], battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
     data["version"] = hashlib.md5((json.dumps(data, sort_keys=True) + (ROOT / "game.lua").read_text()).encode()).hexdigest()[:8]
-    lua = (ROOT / "game.lua").read_text().replace(
-        "DATA = {} --@DATA@", "DATA = JSON.decode([==[" + json.dumps(data) + "]==])")
+    # DATA goes in as a Lua table literal: TTS's JSON.decode takes minutes on a payload this size
+    lua = (ROOT / "game.lua").read_text().replace("DATA = {} --@DATA@", "DATA = " + lua_lit(data))
     xml, assets = xml_ui(base)
-    controller = obj("BlockSquare", tf(0.0, -3.0, 0.0, s=0.5), GUID=CONTROLLER, Locked=True,
-                     Nickname="Game controller (don't delete)", LuaScript=lua)
-    game = dict(version=data["version"], xml=xml, assets=assets, controller=controller)
-    (ROOT / "game.json").write_text(json.dumps(game))
+    (ROOT / "controller.lua").write_text(lua)
+    (ROOT / "game.json").write_text(json.dumps(dict(version=data["version"], xml=xml, assets=assets)))
 
     # Holst.json: just the loader. Only rebuild/redistribute it if loader.lua, the table or the hands change.
     hands = [{"Color": c, "Transform": tf(x, 4.0, side * 29.0, ry=0.0 if side < 0 else 180.0, s=1.0)

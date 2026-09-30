@@ -6,6 +6,7 @@ from lupa import LuaRuntime
 
 save = json.load(open("Holst.json"))
 game = json.load(open("game.json"))
+controller_lua = open("controller.lua").read()
 lua = LuaRuntime(unpack_returned_tuples=True)
 g = lua.globals()
 lua_type = lua.eval("type")
@@ -29,9 +30,14 @@ def to_py(t):
 
 
 g.JSON = to_lua({})
-g.JSON.decode = lambda s: to_lua(json.loads(s))
+def decode(s):
+    assert len(s) < 50_000, f"JSON.decode of {len(s)} chars: TTS takes minutes on this"
+    return to_lua(json.loads(s))
+
+
+g.JSON.decode = decode
 g.JSON.encode = lambda t: json.dumps(to_py(t))
-g.GAME_TEXT = json.dumps(game)
+g.FILES = to_lua({"game.json": json.dumps(game), "controller.lua": controller_lua})
 
 lua.execute("""
 log = {}
@@ -44,7 +50,10 @@ function tonumber(v, base)   -- MoonSharp (TTS) throws where real Lua returns ni
 end
 UIattr = {}
 UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) end,
-       setXml = function(x, assets) UIxml, UIassets = x, assets end }
+       setXml = function(x, assets)
+         for _, a in ipairs(assets) do assert(a.name and a.url, "UI asset needs lowercase name/url") end
+         UIxml, UIassets = x, assets
+       end }
 tabs = {}
 Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do r[i] = {index = i - 1, title = t.title} end return r end,
           removeNotebookTab = function(i) table.remove(tabs, i + 1) end,
@@ -52,7 +61,11 @@ Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do 
 MusicPlayer = { setCurrentAudioclip = function(t) MusicPlayer.url = t.url end, pause = function() end,
                 play = function() end, player_status = "Ready" }
 Wait = { time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
-WebRequest = { get = function(url, cb) requested = url; cb({ text = GAME_TEXT, response_code = 200, is_error = false }) end }
+WebRequest = { get = function(url, cb)
+  requested = url
+  local file = url:match("/main/([^?]+)%?t=%d+$")
+  cb({ text = FILES[file], response_code = FILES[file] and 200 or 404, is_error = false })
+end }
 function Vector(x, y, z) return setmetatable({x=x, y=y, z=z}, {__add = function(a, b) return Vector(a.x+b.x, a.y+b.y, a.z+b.z) end}) end
 objects = {}
 function run(code, self)   -- a script with its own globals, falling back to the shared API
@@ -116,16 +129,17 @@ end
 assert save["ObjectStates"] == [] and "WebRequest.get" in save["LuaScript"]
 g.loader = g.run(save["LuaScript"], None)
 g.loader.onLoad("")
-assert g.requested.startswith("https://raw.githubusercontent.com/Wngui/giants-of-holst/main/game.json?t=")
-ctl = g.getObjectFromGUID(game["controller"]["GUID"])
+assert g.requested.startswith("https://raw.githubusercontent.com/Wngui/giants-of-holst/main/controller.lua?t=")
+CTL = save["LuaScript"].split('CONTROLLER = "')[1][:6]
+ctl = g.getObjectFromGUID(CTL)
 assert ctl and ctl.getVar("VERSION") == game["version"]
 c = ctl.env
-assert 'onClick="%s/pick"' % game["controller"]["GUID"] in g.UIxml
+assert 'onClick="%s/pick"' % CTL in g.UIxml
 assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
 assert count("scene") == 1 and count("kit") == 20, (count("scene"), count("kit"))   # title map + 4 hero kits
 
-scenes = json.loads(game["controller"]["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"]
+scenes = to_py(c.DATA.scenes)
 for i, s in enumerate(scenes, 1):
     c.setScene(i)
     assert count("scene") == len(s["spawns"]), (i, count("scene"))
@@ -155,16 +169,15 @@ assert "HP back to full" in g.log[len(g.log)]
 # ---- same version on reload: nothing reinstalled
 ctl.marker = "original"
 g.loader.onLoad("")
-assert g.getObjectFromGUID(game["controller"]["GUID"]).marker == "original"
+assert g.getObjectFromGUID(CTL).marker == "original"
 
 # ---- new version pushed: controller replaced, scene kept, kits respawned, Red re-dealt, no duplicates
 c.setScene(3)
 game["version"] = "newer"
-game["controller"]["LuaScript"] = game["controller"]["LuaScript"].replace(
-    'VERSION = DATA.version', 'VERSION = "newer"')
-g.GAME_TEXT = json.dumps(game)
+g.FILES = to_lua({"game.json": json.dumps(game),
+                  "controller.lua": controller_lua.replace("VERSION = DATA.version", 'VERSION = "newer"')})
 g.loader.onLoad("")
-ctl2 = g.getObjectFromGUID(game["controller"]["GUID"])
+ctl2 = g.getObjectFromGUID(CTL)
 assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
 assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
 assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6

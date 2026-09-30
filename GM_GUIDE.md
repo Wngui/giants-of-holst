@@ -215,5 +215,5 @@ THE END. (Optional epilogue: she promises to return the Hearthstone and renew th
 5. Play a card onto the table, press REST -> card returns to hand, counters reset.
 6. If maps/bars look the wrong size: TILE_UNIT in build.py / UI_POS in npc.lua.
 
-Updates: Holst.json is only a loader. It downloads game.json from GitHub on every load, so pushed fixes
+Updates: Holst.json is only a loader. It downloads game.json + controller.lua from GitHub on every load, so pushed fixes
 arrive without replacing the save. Offline, a save you made yourself keeps the last version it loaded.
