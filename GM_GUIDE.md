@@ -6,7 +6,8 @@
 - Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.
 - NPC controls (HP, damage box, attack buttons) float over each NPC, GM-only. Type `12` (or `+12`) to hurt, `-5` to heal.
 - Attack buttons whisper the roll to you (Black). Crits add an extra set of damage dice.
-- Fog: heroes reveal around themselves. Use TTS's own fog tool or *Reveal all fog* for set pieces.
+- Hidden enemies: NPCs start invisible to players (you see them). Dropping a hero within 7 squares reveals
+  them; *Reveal all enemies* shows everyone at once for set pieces.
 - The same text as below sits in the Notebook (GM-only tabs).
 
 ## Rules
@@ -66,7 +67,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
-- **Sewer hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. Trade food for their Wolf-tooth Charm.
+- **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
 - **Fresh carcass** HP 1, Def 1. . Food.
 - **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
 - **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
@@ -91,7 +92,7 @@ Background (GM only): the giants' sacred Hearthstone was stolen from their mount
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else.
 ```
 
-## 1. The Outskirts of Holst
+## 1. Holst City
 
 ```
 Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
@@ -102,7 +103,7 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
-GIANTS: after a few minutes, ground shakes. Reveal the fog on the east side. Four giants round the
+GIANTS: after a few minutes, ground shakes. Press REVEAL ALL ENEMIES. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
   Switch to BATTLE music. Giants move 8 (hill giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
@@ -114,7 +115,7 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
 ```
 Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
-FOOD SCENE: two rough hunters drag in carcasses. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
+FOOD SCENE: two rough hunters come in from outside the walls, dragging carcasses from the woods. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
 Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favour.
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
@@ -179,7 +180,7 @@ OUTWARD, scorched. Something burned its way out. Giant footprints lead north-eas
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. Grask's LOG THROW
-opens the fight (2x2 on the cart). Switch to BATTLE music, reveal fog. 3 giants.
+opens the fight (2x2 on the cart). Switch to BATTLE music, press REVEAL ALL ENEMIES. 3 giants.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
 If the party arrives badly hurt from the traps, let them REST at the passage exit first.
@@ -210,7 +211,7 @@ THE END. (Optional epilogue: she promises to return the Hearthstone and renew th
 
 1. Load save as host in Black. GM panel top right, title map with 4 heroes.
 2. Second client picks Thief: moves to Red, gets 6 cards; button shows as taken.
-3. Click each scene: map + NPCs + fog + music change.
+3. Click each scene: table image, props, NPCs and music change; enemies are invisible to players until near.
 4. On a giant: type 20 in the damage box -> bar drops. Attack button -> roll whispered to you.
 5. Play a card onto the table, press REST -> card returns to hand, counters reset.
 6. If things sit off the art or the kits overlap it: LAYOUT in build.py; health bars: UI_POS in npc.lua.

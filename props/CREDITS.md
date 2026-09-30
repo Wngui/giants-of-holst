@@ -1,4 +1,7 @@
 # Prop credits
 
-3D models from Kenney (www.kenney.nl), licensed CC0 (public domain): Fantasy Town Kit 2.0, Survival Kit,
-Graveyard Kit 5.0, Nature Kit. Converted and merged by props.py; nature kit colours repainted.
+3D models licensed CC0 (public domain):
+- KayKit Medieval Hexagon Pack 1.0 and Dungeon Remastered 1.0 by Kay Lousberg (www.kaylousberg.com)
+- Nature Kit by Kenney (www.kenney.nl) - the thrown log, recoloured
+
+Converted, rescaled and merged by props.py.

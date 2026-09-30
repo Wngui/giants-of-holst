@@ -86,6 +86,12 @@ function makeObj(d)
   for _, t in ipairs(d.Tags or {}) do o.tags[t] = true end
   function o.getGUID() return d.GUID end
   function o.hasTag(t) return o.tags[t] == true end
+  function o.removeTag(t) o.tags[t] = nil end
+  function o.setInvisibleTo(t) o.invisible = #t > 0 end
+  function o.getPosition()
+    local p = o.pos or {d.Transform.posX, d.Transform.posY, d.Transform.posZ}
+    return {x = p[1], y = p[2], z = p[3]}
+  end
   function o.destruct() objects[d.GUID] = nil end
   function o.setLock(v) o.locked = v end
   function o.setPositionSmooth(p) o.pos = p end
@@ -201,8 +207,23 @@ fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
     json.dump({"W": W, "D": D, "TOP": TOP, "SQ": SQ, "scenes": dump}, open(os.environ["DUMP"], "w"))
+# hidden enemies: Holst City giants start invisible, the kids near the heroes don't; a drop next to a giant reveals it
+c.setScene(2)
+objs = list(g.getObjectsWithTag("scene").values())
+giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
+kids = [o for o in objs if o.data.Nickname == "Street kid"]
+gm_bar = 'visibility="Black|Host" percentage'
+assert giants and all(o.invisible and o.hasTag("hidden") and gm_bar in o.xml for o in giants)
+assert kids and not any(o.invisible for o in kids)
+hero = list(g.getObjectsWithTag("fig_Red").values())[0]
+gp = giants[0].getPosition()
+hero.pos = lua.table_from([gp.x + 1, gp.y, gp.z])
+c.onObjectDrop("Red", hero)
+assert not giants[0].invisible and gm_bar not in giants[0].xml    # visible again, bar for everyone
 c.revealAll()
-assert count("fog") == 0
+assert count("hidden") == 0 and not any(o.invisible for o in giants)
+sheet = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile" and "Wren" in o.data.Nickname][0]
+assert sheet.data.Transform.rotY == 180, "Red's sheet faces the player (tile images are flipped vs hands)"
 
 bob = g.mkplayer("bob", "White")
 c.pick(bob, None, "pick_Red")

@@ -1,81 +1,86 @@
-"""Kenney CC0 kits -> TTS props: one .obj per prop (multi-piece prefabs merged) + one texture per kit.
+"""CC0 kits -> TTS props: one .obj per prop (multi-piece prefabs merged) + one texture per kit.
+Main kits: KayKit Medieval Hexagon + Dungeon Remastered (Kay Lousberg). Kenney Nature supplies the thrown log.
+Each kit's scale is baked in so 1 model unit = 1 grid square; content.py scales are then plain multipliers.
 Kits download to cache/ (gitignored); output lands in props/ (committed, served from GitHub).
-TTS ignores .mtl files, so the nature kit's flat material colours are baked into a small palette texture.
 Usage: python props.py"""
-import io, math, random, urllib.request, zipfile
+import io, math, subprocess, urllib.request, zipfile
 from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).parent
 CACHE, OUT = ROOT / "cache", ROOT / "props"
-KITS = {
-    "town": "https://kenney.nl/media/pages/assets/fantasy-town-kit/efe948d309-1754222374/kenney_fantasy-town-kit_2.0.zip",
-    "survival": "https://kenney.nl/media/pages/assets/survival-kit/4065a8185b-1712149243/kenney_survival-kit.zip",
-    "graveyard": "https://kenney.nl/media/pages/assets/graveyard-kit/ba8d4b4517-1760691807/kenney_graveyard-kit_5.0.zip",
-    "nature": "https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip",
+KAYKIT = "https://github.com/KayKit-Game-Assets/{}.git"
+KITS = {  # name: (source, obj folder inside it, texture file, baked scale)
+    "medieval": ("KayKit-Medieval-Hexagon-Pack-1.0", "addons/kaykit_medieval_hexagon_pack/Assets/obj",
+                 "buildings/neutral/hexagons_medieval.png", 3.5),
+    "dungeon": ("KayKit-Dungeon-Remastered-1.0", "addons/kaykit_dungeon_remastered/Assets/obj", "dungeon_texture.png", 0.45),
+    "nature": ("https://kenney.nl/media/pages/assets/nature-kit/37ac38a37b-1677698939/kenney_nature-kit.zip",
+               None, None, 1.0),
 }
-PALETTE_CELL = 8   # px per nature material colour
-# the nature kit is bright and teal; repaint it in the muted dark-fantasy look of the rest of the game (sRGB)
-NATURE_COLOURS = {"leafsDark": (46, 78, 44), "leafsGreen": (56, 90, 50), "woodBarkDark": (74, 52, 36),
-                  "woodBark": (96, 66, 44), "woodInner": (170, 140, 100), "grass": (72, 80, 62),
-                  "dirt": (98, 92, 86), "stone": (120, 120, 118), "_defaultMat": (100, 100, 100)}
+NATURE_COLOURS = {"woodBark": (96, 66, 44), "woodInner": (170, 140, 100)}   # Kenney's log, repainted to match
 
 
-def ruin(w, d, seed, wood=False):
-    """Roofless ruined house, w x d tiles: walls round the edge, some windows, a door, broken bits, rubble inside."""
-    rnd = random.Random(seed)
-    m = "wall-wood" if wood else "wall"
-    parts, edges = [], []
-    for i in range(w):
-        edges += [(i, 0, 90), (i, d - 1, -90)]           # south (-z) and north (+z) walls
-    for j in range(d):
-        edges += [(0, j, 180), (w - 1, j, 0)]            # west and east walls
-    door = rnd.randrange(len(edges))
-    for n, (i, j, rot) in enumerate(edges):
-        piece = (f"{m}-door" if n == door else
-                 rnd.choice([f"{m}-broken", f"{m}-broken", f"{m}-window-shutters", m, m]))
-        x, z = i - (w - 1) / 2, j - (d - 1) / 2
-        parts.append(("town", piece, x, 0, z, rot))
-        if piece == m and rnd.random() < 0.35:            # a few walls keep a second storey
-            parts.append(("town", f"{m}-broken", x, 1, z, rot))
-    for _ in range(w * d // 2):
-        parts.append(("town", "planks-half", rnd.uniform(-w / 3, w / 3), 0, rnd.uniform(-d / 3, d / 3), rnd.choice([0, 90, 30])))
-    return parts
+def cart():
+    """Broken cart from medieval pieces: pallet bed, a crate and sacks on it, one wheel on, one lying off."""
+    return [("medieval", "decoration/props/pallet", 0, 0.02, -0.15, 0, 1, 0),
+            ("medieval", "decoration/props/pallet", 0, 0.02, 0.15, 0, 1, 0),
+            ("medieval", "buildings/red/building_watermill_red_building_watermill_wheel_red", 0.17, 0.056, -0.05, 90, 0.2, 0),
+            ("medieval", "buildings/red/building_watermill_red_building_watermill_wheel_red", 0.36, 0.01, 0.3, 30, 0.2, 90),
+            ("medieval", "decoration/props/crate_long_A", 0, 0.1, 0.08, 20, 1, 0),
+            ("medieval", "decoration/props/sack", -0.08, 0.1, -0.2, 50, 1, 0),
+            ("medieval", "decoration/props/sack", -0.28, 0, -0.1, 10, 1, 0)]
 
 
-# prefab name -> list of (kit, piece, x, y, z, rotY degrees); single pieces use their own name
-PREFABS = {
-    "ruin_2x2": ruin(2, 2, 1), "ruin_3x2": ruin(3, 2, 2), "ruin_2x3": ruin(2, 3, 3, wood=True),
-    "ruin_3x3": ruin(3, 3, 4, wood=True), "ruin_4x2": ruin(4, 2, 5),
-    "broken_cart": [("town", "cart", 0, 0, 0, 0), ("town", "wheel", 0.55, 0, 0.75, 70),
-                    ("town", "planks-half", -0.6, 0, -0.5, 25)],
-}
-SINGLES = {  # name -> (kit, piece)
-    "cart": ("town", "cart"), "fence": ("town", "fence"), "fence_broken": ("town", "fence-broken"),
-    "rock_town": ("town", "rock-large"), "stall": ("town", "stall-red"), "lantern": ("town", "lantern"),
-    "tent": ("survival", "tent-canvas"), "campfire": ("survival", "campfire-pit"), "bedroll": ("survival", "bedroll"),
-    "crate": ("survival", "box-large"), "barrel_s": ("survival", "barrel"), "signpost": ("survival", "signpost"),
-    "stone_wall": ("graveyard", "stone-wall"), "stone_wall_broken": ("graveyard", "stone-wall-damaged"),
-    "stone_wall_curve": ("graveyard", "stone-wall-curve"), "debris": ("graveyard", "debris"),
-    "debris_wood": ("graveyard", "debris-wood"), "rubble": ("graveyard", "rocks"), "skeleton": ("graveyard", "character-skeleton"),
-    "pine": ("nature", "tree_pineTallA"), "pine_b": ("nature", "tree_pineDefaultA"), "oak": ("nature", "tree_oak_dark"),
-    "log_large": ("nature", "log_large"), "stump": ("nature", "stump_old"), "bush": ("nature", "plant_bushLarge"),
-    "rock_big": ("nature", "rock_largeA"), "rock_tall": ("nature", "rock_tallA"), "rock_small": ("nature", "rock_smallA"),
-    "cliff": ("nature", "cliff_block_rock"), "cliff_half": ("nature", "cliff_half_rock"),
-    "cliff_corner": ("nature", "cliff_corner_rock"), "cave_mouth": ("nature", "cliff_cave_rock"),
-    "campfire_cold": ("nature", "campfire_stones"),
+# prefab name -> list of (kit, piece, x, y, z, rotY, scale, rotX) in the kit's native units
+PREFABS = {"broken_cart": cart()}
+M, D = "medieval", "dungeon"
+FLATTEN = {"grate"}   # floor pieces whose detail sits in a pit below the floor: squash them onto the surface
+SINGLES = {  # name -> (kit, piece path without .obj)
+    "house_a": (M, "buildings/red/building_home_A_red"), "house_b": (M, "buildings/blue/building_home_B_blue"),
+    "house_c": (M, "buildings/yellow/building_home_A_yellow"), "house_d": (M, "buildings/green/building_home_B_green"),
+    "tavern": (M, "buildings/red/building_tavern_red"), "market": (M, "buildings/yellow/building_market_yellow"),
+    "blacksmith": (M, "buildings/blue/building_blacksmith_blue"), "church": (M, "buildings/red/building_church_red"),
+    "well": (M, "buildings/red/building_well_red"), "destroyed": (M, "buildings/neutral/building_destroyed"),
+    "scaffolding": (M, "buildings/neutral/building_scaffolding"), "fence_wood": (M, "buildings/neutral/fence_wood_straight"),
+    "fence_stone": (M, "buildings/neutral/fence_stone_straight"), "tent": (M, "decoration/props/tent"),
+    "wheelbarrow": (M, "decoration/props/wheelbarrow"), "crate": (M, "decoration/props/crate_A_big"),
+    "crate_long": (M, "decoration/props/crate_long_A"), "barrel": (M, "decoration/props/barrel"),
+    "sack": (M, "decoration/props/sack"), "lumber": (M, "decoration/props/resource_lumber"),
+    "stones": (M, "decoration/props/resource_stone"), "trees_large": (M, "decoration/nature/trees_B_large"),
+    "trees_medium": (M, "decoration/nature/trees_A_medium"), "tree_a": (M, "decoration/nature/tree_single_A"),
+    "tree_b": (M, "decoration/nature/tree_single_B"), "stump": (M, "decoration/nature/tree_single_A_cut"),
+    "rock_a": (M, "decoration/nature/rock_single_A"), "rock_b": (M, "decoration/nature/rock_single_B"),
+    "rock_c": (M, "decoration/nature/rock_single_C"), "rock_d": (M, "decoration/nature/rock_single_D"),
+    "rock_e": (M, "decoration/nature/rock_single_E"), "hill": (M, "decoration/nature/hill_single_A"),
+    "wall": (D, "wall"), "wall_broken": (D, "wall_broken"), "wall_arched": (D, "wall_arched"),
+    "wall_door": (D, "wall_doorway_door"), "wall_half": (D, "wall_half"), "pillar": (D, "pillar"),
+    "grate": (D, "floor_tile_big_grate"), "barrel_big": (D, "barrel_large"), "barrels": (D, "barrel_small_stack"),
+    "keg": (D, "keg_decorated"), "chest_gold": (D, "chest_gold"), "chest": (D, "chest"), "coins": (D, "coin_stack_large"),
+    "table_feast": (D, "table_medium_tablecloth_decorated_B"), "table_long": (D, "table_long_decorated_A"),
+    "table_broken": (D, "table_long_broken"), "chair": (D, "chair"), "stool": (D, "stool"), "torch": (D, "torch_lit"),
+    "rubble": (D, "rubble_large"), "rubble_half": (D, "rubble_half"), "banner": (D, "banner_patternA_red"),
+    "bed": (D, "bed_floor"), "candles": (D, "candle_triple"), "crates": (D, "crates_stacked"), "box": (D, "box_large"),
+    "trunk": (D, "trunk_large_A"), "shelves": (D, "shelves"),
+    "log_large": ("nature", "log_large"),
 }
 
 
 def kit_dir(kit):
-    d = CACHE / kit
+    src, sub, _, _ = KITS[kit]
+    if src.startswith("http"):
+        d = CACHE / kit
+        if not d.exists():
+            zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(src).read())).extractall(d)
+        return next(d.glob("**/OBJ format"))
+    d = CACHE / src
     if not d.exists():
-        zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(KITS[kit]).read())).extractall(d)
-    return next(d.glob("**/OBJ format"))
+        subprocess.run(["git", "clone", "-q", "--depth", "1", "--filter=blob:none", "--sparse", KAYKIT.format(src), str(d)], check=True)
+        subprocess.run(["git", "-C", str(d), "sparse-checkout", "set", "--no-cone", f"/{sub}/**", "/LICENSE.txt"], check=True)
+    return d / sub
 
 
 def read_obj(path):
-    """-> list of faces; each face = [(pos, uv or None, normal)] plus material name."""
+    """-> list of (material, face); face = [(pos, uv or None, normal)]."""
     v, vt, vn, faces, mat = [], [], [], [], None
     for line in path.read_text().splitlines():
         p = line.split()
@@ -109,13 +114,17 @@ def read_mtl_colours(path):
     return cols
 
 
-def rot_y(p, deg):
-    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
-    return (p[0] * c + p[2] * s, p[1], -p[0] * s + p[2] * c)
+def rot(p, ry, rx=0):
+    y, z = p[1], p[2]
+    if rx:
+        c, s = math.cos(math.radians(rx)), math.sin(math.radians(rx))
+        y, z = y * c - z * s, y * s + z * c
+    c, s = math.cos(math.radians(ry)), math.sin(math.radians(ry))
+    return (p[0] * c + z * s, y, -p[0] * s + z * c)
 
 
 def write_obj(path, faces, uv_of):
-    lines, n = ["# The Giants of Holst prop, from Kenney CC0 kits (www.kenney.nl)"], 0
+    lines, n = ["# The Giants of Holst prop, from CC0 kits by KayKit (Kay Lousberg) and Kenney"], 0
     for mat, face in faces:
         for pos, uv, nrm in face:
             u, w = uv_of(mat, uv)
@@ -127,41 +136,48 @@ def write_obj(path, faces, uv_of):
 
 def main():
     OUT.mkdir(exist_ok=True)
-    jobs = {name: parts for name, parts in PREFABS.items()}
-    jobs.update({name: [(kit, piece, 0, 0, 0, 0)] for name, (kit, piece) in SINGLES.items()})
-    # nature palette: every material colour used by any nature piece, one cell each
-    nature_cols = {}
+    for old in OUT.glob("*.obj"):
+        old.unlink()
+    jobs = dict(PREFABS)
+    jobs.update({name: [(kit, piece, 0, 0, 0, 0, 1, 0)] for name, (kit, piece) in SINGLES.items()})
+    for kit, (_, _, tex, _) in KITS.items():
+        if tex:
+            Image.open(kit_dir(kit) / tex).convert("RGB").save(OUT / f"tex_{kit}.png")
+    # Kenney nature has flat material colours: bake them into a small palette texture
+    cols = {}
     for parts in jobs.values():
         for kit, piece, *_ in parts:
             if kit == "nature":
-                nature_cols.update(read_mtl_colours(kit_dir("nature") / f"{piece}.mtl"))
-    names = sorted(nature_cols)
-    side = math.ceil(math.sqrt(len(names)))
-    pal = Image.new("RGB", (side * PALETTE_CELL, side * PALETTE_CELL))
+                cols.update(read_mtl_colours(kit_dir("nature") / f"{piece}.mtl"))
+    names = sorted(cols)
+    pal = Image.new("RGB", (8 * len(names), 8))
     cell = {}
     for i, nm in enumerate(names):
-        cx, cy = i % side, i // side
-        pal.paste(NATURE_COLOURS.get(nm) or tuple(int(c * 255) for c in nature_cols[nm]),
-                  (cx * PALETTE_CELL, cy * PALETTE_CELL, (cx + 1) * PALETTE_CELL, (cy + 1) * PALETTE_CELL))
-        cell[nm] = ((cx + 0.5) / side, 1 - (cy + 0.5) / side)
+        pal.paste(NATURE_COLOURS.get(nm) or tuple(int(c * 255) for c in cols[nm]), (i * 8, 0, i * 8 + 8, 8))
+        cell[nm] = ((i + 0.5) / len(names), 0.5)
     pal.save(OUT / "tex_nature.png")
-    for kit in ("town", "survival", "graveyard"):
-        Image.open(kit_dir(kit) / "Textures" / "colormap.png").convert("RGB").save(OUT / f"tex_{kit}.png")
 
     textures = {}
     for name, parts in jobs.items():
         kits = {k for k, *_ in parts}
         assert len(kits) == 1, f"{name}: one texture per prop, got {kits}"
         kit = kits.pop()
+        k = KITS[kit][3]
         faces = []
-        for _, piece, x, y, z, rot in parts:
-            for mat, face in read_obj(kit_dir(kit) / f"{piece}.obj"):
-                faces.append((mat, [(tuple(a + b for a, b in zip(rot_y(p, rot), (x, y, z))), uv, rot_y(nr, rot))
+        for _, piece, x, y, z, ry, s, rx in parts:
+            for mat, face in read_obj((kit_dir(kit) / f"{piece}.obj").resolve()):
+                faces.append((mat, [(tuple(k * (a * s + b) for a, b in zip(rot(p, ry, rx), (x, y, z))), uv, rot(nr, ry, rx))
                                     for p, uv, nr in face]))
-        uv_of = (lambda mat, uv: cell[mat]) if kit == "nature" else (lambda mat, uv: uv)
+        if name in FLATTEN:
+            lo = min(p[1] for _, f in faces for p, *_ in f)
+            hi = max(p[1] for _, f in faces for p, *_ in f)
+            faces = [(m, [((p[0], 0.05 * (p[1] - lo) / (hi - lo), p[2]), uv, nr) for p, uv, nr in f]) for m, f in faces]
+        uv_of = (lambda mat, uv: cell[mat]) if kit == "nature" else (lambda mat, uv: uv or (0.5, 0.5))
         write_obj(OUT / f"{name}.obj", faces, uv_of)
         textures[name] = f"tex_{kit}.png"
-    # thin slab collider for every prop: figures can stand in ruins/among trees instead of on top of a hull
+    for stale in ("tex_town.png", "tex_survival.png", "tex_graveyard.png"):
+        (OUT / stale).unlink(missing_ok=True)
+    # thin slab collider for every prop: figures can stand among props instead of on top of a hull
     (OUT / "collider_flat.obj").write_text("\n".join(
         [f"v {x} {y} {z}" for x in (-0.5, 0.5) for y in (0, 0.02) for z in (-0.5, 0.5)] +
         ["f 1 3 7 5", "f 2 6 8 4", "f 1 5 6 2", "f 3 4 8 7", "f 1 2 4 3", "f 5 7 8 6"]) + "\n")

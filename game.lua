@@ -98,15 +98,13 @@ function placed(d)
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
         if g.role == "sheet" then
+            t.rotY = c.ry + 180                       -- tile images face the opposite way to hands
             local sc = T.w * L.sheet_w / L.tile_unit
             t.scaleX, t.scaleY, t.scaleZ = sc, 1, sc
         end
-    elseif g.k == "fog" then                          -- covers the scene art only
-        p = world(0, 0, 2)
-        t.scaleX, t.scaleY, t.scaleZ = L.cols * SQ, 4, L.rows * SQ
     else
         -- props drop a little and get pinned; figures are scaled to the grid (RPG kit figures fit a 2-unit square)
-        p = world(g.x, g.z, g.k == "fig" and 1 or 0.3)
+        p = world(g.x, g.z, g.lift or (g.k == "fig" and 1 or 0.3))
         local unit = (g.k == "model") and SQ or SQ / 2
         local s = g.s or { 1, 1, 1 }
         t.scaleX, t.scaleY, t.scaleZ = s[1] * unit, s[2] * unit, s[3] * unit
@@ -129,12 +127,15 @@ function setScene(i)
         spawnObjectData({ data = placed(d), callback_function = function(o)
             -- let props settle on the table, then pin them
             if o.hasTag("pin") then Wait.time(function() o.setLock(true) end, 1.5) end
+            if o.hasTag("hidden") then hide(o) end
         end })
     end
     for n, color in ipairs(DATA.colors) do
         local fig = kit("fig_" .. color)
         if fig then
-            fig.setPositionSmooth(world(s.heroes[n][1], s.heroes[n][2], 1), false, true)
+            local p = world(s.heroes[n][1], s.heroes[n][2], 1)
+            fig.setPositionSmooth(p, false, true)
+            Wait.frames(function() revealNear(p) end, 2)   -- after the scene's NPCs have spawned
             fig.setRotationSmooth({ 0, 90, 0 })   -- face east, into the scene
         end
     end
@@ -143,8 +144,39 @@ function setScene(i)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
 end
 
+-- ---------------------------------------------------------------- hidden enemies (instead of TTS's fog box)
+PLAYERS = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey" }
+
+function hide(o)
+    o.setInvisibleTo(PLAYERS)
+    o.call("setHidden", { hidden = true })
+end
+
+function reveal(o)
+    o.setInvisibleTo({})
+    o.removeTag("hidden")
+    o.call("setHidden", { hidden = false })
+end
+
 function revealAll()
-    for _, o in ipairs(getObjectsWithTag("fog")) do o.destruct() end
+    for _, o in ipairs(getObjectsWithTag("hidden")) do reveal(o) end
+end
+
+function revealNear(p)
+    local r = DATA.layout.reveal * SQ
+    for _, o in ipairs(getObjectsWithTag("hidden")) do
+        local q = o.getPosition()
+        if (q.x - p[1]) ^ 2 + (q.z - p[3]) ^ 2 <= r * r then reveal(o) end
+    end
+end
+
+function onObjectDrop(_, o)
+    for _, color in ipairs(DATA.colors) do
+        if o.hasTag("fig_" .. color) then
+            local q = o.getPosition()
+            revealNear({ q.x, q.y, q.z })
+        end
+    end
 end
 
 -- ---------------------------------------------------------------- music

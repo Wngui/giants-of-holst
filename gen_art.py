@@ -2,16 +2,18 @@
 so delete one to re-roll it. Usage: python gen_art.py  (ComfyUI must be on 127.0.0.1:8188)"""
 import json, time, urllib.request, urllib.parse
 from pathlib import Path
-from content import HEROES, SCENES, STYLE, MAP_STYLE
+from content import HEROES, SCENES, STYLE, MAP_STYLE, GROUNDS, GROUND_STYLE
 
 COMFY = "http://127.0.0.1:8188"
 RAW = Path(__file__).parent / "art" / "raw"
-REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1}  # bump to get a new seed
+REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1, "ground_outskirts": 1, "ground_den": 2, "ground_cart": 1}  # bump to get a new seed
 
 
 def jobs():
     for s in SCENES:
         yield f"map_{s['key']}", f"{MAP_STYLE}, {s['map_prompt']}", 1536, 1024
+    for key, prompt in GROUNDS.items():
+        yield f"ground_{key}", f"{prompt}, {GROUND_STYLE}", 1536, 1024
     for h in HEROES:
         yield f"portrait_{h['key']}", f"portrait of {h['portrait']}, {STYLE}", 768, 768
         for i, (_, _, prompt) in enumerate(h["cards"]):

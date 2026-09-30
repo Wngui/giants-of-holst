@@ -1,6 +1,6 @@
 """Build the TTS save.  python build.py <asset base url>
 e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/out/*, Holst.json, GM_GUIDE.md"""
-import hashlib, json, sys, textwrap
+import hashlib, json, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC
@@ -13,7 +13,7 @@ TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
 ART_FRAC = 0.64             # share of the table width the scene art covers; the wooden border holds the player kits
 # measured-at-load layout knobs, passed to game.lua (fractions of the table's measured width/depth)
 LAYOUT = {"cols": COLS, "rows": ROWS, "art_w": ART_FRAC, "surface": 1.0,
-          "kit_x": 0.41, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0}
+          "kit_x": 0.41, "reveal": 7, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0}
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSerif{}.ttf"
 RGB = {"Red": (150, 35, 35), "Blue": (35, 70, 150), "Green": (35, 115, 55), "Purple": (100, 45, 135)}
 
@@ -84,7 +84,8 @@ def build_images():
     aw = int(TABLE_PX[0] * ART_FRAC)
     ah = int(aw / 1.5)
     for s in SCENES:
-        im = Image.open(RAW / f"map_{s['key']}.png").convert("RGB")
+        src = "map_title" if s["key"] == "title" else f"ground_{s['key']}"
+        im = Image.open(upscaled(src)).convert("RGB")
         if s["key"] == "title":
             d = ImageDraw.Draw(im)
             d.text((768, 470), s["title"], font=font(110, True), fill=(250, 235, 200), anchor="mm",
@@ -92,8 +93,19 @@ def build_images():
         table = wood.copy()
         x0, y0 = (TABLE_PX[0] - aw) // 2, (TABLE_PX[1] - ah) // 2
         ImageDraw.Draw(table).rectangle((x0 - 14, y0 - 14, x0 + aw + 13, y0 + ah + 13), fill=(150, 115, 50))
-        table.paste(im.resize((aw, ah), Image.LANCZOS), (x0, y0))
+        table.paste(im.resize((aw, ah), Image.LANCZOS), (x0, y0))   # downscale from the 2x upscale: stays sharp
         table.save(OUT / f"table_{s['key']}.jpg", quality=85)
+
+
+def upscaled(name):
+    """2x waifu2x copy of art/raw/<name>.png (cached in art/raw/up/), so the table art is sharp, not stretched."""
+    out = RAW / "up" / f"{name}.png"
+    if not out.exists():
+        out.parent.mkdir(exist_ok=True)
+        nunif = ROOT.parent.parent / "tools" / "nunif"
+        subprocess.run([str(nunif / ".venv/bin/python"), "-m", "waifu2x.cli", "-m", "noise_scale2x", "-n", "1",
+                        "--style", "art", "-i", str(RAW / f"{name}.png"), "-o", str(out.parent)], cwd=nunif, check=True)
+    return out
 
 
 # ---------------------------------------------------------------- TTS objects
@@ -146,21 +158,23 @@ def prop(spec, n, scene, base, textures):
         return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
     return obj("Custom_Model", tf(ry=rot), grid={"x": x, "z": z, "k": "model", "s": s}, Nickname="", **common,
                CustomMesh={"MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{textures[name]}",
-                           "NormalURL": "", "ColliderURL": f"{base}props/collider_flat.obj", "Convex": True,
+                           # tables get TTS's box collider so dice can rest on them; everything else a flat slab
+                           "NormalURL": "", "ColliderURL": "" if name.startswith("table") else f"{base}props/collider_flat.obj",
+                           "Convex": True,
                            "MaterialIndex": 1, "TypeIndex": 0, "CastShadows": True})
 
 
 def scene_data(s, base, textures):
     spawns = []
-    if s["fog"]:
-        spawns.append(obj("FogOfWar", tf(), GUID=guid(s["key"], "fog"), Tags=["scene", "fog"],
-                          FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0}, grid={"k": "fog"}))
     for n, spec in enumerate(s.get("props", [])):
         spawns.append(prop(spec, n, s["key"], base, textures))
     for n, spec in enumerate(s["npcs"]):
-        spawns.append(npc(*spec[:3], n, s["key"], *spec[3:]))
+        o = npc(*spec[:3], n, s["key"], *spec[3:])
+        if s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
+            o["Tags"] = o["Tags"] + ["hidden"]
+        spawns.append(o)
     if s["key"] == "den":   # Baron's Bones dice on the gambling table
-        spawns += [obj("Die_6", tf(), GUID=guid("den", "die", i), Tags=["scene"], grid={"x": -0.6 + 0.6 * i, "z": 0, "k": "fig"})
+        spawns += [obj("Die_6", tf(), GUID=guid("den", "die", i), Tags=["scene"], grid={"x": -0.4 + 0.4 * i, "z": 0, "k": "fig", "lift": 4})
                    for i in range(3)]
     return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
                 table=f"{base}art/out/table_{s['key']}.jpg", music=dict(url=f"{base}music/{s['music']}", title=s["title"]))
@@ -179,7 +193,6 @@ def hero_objects(h, n, base):
     colour = dict(zip("rgb", [v / 255 for v in RGB[c]]))
     return [
         obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
-            FogOfWarRevealer={"Active": True, "Range": 10.0, "Color": "All"},
             grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig"}),
         tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=True,
              Tags=["kit"], grid={"role": "sheet", "color": c}),
@@ -204,7 +217,7 @@ def xml_ui(base):
 {scenes}
 <HorizontalLayout spacing="4" preferredHeight="34"><Button {on}musicScene" {btn}>Scene music</Button>
 <Button {on}musicBattle" {btn}>Battle</Button><Button {on}musicStop" {btn}>Stop</Button></HorizontalLayout>
-<Button {on}revealAll" {btn}>Reveal all fog</Button>
+<Button {on}revealAll" {btn}>Reveal all enemies</Button>
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 </VerticalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image image="portrait_{h['key']}" preserveAspect="true"/>
@@ -241,7 +254,8 @@ def gm_guide():
            "- Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.",
            "- NPC controls (HP, damage box, attack buttons) float over each NPC, GM-only. Type `12` (or `+12`) to hurt, `-5` to heal.",
            "- Attack buttons whisper the roll to you (Black). Crits add an extra set of damage dice.",
-           "- Fog: heroes reveal around themselves. Use TTS's own fog tool or *Reveal all fog* for set pieces.",
+           "- Hidden enemies: NPCs start invisible to players (you see them). Dropping a hero within 7 squares reveals",
+           "  them; *Reveal all enemies* shows everyone at once for set pieces.",
            "- The same text as below sits in the Notebook (GM-only tabs).\n",
            "## Rules\n", "```", RULES, "```\n", "## Heroes\n"]
     for h in HEROES:
@@ -257,7 +271,7 @@ def gm_guide():
     out += ["\n## First-run checklist\n",
             "1. Load save as host in Black. GM panel top right, title map with 4 heroes.",
             "2. Second client picks Thief: moves to Red, gets 6 cards; button shows as taken.",
-            "3. Click each scene: map + NPCs + fog + music change.",
+            "3. Click each scene: table image, props, NPCs and music change; enemies are invisible to players until near.",
             "4. On a giant: type 20 in the damage box -> bar drops. Attack button -> roll whispered to you.",
             "5. Play a card onto the table, press REST -> card returns to hand, counters reset.",
             "6. If things sit off the art or the kits overlap it: LAYOUT in build.py; health bars: UI_POS in npc.lua.",

@@ -16,7 +16,8 @@ function draw()
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="%d"><VerticalLayout spacing="4" childForceExpandHeight="false">',
         UI_POS, UI_ROT, UI_SCALE, 60 + 44 * #S.attacks) }
-    x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22" percentage="' .. pct() ..
+    x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22"' .. (S.hidden and ' visibility="' .. GM .. '"' or '') ..
+        ' percentage="' .. pct() ..
         '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>'
     x[#x + 1] = '<HorizontalLayout visibility="' .. GM .. '" preferredHeight="34" spacing="4">' ..
         '<Text id="hp" fontSize="18" color="#ffffff" outline="#000000">' .. hpText() .. '</Text>' ..
@@ -28,6 +29,12 @@ function draw()
     end
     x[#x + 1] = '</VerticalLayout></Panel>'
     self.UI.setXml(table.concat(x))
+end
+
+-- called by the controller: while hidden from players, the health bar is GM-only too
+function setHidden(p)
+    S.hidden = p.hidden
+    draw()
 end
 
 function pct() return math.floor(100 * S.hp / S.max) end
