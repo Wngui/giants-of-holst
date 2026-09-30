@@ -34,17 +34,20 @@ function pct() return math.floor(100 * S.hp / S.max) end
 function hpText() return S.hp .. "/" .. S.max .. "  Def " .. S.def end
 
 function applyDamage(player, value)
-    local n = tonumber((value or ""):gsub("^%+", ""), 10)
+    -- MoonSharp's tonumber(s, 10) throws on "-5"/"", so pattern-check first and call it without a base
+    local num = (value or ""):match("^%s*%+?(%-?%d+)%s*$")
+    local n = num and tonumber(num)
     if not n or n == 0 then return end
-    local was = S.hp
     S.hp = math.max(0, math.min(S.max, S.hp - n))
     self.UI.setAttribute("bar", "percentage", pct())
     self.UI.setAttribute("hp", "text", hpText())
     self.UI.setAttribute("dmg", "text", "")
-    local rpg = self.RPGFigurine
-    if (was > 0 and S.hp == 0) or (was == 0 and S.hp > 0) then
-        if rpg then rpg.die() end
-        broadcastToAll(S.name .. (S.hp == 0 and " falls!" or " gets back up!"), { 0.9, 0.4, 0.3 })
+    -- die() toggles the lying pose; S.down tracks it so figures that start lying (the princess) stand when healed
+    local down = S.hp == 0
+    if down ~= (S.down or false) then
+        S.down = down
+        if self.RPGFigurine then self.RPGFigurine.die() end
+        broadcastToAll(S.name .. (down and " falls!" or " gets back up!"), { 0.9, 0.4, 0.3 })
     end
 end
 

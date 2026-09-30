@@ -36,7 +36,10 @@ function setScene(i)
     end
     for n, color in ipairs(DATA.colors) do
         local fig = getObjectFromGUID(DATA.heroes[color].fig)
-        if fig then fig.setPositionSmooth(s.heroes[n], false, true) end
+        if fig then
+            fig.setPositionSmooth(s.heroes[n], false, true)
+            fig.setRotationSmooth({ 0, 90, 0 })   -- face east, into the scene
+        end
     end
     UI.setAttribute("sceneTitle", "text", s.title)
     play(s.music)
@@ -61,7 +64,7 @@ function musicStop() MusicPlayer.pause() end
 function pick(player, _, id)
     local color = id:sub(6)
     if Player[color].seated then
-        broadcastToColor("That adventurer is taken, pick another.", player.color, "Orange")
+        broadcastToColor("That adventurer is taken, pick another.", player.color, { 1, 0.6, 0.2 })
         return
     end
     player.changeColor(color)
@@ -91,7 +94,7 @@ function setupHero(color)
     local h = DATA.heroes[color]
     local deck = getObjectFromGUID(h.deck)
     if deck then deck.deal(6, color) end
-    broadcastToAll(Player[color].steam_name .. " is " .. h.name .. ".", color)
+    broadcastToAll(Player[color].steam_name .. " is " .. h.name .. ".", { 0.94, 0.85, 0.63 })
 end
 
 -- ---------------------------------------------------------------- rest

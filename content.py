@@ -25,7 +25,7 @@ HEROES = [
              ("Smoke Bomb", "Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.",
               "a burst of thick grey smoke in a narrow street, silhouettes escaping"),
              ("Loaded Die", "Reroll any one die on the table, yours or anyone else's. Great at games of chance.",
-              "a single bone die glinting on a gambling table, hand sliding it"),
+              "close-up of a single ivory six-sided die with round pips on a worn wooden table, candlelight, blank table surface"),
              ("Poisoned Blade", "Your next hit also deals 1d6 at the start of the target's next 3 turns.",
               "a dagger dripping green poison over a vial"),
          ]),
@@ -52,7 +52,7 @@ HEROES = [
          stats=dict(Might=1, Agility=0, Wits=3),
          attacks=[("Mace", 3, "1d6+1", "melee"), ("Sacred flame", 5, "1d8+1", "range 8, ignores shields")],
          blurb="Battle priest of the Dawn. Keeps everyone breathing.",
-         portrait="a stout battle priestess with a mace and holy symbol, warm light, braided hair",
+         portrait="a stout middle-aged battle priestess in chainmail holding a flanged mace, a golden sun pendant on her chest, kind stern face, braided hair, warm light",
          cards=[
              ("Mending Touch", "Heal an adjacent ally 2d8+3.",
               "glowing hands pressed on a wounded shoulder, soft golden light"),
@@ -76,9 +76,9 @@ HEROES = [
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
               "a huge fireball exploding in a ruined street, wicker burning"),
              ("Tongues", "For this scene the whole party understands and speaks every language, including Giantish.",
-              "glowing runes flowing from a wizard's mouth, floating letters of light"),
+              "an old bearded human wizard speaking, ribbons of swirling golden light flowing from his mouth, calm wise face"),
              ("Levitate", "Lift yourself or one ally up to 10 squares straight up, and set them down gently.",
-              "a wizard floating up a tall dark cave shaft, robes billowing"),
+              "an old wizard levitating in mid-air inside a tall dark cave shaft, feet high above the ground, robes billowing, glowing aura"),
              ("Mirror Image", "Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.",
               "three identical wizards shimmering side by side"),
              ("Frost Nova", "Enemies adjacent to you take 1d6 and can't move on their next turn.",
@@ -121,7 +121,7 @@ NPCS = {
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Rat Count."),
     "refugee": dict(name="Refugee", fig="Figurine_Mara", hp=6, defense=10, attacks=[], notes="Hungry and scared."),
-    "noble": dict(name="Lady Oriska (noble)", fig="Figurine_Sir_Loin", hp=10, defense=12, attacks=[],
+    "noble": dict(name="Lady Oriska (noble)", fig="Figurine_Sir_Loin", flip=True, hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
     "hunter": dict(name="Sewer hunter", fig="rpg_RANGER", hp=14, defense=13, attacks=[
         ("Short bow", 4, "1d8", "range 10"),
@@ -150,8 +150,11 @@ NPCS = {
                        dead=True),
     "princess": dict(name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
         ("Moonfire", 6, "2d6", "range 10 (once she's healed)"),
-    ], notes="Wounded (lying down). Heal her or give her food and she stands. Right-click > toggle to stand.",
-        dead=True, tint=(1.0, 0.75, 0.85)),
+    ], notes="Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.",
+        dead=True, start_hp=4, tint=(1.0, 0.75, 0.85)),
+    "giant_rat": dict(name="Giant rat", fig="rpg_RAT", hp=6, defense=12, attacks=[
+        ("Bite", 4, "1d6", "melee"),
+    ], notes="Only attacks if the bell trap rings or it's cornered."),
 }
 
 # ---------------------------------------------------------------- scenes
@@ -159,7 +162,7 @@ NPCS = {
 SCENES = [
     dict(key="title", title="The Giants of Holst", fog=False, music="title.mp3",
          map_prompt="a royal parchment map of a mountainous fantasy kingdom with a walled city in a valley, giants' mountains to the north",
-         heroes=[(-3, 0), (-1, 0), (1, 0), (3, 0)], npcs=[],
+         heroes=[(-3, -3), (-1, -3), (1, -3), (3, -3)], npcs=[],
          notes="""PARTY SELECT. Players click their adventurer on the pick panel (top of screen). One each.
 Read aloud:
   "By order of King Aldwin of Aldmere: Princess Isolde has not returned from Holst, in the
@@ -172,10 +175,10 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
 
     dict(key="outskirts", title="1. The Outskirts of Holst", fog=True, music="outskirts.mp3", battle=True,
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
-         heroes=[(-10, -1), (-10, 0), (-10, 1), (-9, 0)],
+         heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
-               ("giant_club", 9, 5), ("giant_eye", 10, 2), ("giant_troll", 9, -3), ("giant_club", 10, -5),
-               ("thrall", 7, 5), ("thrall", 8, 2), ("thrall", 7, -3)],
+               ("giant_club", 5, 3), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
+               ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3)],
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
@@ -186,15 +189,15 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Reveal the fog on the east side. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8, thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (hill giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene."""),
 
     dict(key="sewer", title="2. The Sewer Warren", fog=True, music="sewer.mp3", rest=True,
          map_prompt="underground stone sewer cavern with a refugee camp, tents made of rags, small fires, a central channel of dark water, crates",
-         heroes=[(-10, 5), (-10, 4), (-9, 5), (-9, 4)],
+         heroes=[(-7, 4), (-7, 3), (-6, 4), (-6, 3)],
          npcs=[("refugee", -4, 2), ("refugee", -3, -1), ("refugee", 0, 3), ("refugee", 2, -4),
-               ("noble", 5, 1), ("hunter", 7, 2), ("hunter", 7, 0), ("carcass", 6, 1), ("carcass", 6, 0)],
+               ("noble", 4, 1), ("hunter", 8, 3), ("hunter", 8, 0), ("carcass", 6, 3), ("carcass", 6, 0)],
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
 FOOD SCENE: two rough hunters drag in carcasses. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
@@ -209,8 +212,8 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
 
     dict(key="den", title="3. The Rat Count's Den", fog=True, music="den.mp3",
          map_prompt="a smugglers den in an old underground cistern, a large round gambling table with candles, stolen furniture, rugs, crates of loot, a hidden door in the stone wall",
-         heroes=[(-10, -2), (-10, -1), (-9, -2), (-9, -1)],
-         npcs=[("rat_count", 2, 0), ("guard", 4, 2), ("guard", 4, -2), ("street_kid", -2, 4), ("street_kid", 0, -5)],
+         heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
+         npcs=[("rat_count", 2, 0), ("guard", 4, 2), ("guard", 4, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
          notes="""Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
 out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Grev Vasko,
 the Rat Count. The street kids sit around him like cats."
@@ -219,7 +222,7 @@ RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
-  One hero plays, others may "help" (cards: Loaded Die, Blessing +1d4 to one die).
+  One hero plays, others may "help" (cards: Loaded Die rerolls one die; Blessing adds +1d4 to the total).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
@@ -235,9 +238,9 @@ IF THEY LOSE: take their food and gold. He still sells the info for "a favour": 
 If paid the kids earlier: Vasko starts friendly and the first round is given to the party."""),
 
     dict(key="passage", title="4. The Smugglers' Passage", fog=True, music="passage.mp3",
-         map_prompt="a long narrow winding stone tunnel dungeon corridor from left to right, cracked floor tiles, small side alcoves, old bones, dripping water, torch sconces",
-         heroes=[(-10, 0), (-10, 1), (-9, 0), (-9, 1)],
-         npcs=[],
+         map_prompt="a long stone dungeon corridor three squares wide crossing the entire image from left to right, rough cave rock filling the areas above and below the corridor, cracked flagstones, a skeleton, puddles, torch sconces on the walls",
+         heroes=[(-8, 0), (-8, 1), (-7, 0), (-7, 1)],
+         npcs=[("giant_rat", 8, 1), ("giant_rat", 8, -1)],
          notes="""Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
 FOUR TRAPS, west to east. Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
@@ -246,7 +249,7 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
-  4. BELL TRIPWIRE (column +8): harmless... unless it rings: 2 giant rats (use thrall stats) arrive.
+  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats at the east end attack.
 LOOT: the skeleton has a LANTERN OF TRUE SIGHT (magic: once, see through illusions/invisibility
 for a scene) - hint: the princess will be hard to see in the cave.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
@@ -255,7 +258,7 @@ Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks i
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
          heroes=[(-10, -1), (-10, 0), (-10, 1), (-9, 0)],
          npcs=[("dead_thug", 0, 1), ("dead_thug", 1, -1), ("dead_thug", -1, -2),
-               ("log_giant", 9, 5), ("giant_club", 10, -2), ("giant_eye", 8, -6)],
+               ("log_giant", 9, 5, 45), ("giant_club", 10, -2, 35), ("giant_eye", 8, -6, 35)],
          notes="""Read aloud: "The tracks lead north into the pines. An hour later you find the cart - or what's
 left of it. It's been stamped flat. So have the men who drove it."
 INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the cart - empty, bent
@@ -264,24 +267,26 @@ GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. Grask's LOG THROW
 opens the fight (2x2 on the cart). Switch to BATTLE music, reveal fog. 3 giants.
-Fight to win. Fire burns wicker shields. When 2 giants fall, the last one flees north-east (to the cave).
+These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
+When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
+If the party arrives badly hurt from the traps, let them REST at the passage exit first.
 After: tracks and blood lead to a cave in the hillside."""),
 
     dict(key="cave", title="6. The Last Stand Cave", fog=True, music="cave.mp3",
          map_prompt="inside a large dark natural cave, rocky floor, a tall shaft in the far wall rising into darkness, fallen weapons, a broken wicker shield, faint light from a crack above",
-         heroes=[(-10, -1), (-10, 0), (-10, 1), (-9, 0)],
+         heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
          npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0, 0), ("dying_giant", 8, -4),
-               ("princess", 9, 6)],
+               ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, slumped against the rock, a giant. Still breathing."
 HROTHGUL (dying giant): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
 gets a few words. He is not hostile, just dying. What he knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
-  - "The thieves fought. She... became a bird. White bird. Flew up." (points to the dark shaft)
+  - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
   - He carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
-THE SHAFT (north-east): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
+THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
 She keeps a shard of her MOONSTAFF (magic, gift to whoever reached her first: once, cast Fireball).

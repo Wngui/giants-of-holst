@@ -74,7 +74,8 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
 - **Hrothgul, dying giant** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes.
 - **Fallen guildsman** HP 1, Def 1. . Died fighting.
-- **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down). Heal her or give her food and she stands. Right-click > toggle to stand.
+- **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.
+- **Giant rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
 
 ## The Giants of Holst
 
@@ -103,7 +104,7 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Reveal the fog on the east side. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8, thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (hill giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene.
 ```
@@ -135,7 +136,7 @@ RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
-  One hero plays, others may "help" (cards: Loaded Die, Blessing +1d4 to one die).
+  One hero plays, others may "help" (cards: Loaded Die rerolls one die; Blessing adds +1d4 to the total).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
@@ -162,7 +163,7 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
-  4. BELL TRIPWIRE (column +8): harmless... unless it rings: 2 giant rats (use thrall stats) arrive.
+  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats at the east end attack.
 LOOT: the skeleton has a LANTERN OF TRUE SIGHT (magic: once, see through illusions/invisibility
 for a scene) - hint: the princess will be hard to see in the cave.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud.
@@ -179,7 +180,9 @@ GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. Grask's LOG THROW
 opens the fight (2x2 on the cart). Switch to BATTLE music, reveal fog. 3 giants.
-Fight to win. Fire burns wicker shields. When 2 giants fall, the last one flees north-east (to the cave).
+These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
+When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
+If the party arrives badly hurt from the traps, let them REST at the passage exit first.
 After: tracks and blood lead to a cave in the hillside.
 ```
 
@@ -192,10 +195,10 @@ HROTHGUL (dying giant): speaks Giantish only. Tongues / Speak with the Dying let
 gets a few words. He is not hostile, just dying. What he knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
-  - "The thieves fought. She... became a bird. White bird. Flew up." (points to the dark shaft)
+  - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
   - He carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
-THE SHAFT (north-east): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
+THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
 She keeps a shard of her MOONSTAFF (magic, gift to whoever reached her first: once, cast Fireball).

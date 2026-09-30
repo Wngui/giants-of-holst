@@ -6,6 +6,7 @@ from content import HEROES, SCENES, STYLE, MAP_STYLE
 
 COMFY = "http://127.0.0.1:8188"
 RAW = Path(__file__).parent / "art" / "raw"
+REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1}  # bump to get a new seed
 
 
 def jobs():
@@ -15,7 +16,7 @@ def jobs():
         yield f"portrait_{h['key']}", f"portrait of {h['portrait']}, {STYLE}", 768, 768
         for i, (_, _, prompt) in enumerate(h["cards"]):
             yield f"card_{h['key']}_{i}", f"{prompt}, {STYLE}", 768, 640
-    yield "card_back", f"ornate symmetrical card back pattern, a giant's footprint inside a crown, gold on deep red, {STYLE}", 640, 896
+    yield "card_back", f"ornate symmetrical celtic knotwork pattern, gold filigree on deep crimson leather, no symbols, {STYLE}", 640, 896
 
 
 def workflow(prompt, w, h, seed):
@@ -53,5 +54,5 @@ if __name__ == "__main__":
     for seed, (name, prompt, w, h) in enumerate(jobs()):
         out = RAW / f"{name}.png"
         if not out.exists():
-            out.write_bytes(render(prompt, w, h, 1000 + seed))
+            out.write_bytes(render(prompt, w, h, 1000 + seed + 100 * REROLL.get(name, 0)))
             print("rendered", name)

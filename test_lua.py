@@ -126,6 +126,12 @@ self = { UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, 
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
 function broadcastToAll(m) log[#log+1] = m end
 function broadcastToColor(m, c) log[#log+1] = c .. ": " .. m end
+-- MoonSharp (TTS) throws where real Lua returns nil when a base is given
+local _tonumber = tonumber
+function tonumber(v, base)
+  if base then assert(tostring(v):match("^%d+$"), "MoonSharp tonumber throws on " .. tostring(v)) end
+  return _tonumber(v, base)
+end
 """)
 npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
@@ -136,7 +142,9 @@ ng.applyDamage(None, "100")
 assert ng.died == 1 and "falls" in ng.log[1]
 ng.applyDamage(None, "-10")
 assert ng.died == 2 and ng.attrs["hp.text"].startswith("10/60")
-ng.applyDamage(None, "abc")                             # ignored
+for junk in ("abc", "", " ", "--3", None):              # ignored, no error
+    ng.applyDamage(None, junk)
+assert ng.attrs["hp.text"].startswith("10/60")
 for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())
@@ -144,4 +152,15 @@ assert all("to hit" in m and "dmg" in m for m in msgs[2:]) and ng.swung == 200
 for n in range(20):
     t, detail = ng.roll("2d8+4")
     assert 6 <= t <= 20 and detail.endswith("+4")
+
+# princess starts lying down at 4 HP; healing stands her up (one die() toggle), not the other way round
+scenes = json.loads(save["LuaScript"].split("[==[")[1].split("]==]")[0])["scenes"]
+isolde = next(o for s in scenes for o in s["spawns"] if o.get("Nickname") == "Princess Isolde")
+assert isolde["RPGdead"]
+npc.execute("died, log = 0, {}")
+ng.onLoad(isolde["LuaScriptState"])
+ng.applyDamage(None, "-8")
+assert ng.died == 1 and "gets back up" in ng.log[1] and ng.attrs["hp.text"].startswith("12/20")
+ng.applyDamage(None, "3")
+assert ng.died == 1                                      # still standing, no toggle
 print("ok -", msgs[-1])

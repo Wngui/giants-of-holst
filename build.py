@@ -63,7 +63,7 @@ def make_sheet(hero):
     d.text((600, 360), stats, font=font(36, True), fill=(30, 20, 10))
     d.text((600, 430), "ATTACKS  (d20 + bonus vs Defense)", font=font(26, True), fill=col)
     for n, (name, bonus, dmg, note) in enumerate(hero["attacks"]):
-        d.text((600, 475 + n * 45), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(26), fill=(30, 20, 10))
+        d.text((600, 475 + n * 45), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=(30, 20, 10))
     wrap(d, (40, 600), RULES, 24, 105, spacing=8)
     return im
 
@@ -102,25 +102,27 @@ def obj(name, transform, **kw):
 
 
 def tile(url, transform, **kw):
+    transform["scaleY"] = 1.0   # keep tiles thin; scale only stretches X/Z
     return obj("Custom_Tile", transform, CustomImage={
         "ImageURL": url, "ImageSecondaryURL": "", "ImageScalar": 1.0, "WidthScale": 0.0,
         "CustomTile": {"Type": 0, "Thickness": 0.2, "Stackable": False, "Stretch": False}}, **kw)
 
 
-def npc(key, x, z, n, scene):
+def npc(key, x, z, n, scene, hp=None):
     t = NPCS[key]
+    hp = hp or t["hp"]
     attacks = [dict(name=a, hit=b, dmg=c, note=d) for a, b, c, d in t["attacks"]]
-    o = obj(t["fig"], tf(x * CELL, 2.0, z * CELL, ry=270.0 if x > 0 else 90.0),
-            GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"],
-            GMNotes=t["notes"], Description=t["notes"] if not attacks else "")
+    ry = (270.0 if x > 0 else 90.0) + (180.0 if t.get("flip") else 0.0)   # flip: model faces backwards
+    o = obj(t["fig"], tf(x * CELL, 3.0, z * CELL, ry=ry),
+            GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"])
     if t.get("dead"):
         o["RPGdead"] = True
     if t.get("tint"):
         o["ColorDiffuse"] = dict(zip("rgb", t["tint"]))
-    if attacks:
+    if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
-        o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t["hp"], "max": t["hp"],
-                                          "def": t["defense"], "attacks": attacks})
+        o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
+                                          "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks})
     return o
 
 
@@ -131,12 +133,12 @@ def scene_data(s, base):
         spawns.append(obj("FogOfWar", {**tf(y=3.0), "scaleX": MAP_W + 2, "scaleY": 6.0, "scaleZ": MAP_W * 2 / 3 + 2},
                           GUID=guid(s["key"], "fog"), Tags=["scene", "fog", "pin"],
                           FogOfWar={"HideGmPointer": False, "HideObjects": True, "Height": 1.0, "RevealedLocations": {}}))
-    for n, (key, x, z) in enumerate(s["npcs"]):
-        spawns.append(npc(key, x, z, n, s["key"]))
+    for n, spec in enumerate(s["npcs"]):
+        spawns.append(npc(*spec[:3], n, s["key"], *spec[3:]))
     if s["key"] == "den":   # Rat's Bones dice on the gambling table
         spawns += [obj("Die_6", tf(-2.0 + i, 2.0, -1.5), GUID=guid("den", "die", i), Tags=["scene"]) for i in range(3)]
     return dict(title=s["title"], spawns=spawns,
-                heroes=[[x * CELL, 3.0, z * CELL] for x, z in s["heroes"]],
+                heroes=[[x * CELL, 4.0, z * CELL] for x, z in s["heroes"]],
                 music=dict(url=f"{base}music/{s['music']}", title=s["title"]))
 
 
@@ -151,7 +153,7 @@ def hero_objects(h, n, base):
     cdeck = {"FaceURL": face, "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 3, "NumHeight": 2,
              "BackIsHidden": True, "UniqueBack": False, "Type": 0}
     ids = [(n + 1) * 100 + i for i in range(6)]
-    cards = [obj("Card", tf(), CardID=cid, Nickname=title, Description=text, Tags=[f"card_{c}"],
+    cards = [obj("Card", tf(), CardID=cid, Hands=True, Nickname=title, Description=text, Tags=[f"card_{c}"],
                  CustomDeck={str(n + 1): cdeck}, GUID=guid(c, "card", i))
              for i, (cid, (title, text, _)) in enumerate(zip(ids, h["cards"]))]
     dice = [obj("Die_20", tf(sx + dx * 9, 2.0, z - 2), GUID=guid(c, "d20"), ColorDiffuse=dict(zip("rgb", [v / 255 for v in RGB[c]])))]
@@ -164,7 +166,7 @@ def hero_objects(h, n, base):
         obj("Counter", tf(sx + dx * 9, 1.5, z + 2, ry=ry), GUID=guid(c, "counter"), Nickname=f"{h['name']} HP",
             Counter={"value": h["hp"]}),
         obj("Deck", tf(sx - dx * 9, 2.0, z, ry=ry, rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards",
-            DeckIDs=ids, CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=[f"card_{c}"]),
+            DeckIDs=ids, CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=[f"card_{c}"], Hands=True),
     ] + dice
 
 
