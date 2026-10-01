@@ -192,7 +192,7 @@ def rocks(x1, z1, x2, z2, seed, spacing=1.1, big=1.6):
         x = x1 + (x2 - x1) * i / n + rnd.uniform(-0.25, 0.25)
         z = z1 + (z2 - z1) * i / n + rnd.uniform(-0.25, 0.25)
         piece = rnd.choice(["rock_a", "rock_b", "rock_c", "rock_d", "rock_e"])
-        size = big * rnd.uniform(0.8, 1.3)
+        size = big * rnd.uniform(0.7, 1.1)
         out.append((piece, round(x, 2), round(z, 2), rnd.randrange(360), round(size, 2)))
     return out
 
@@ -228,13 +228,13 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
     dict(key="outskirts", title="1. Holst City", fog=True, music="outskirts.mp3", battle=True,
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
          heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
-         props=[("house_a", -8, 5.6, 180), ("destroyed", -2.8, 5.4, 170), ("tavern", 2.8, 5.3, 180), ("house_b", 7.8, 5.6, 200),
-                ("house_d", -9.6, 2.2, 90), ("house_c", -8.6, -5.6, 10), ("market", -3, -5.6, 0, 0.8),
-                ("destroyed", 7.8, -5.3, 30), ("house_a", 9.6, 1.8, 270), ("scaffolding", 4, -5.8, 0, 0.55),
-                ("grate", 0, -2.2), ("well", -1, 2), ("broken_cart", -4, -1.6, 40),
-                ("wheelbarrow", -5.3, -3.2, 60), ("crate", -6.3, -3.6), ("barrel", -6.5, -2.6), ("barrel", -5.9, -2.2),
+         props=[("house_a", -8.2, 5.6, 180), ("ruin_b", -2.8, 5.6, 180), ("tavern", 2.9, 5.4, 180), ("house_b", 7.9, 5.7, 180),
+                ("house_d", -9.8, 2.1, 90), ("house_c", -8.4, -5.8, 0), ("stall", -3.4, -5.6, 0, 1.2), ("stall", -1.2, -5.8, 10, 1.2),
+                ("ruin_a", 7.9, -5.6, 0), ("house_a", 9.8, 1.6, 270), ("ruin_c", 3.8, -6, 0),
+                ("grate", 0, -2.2), ("well", -1, 2), ("broken_cart", -4, -1.6, 40, 1.1),
+                ("cart", -5.6, -3.4, 70, 0.9), ("crate", -6.4, -2.4, 20), ("barrel", -6.8, -1.9), ("barrel", -6.3, -1.6),
                 ("sack", 1.6, 3.2, 20), ("sack", 2.1, 2.8, 70), ("lumber", 5.6, 2.9, 20),
-                ("rubble_half", -3, 3.3, 10, 0.9), ("rubble_half", 6.2, -3, 60, 0.9), ("stones", 3.3, -3.3)],
+                ("rubble", -3, 3.3, 10), ("rubble", 6.2, -3, 60), ("rubble", 3.3, -3.3, 20, 0.8), ("crates", 5.4, -4, 30)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
                ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
                ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3)],
@@ -257,12 +257,12 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
          heroes=[(-5, 1), (-5, 2), (-4, 1), (-4, 2)],
          props=wall_line("wall", -9.9, 6.3, 9.9, 6.3, spacing=1.8) + wall_line("wall", -10.4, -6, -10.4, 4.8, spacing=1.8)
                + wall_line("wall", 10.4, -6, 10.4, 4.8, spacing=1.8)
-               + [("tent", -8, 3.6, 30), ("tent", -8.3, -3.4, 150), ("tent", -5.8, 4.8, 10, 0.9),
-                  ("bed", -6.2, 2.4, 90, 1.3), ("bed", -7, -1.2, 0, 1.3), ("bed", -5.4, -4.6, 60, 1.3),
-                  ("torch", -6, 0.6, 0, 2), ("torch", -3.8, -5.2, 0, 2), ("torch", 8.6, -3.4, 0, 2), ("torch", 4.4, 4.6, 0, 2),
-                  ("lumber", 0, 0.6, 0, (1.3, 0.3, 0.9)), ("lumber", 0.1, -4.4, 5, (1.3, 0.3, 0.9)),
-                  ("crates", 8.6, 3.8, 0, 1.4), ("barrel_big", 7.6, 4.6, 0, 1.3), ("sack", 3.4, 0.2, 30), ("sack", 3.8, -0.4),
-                  ("box", 5.6, 1.2, 15, 1.3), ("barrels", -9.2, 0.6, 0, 1.3)],
+               + [("tent", -8, 3.6, 30), ("tent", -8.3, -3.4, 150), ("tent", -5.8, 4.8, 10),
+                  ("bed", -6.2, 2.4, 90), ("bed", -7, -1.2, 0), ("bed", -5.4, -4.6, 60), ("bed", -9, 1.3, 20),
+                  ("torch", -6, 0.6), ("torch", -3.8, -5.2), ("torch", 8.6, -3.4), ("torch", 4.4, 4.6),
+                  ("bridge", 0, 0.6), ("bridge", 0.1, -4.4, 5),
+                  ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6), ("barrel", 7.9, 4.1), ("sack", 3.4, 0.2, 30), ("sack", 3.8, -0.4),
+                  ("crate", 5.6, 1.2, 15), ("keg", -9.2, -0.4, 90), ("rubble", 3.2, 5.2, 0, 0.7)],
          npcs=[("refugee", -6.3, 3.2), ("refugee", -6.6, -1.6), ("refugee", -3.6, -3), ("refugee", 4.3, -4.5),
                ("noble", 4, -1.5), ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 5.6, -2.9), ("carcass", 6.5, -1.2)],
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
@@ -281,12 +281,12 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
          map_prompt="a smugglers den in an old underground cistern, a large round gambling table with candles, stolen furniture, rugs, crates of loot, a hidden door in the stone wall",
          heroes=[(-6, -1), (-6, 0), (-5, -1), (-5, 0)],
          props=ring("wall", 9.4, 6.8, 30, gap=(-8, 8)) + [("wall_door", 9.4, 0, 90)]
-               + [("table_feast", 0, 0, 0, 2), ("chair", -1.7, 0, 90, 1.8), ("chair", 0, 1.7, 180, 1.8),
-                  ("chair", 0, -1.7, 0, 1.8), ("chair", 4.4, 0, 270, 2.6),
-                  ("torch", -3, 3, 0, 2), ("torch", 3, 3, 0, 2), ("torch", -3, -3, 0, 2), ("torch", 3, -3, 0, 2),
-                  ("chest_gold", 6.3, 4, 200, 1.4), ("coins", 5.2, 4.7, 0, 1.4), ("chest_gold", -6, -4.2, 20, 1.4),
-                  ("coins", 7, 3.1, 0, 1.2), ("keg", -7.3, 2, 90, 1.2), ("keg", -7.6, 0, 90, 1.2), ("crates", 6.4, -4.2, 0, 1.3),
-                  ("barrels", -4.5, 5.2, 0, 1.3), ("pillar", -5.5, 3.4, 0, 1), ("pillar", 5.8, -2.6, 0, 1), ("trunk", -3, -5.3, 10, 1.4)],
+               + [("table_feast", 0, 0, 0, 1.5), ("chair", -1.1, 0, 270, 1.2), ("chair", 0, 1.1, 0, 1.2),
+                  ("chair", 0, -1.1, 180, 1.2), ("throne", 4.3, 0, 90), ("banner", 5.2, 0, 90),
+                  ("torch", -3, 3), ("torch", 3, 3), ("torch", -3, -3), ("torch", 3, -3),
+                  ("chest_gold", 6.3, 4, 200), ("coins", 5.2, 4.7), ("chest_gold", -6, -4.2, 20),
+                  ("coins", 7, 3.1, 0, 0.8), ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", 6.4, -4.2),
+                  ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("pillar", -5.5, 3.4), ("pillar", 5.8, -2.6), ("chest", -3, -5.3, 10)],
          npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
          notes="""Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
 out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Vasko,
@@ -314,12 +314,12 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
     dict(key="passage", title="4. The Smugglers' Passage", fog=True, music="passage.mp3",
          map_prompt="a long stone dungeon corridor three squares wide crossing the entire image from left to right, rough cave rock filling the areas above and below the corridor, cracked flagstones, a skeleton, puddles, torch sconces on the walls",
          heroes=[(-8, -0.5), (-8, 0.5), (-7, -0.5), (-7, 0.5)],
-         props=[(("wall_broken" if i % 4 == 2 else "wall_arched" if i % 4 == 0 else "wall"), *rest) for i, (_, *rest) in enumerate(
+         props=[(("wall_broken" if i % 5 == 2 else "wall"), *rest) for i, (_, *rest) in enumerate(
                    wall_line("wall", -9.9, 2.4, 9.9, 2.4, spacing=1.8))]
                + wall_line("wall", -9.9, -2.4, 9.9, -2.4, (1, 0.4, 1), spacing=1.8)   # low south wall: players see in
                + [("wall_door", -10.8, 0, 90), ("pillar", -10.8, 1.6), ("pillar", -10.8, -1.6),
-                  ("rubble_half", -4, 1.4, 20, 0.7), ("rubble_half", 5, -1.4, 200, 0.7), ("torch", -6, 1.7, 0, 1.6),
-                  ("torch", 1, -1.7, 0, 1.6), ("torch", 7, 1.7, 0, 1.6), ("trunk", -2.6, -1.5, 80, 1.2)],
+                  ("rubble", -4, 1.4, 20, 0.7), ("rubble", 5, -1.4, 200, 0.7), ("torch", -6, 1.7),
+                  ("torch", 1, -1.7), ("torch", 7, 1.7), ("chest", -2.6, -1.5, 80)],
          npcs=[("giant_rat", 8, 0.8), ("giant_rat", 8, -0.8)],
          notes="""Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
@@ -337,12 +337,12 @@ Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks i
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True,
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
          heroes=[(-1, -6), (0, -6), (1, -6), (0, -5)],
-         props=[("broken_cart", 0.2, 0.6, 60, 1.4), ("log_large", 2.8, 2, 25, (5, 2, 2)),
+         props=[("broken_cart", 0.2, 0.6, 60, 1.2), ("log_large", 2.8, 2, 25, (5, 1.6, 1.6)),
                 ("crate", -1.8, 2.4, 10), ("crate", 1.9, -1.2, 40), ("sack", -1, -1.4, 30), ("sack", 1.2, 2.9, 80),
-                ("trees_large", -9, 5, 0, 0.55), ("trees_large", -9.5, -5.6, 90, 0.55), ("trees_large", 9.6, 1, 180, 0.55),
-                ("trees_large", 9.8, -6.8, 270, 0.5), ("tree_a", -7, 6.6), ("tree_b", 7, 6.6), ("tree_a", -10.5, -1.2),
-                ("tree_b", 10.4, 3.8), ("tree_a", 6.8, -6.2), ("tree_b", -6.8, -6.6), ("tree_a", 6.7, 2.9, 40),
-                ("stump", -6.4, 2.8), ("stump", 6.5, -1.8), ("rock_c", -6.5, -2.5, 30, 1.4), ("rock_a", 6.3, 5, 0, 1.6)],
+                ("pines", -9, 5), ("pines", -9.5, -5.6, 90), ("pines", 9.6, 1, 180), ("pines", 9.8, -6.6, 270),
+                ("oaks", -9.6, 0.4, 40), ("pine", -7, 6.6), ("pine_b", 7, 6.6), ("pine", 10.4, 3.8), ("oak", 6.8, -6.2),
+                ("pine_b", -6.8, -6.6), ("oak", 6.7, 2.9, 40),
+                ("stump", -6.4, 2.8, 0, 1.4), ("stump", 6.5, -1.8, 0, 1.4), ("rock_c", -6.5, -2.5, 30, 1.2), ("rock_a", 6.3, 5)],
          npcs=[("dead_thug", -1.6, 1.4), ("dead_thug", 1.6, -0.3), ("dead_thug", -0.6, -1.9),
                ("log_giant", 8.3, 4.4, 45), ("giant_club", -8.3, -2.4, 35), ("giant_eye", 8, -3.8, 35)],
          notes="""Read aloud: "The tracks lead north into the pines. An hour later you find the cart - or what's
@@ -363,11 +363,11 @@ After: tracks and blood lead to a cave in the hillside."""),
          heroes=[(0, -6), (1, -6), (0, -5), (1, -5)],
          props=rocks(-10, 6.8, -1.6, 6.8, 4) + rocks(1.6, 6.8, 10, 6.8, 5) + rocks(-10, -6.8, -2, -6.8, 6)
                + rocks(3, -6.8, 10, -6.8, 7) + rocks(-10.4, -5.8, -10.4, 5.8, 8) + rocks(10.4, -5.8, 10.4, 5.8, 9)
-               + [(r, x, z, (x * 53 + z * 29) % 360, 3) for r, x, z in [("rock_b", -8, 4.5), ("rock_d", -8, -4.4),
+               + [(r, x, z, (x * 53 + z * 29) % 360, 2) for r, x, z in [("rock_b", -8, 4.5), ("rock_d", -8, -4.4),
                                                                          ("rock_e", 8, 4.5), ("rock_b", 8.2, -1.2)]]
-               + [("rubble", -1.6, 5.6, 0, 0.7), ("rubble", 1.8, 5.6, 180, 0.7), ("rock_b", 2.8, -2.4, 30, 2.2),
-                  ("rock_d", 2.8, -0.4, 80, 1.8), ("lumber", -1.3, 0.8, 30, 0.6), ("stones", -1, 1.4),
-                  ("rubble_half", 4, 2.5, 0, 0.6), ("torch", -3.5, -1, 0, 1.6)],
+               + [("stalagmite", x, z, (x * 31) % 360) for x, z in [(-5.5, 3.8), (4.8, 4.2), (-6, -2.8), (5.6, 1.5), (-3, 5)]]
+               + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
+                  ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1)],
          npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 6, -4.8),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
