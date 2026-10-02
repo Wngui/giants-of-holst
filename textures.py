@@ -36,19 +36,23 @@ TEXTURES = {
     "banner": (None, (120, 30, 30), "a medieval heraldic banner seen straight on, deep red cloth, a black rat crest with a "
                                     "gold crown, filling the whole image"),
     "sign": (None, (110, 80, 50), "a wooden tavern sign seen straight on, painted tankard of ale, no text, filling the image"),
+    # recoloured variants and floor colours used by forge.py (placeholder colours, no painted version yet)
+    "plaster_white": (1.2, (190, 186, 176), None), "plaster_rose": (1.2, (176, 140, 128), None),
+    "shingle": (0.8, (110, 70, 52), None), "wicker": (0.7, (140, 110, 60), None),
+    "sewer_stone": (2.0, (70, 76, 72), None), "dirt_road": (2.5, (104, 86, 64), None),
 }
 
 
 def placeholder(name, colour):
-    from PIL import Image, ImageDraw   # lazy: forge.py imports this table inside Blender, which has no Pillow
+    from PIL import Image, ImageDraw, ImageFilter   # lazy: forge.py imports this table inside Blender, which has no Pillow
     rnd = random.Random(name)
     im = Image.new("RGB", (256, 256), colour)
     d = ImageDraw.Draw(im)
-    for _ in range(900):   # speckle so tiling and scale are visible in previews
-        x, y, r = rnd.randrange(256), rnd.randrange(256), rnd.randrange(1, 6)
-        k = rnd.uniform(0.75, 1.2)
+    for _ in range(260):   # soft mottling: fine speckle read as grain once tiled over walls and roofs
+        x, y, r = rnd.randrange(256), rnd.randrange(256), rnd.randrange(4, 14)
+        k = rnd.uniform(0.9, 1.08)
         d.ellipse((x - r, y - r, x + r, y + r), fill=tuple(min(255, int(c * k)) for c in colour))
-    return im
+    return im.filter(ImageFilter.GaussianBlur(4))
 
 
 def seamless(im):

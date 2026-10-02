@@ -197,6 +197,34 @@ def rocks(x1, z1, x2, z2, seed, spacing=1.1, big=1.6):
     return out
 
 
+def wall_run(prop, x1, z1, x2, z2, height=1.0):
+    """Wall segments (1.8 long) stretched to cover exactly from (x1, z1) to (x2, z2)."""
+    L = math.hypot(x2 - x1, z2 - z1)
+    n = max(1, math.ceil(L / 1.8 - 0.05))
+    rot = math.degrees(math.atan2(-(z2 - z1), x2 - x1))
+    return [(prop, round(x1 + (x2 - x1) * (i + 0.5) / n, 2), round(z1 + (z2 - z1) * (i + 0.5) / n, 2), rot,
+             (round(L / n / 1.8, 3), height, 1)) for i in range(n)]
+
+
+def passage_walls():
+    """The smugglers' tunnel: main corridor west-east (z -2.4..2.4) with three dead-end side passages, 2.2 wide:
+    A north at x -3.5, B south at x 1.5, C north at x 6. The south walls are low so players see in."""
+    north = [(-10.8, -4.6), (-2.4, 4.9), (7.1, 10.8)]
+    south = [(-10.8, 0.4), (2.6, 10.8)]
+    out = []
+    for x1, x2 in north:
+        out += wall_run("wall", x1, 2.4, x2, 2.4)
+    for x1, x2 in south:
+        out += wall_run("wall", x1, -2.4, x2, -2.4, 0.4)
+    for bx, z_end in ((-3.5, 6.6), (6.0, 5.4)):        # north branches A, C
+        out += wall_run("wall", bx - 1.1, 2.6, bx - 1.1, z_end) + wall_run("wall", bx + 1.1, 2.6, bx + 1.1, z_end)
+        out += wall_run("wall", bx - 1.1, z_end, bx + 1.1, z_end)
+    bx, z_end = 1.5, -6.4                                # south branch B (low walls, broken end)
+    out += wall_run("wall", bx - 1.1, -2.6, bx - 1.1, z_end, 0.4) + wall_run("wall", bx + 1.1, -2.6, bx + 1.1, z_end, 0.4)
+    out += wall_run("wall_broken", bx - 1.1, z_end, bx + 1.1, z_end)
+    return [("wall_broken" if p == "wall" and i % 6 == 3 else p, *rest) for i, (p, *rest) in enumerate(out)]
+
+
 def ring(prop, rx, rz, count, gap=None, scale=1):
     """Ellipse of props (walls turned along it); gap=(from, to) in degrees (0 = east) is left open."""
     out = []
@@ -234,7 +262,9 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
                 ("grate", 0, -2.2), ("well", -1, 2), ("broken_cart", -4, -1.6, 40, 1.1),
                 ("cart", -5.6, -3.4, 70, 0.9), ("crate", -6.4, -2.4, 20), ("barrel", -6.8, -1.9), ("barrel", -6.3, -1.6),
                 ("sack", 1.6, 3.2, 20), ("sack", 2.1, 2.8, 70), ("lumber", 5.6, 2.9, 20),
-                ("rubble", -3, 3.3, 10), ("rubble", 6.2, -3, 60), ("rubble", 3.3, -3.3, 20, 0.8), ("crates", 5.4, -4, 30)],
+                ("rubble", -3, 3.3, 10), ("rubble", 6.2, -3, 60), ("rubble", 3.3, -3.3, 20, 0.8), ("crates", 5.4, -4, 30),
+                ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115), ("wicker_shield", 2.6, -3.6, 20),
+                ("goods", -2.6, -4.3, 10), ("goods", -4.9, -4.2, 200)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
                ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
                ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3)],
@@ -280,13 +310,17 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
     dict(key="den", title="3. The Bandit Baron's Den", fog=True, music="den.mp3",
          map_prompt="a smugglers den in an old underground cistern, a large round gambling table with candles, stolen furniture, rugs, crates of loot, a hidden door in the stone wall",
          heroes=[(-6, -1), (-6, 0), (-5, -1), (-5, 0)],
-         props=ring("wall", 9.4, 6.8, 30, gap=(-8, 8)) + [("wall_door", 9.4, 0, 90)]
-               + [("table_feast", 0, 0, 0, 1.5), ("chair", -1.1, 0, 270, 1.2), ("chair", 0, 1.1, 0, 1.2),
-                  ("chair", 0, -1.1, 180, 1.2), ("throne", 4.3, 0, 90), ("banner", 5.2, 0, 90),
-                  ("torch", -3, 3), ("torch", 3, 3), ("torch", -3, -3), ("torch", 3, -3),
-                  ("chest_gold", 6.3, 4, 200), ("coins", 5.2, 4.7), ("chest_gold", -6, -4.2, 20),
-                  ("coins", 7, 3.1, 0, 0.8), ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", 6.4, -4.2),
-                  ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("pillar", -5.5, 3.4), ("pillar", 5.8, -2.6), ("chest", -3, -5.3, 10)],
+         props=[("wall_sconce" if i % 3 == 0 else "wall", *rest) for i, (_, *rest) in enumerate(ring("wall", 9.4, 6.8, 30, gap=(-8, 8)))]
+               + [("wall_door", 9.4, 0, 90)]
+               + [("pillar", round(6.6 * math.cos(math.radians(t)), 2), round(4.8 * math.sin(math.radians(t)), 2))
+                  for t in (40, 90, 140, 220, 270, 320)]                       # cistern columns
+               + [("rug", 0, 0, 15), ("table_feast", 0, 0, 0, 1.5), ("chair", -1.1, 0, 270, 1.2), ("chair", 0, 1.1, 0, 1.2),
+                  ("chair", 0, -1.1, 180, 1.2), ("throne_dais", 5.0, 0, 270), ("banner", 6.1, 1.4, 90), ("banner", 6.1, -1.4, 90),
+                  ("candelabra", -1.7, 1.7), ("candelabra", -1.7, -1.7), ("candelabra", 3.6, 1.3), ("candelabra", 3.6, -1.3),
+                  ("torch", -3, 3), ("torch", 3, 3.4), ("torch", -3, -3), ("torch", 3, -3.4),
+                  ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20), ("coins", 5.9, 4.6),
+                  ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", -6.9, -2.6),
+                  ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("chest", -3, -5.3, 10)],
          npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
          notes="""Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
 out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Vasko,
@@ -314,13 +348,17 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
     dict(key="passage", title="4. The Smugglers' Passage", fog=True, music="passage.mp3",
          map_prompt="a long stone dungeon corridor three squares wide crossing the entire image from left to right, rough cave rock filling the areas above and below the corridor, cracked flagstones, a skeleton, puddles, torch sconces on the walls",
          heroes=[(-8, -0.5), (-8, 0.5), (-7, -0.5), (-7, 0.5)],
-         props=[(("wall_broken" if i % 5 == 2 else "wall"), *rest) for i, (_, *rest) in enumerate(
-                   wall_line("wall", -9.9, 2.4, 9.9, 2.4, spacing=1.8))]
-               + wall_line("wall", -9.9, -2.4, 9.9, -2.4, (1, 0.4, 1), spacing=1.8)   # low south wall: players see in
+         props=passage_walls()
                + [("wall_door", -10.8, 0, 90), ("pillar", -10.8, 1.6), ("pillar", -10.8, -1.6),
                   ("rubble", -4, 1.4, 20, 0.7), ("rubble", 5, -1.4, 200, 0.7), ("torch", -6, 1.7),
-                  ("torch", 1, -1.7), ("torch", 7, 1.7), ("chest", -2.6, -1.5, 80)],
-         npcs=[("giant_rat", 8, 0.8), ("giant_rat", 8, -0.8)],
+                  ("torch", -0.5, -1.7), ("torch", 8.5, 1.7), ("chest", -2.6, -1.5, 80),
+                  # A: old guard post (north, x -3.5)
+                  ("chest", -3.5, 6.0, 0), ("torch", -4.3, 5.4), ("rubble", -2.9, 4.4, 60, 0.6),
+                  # B: collapsed stash (south, x 1.5)
+                  ("rubble", 1.5, -5.6, 0, 1.1), ("barrel", 0.9, -4.6), ("sack", 2.0, -4.2, 40), ("crate", 1.9, -3.4, 15),
+                  # C: rats' nest (north, x 6)
+                  ("bed", 5.6, 4.6, 20), ("bed", 6.4, 4.0, 110), ("sack", 6.6, 4.9, 70), ("rubble", 5.4, 3.4, 140, 0.5)],
+         npcs=[("giant_rat", 5.6, 3.6), ("giant_rat", 6.4, 3.2)],
          notes="""Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
 FOUR TRAPS, west to east. Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
@@ -329,15 +367,22 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
-  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats at the east end attack.
-LOOT: the skeleton has a LANTERN OF TRUE SIGHT (magic: once, see through illusions/invisibility
-for a scene) - hint: the princess will be hard to see in the cave.
+  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
+SIDE PASSAGES (optional, each off the main tunnel):
+  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
+     TRUE SIGHT (magic: once, see through illusions/invisibility for a scene) - hint: the princess will be hard
+     to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
+  B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
+     ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
+     Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
+  C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
 
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True,
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
          heroes=[(-1, -6), (0, -6), (1, -6), (0, -5)],
-         props=[("broken_cart", 0.2, 0.6, 60, 1.2), ("log_large", 2.8, 2, 25, (5, 1.6, 1.6)),
+         props=[("broken_cart", 0.2, 0.6, 60, 1.2), ("log_large", 2.8, 2, 25),
                 ("crate", -1.8, 2.4, 10), ("crate", 1.9, -1.2, 40), ("sack", -1, -1.4, 30), ("sack", 1.2, 2.9, 80),
                 ("pines", -9, 5), ("pines", -9.5, -5.6, 90), ("pines", 9.6, 1, 180), ("pines", 9.8, -6.6, 270),
                 ("oaks", -9.6, 0.4, 40), ("pine", -7, 6.6), ("pine_b", 7, 6.6), ("pine", 10.4, 3.8), ("oak", 6.8, -6.2),
@@ -367,7 +412,8 @@ After: tracks and blood lead to a cave in the hillside."""),
                                                                          ("rock_e", 8, 4.5), ("rock_b", 8.2, -1.2)]]
                + [("stalagmite", x, z, (x * 31) % 360) for x, z in [(-5.5, 3.8), (4.8, 4.2), (-6, -2.8), (5.6, 1.5), (-3, 5)]]
                + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
-                  ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1)],
+                  ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1),
+                  ("wicker_shield", 4.4, -3.2, 130, 0.9), ("giant_club", 7.6, -3.0, 75, 0.9)],
          npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 6, -4.8),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -

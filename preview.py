@@ -36,7 +36,7 @@ meshes = {}
 
 def obj_mesh(path):
     if path not in meshes:
-        v, vt, faces = [], [], []
+        v, vt, vn, faces = [], [], [], []
         for line in open(path):
             p = line.split()
             if p and p[0] == "v":
@@ -44,16 +44,22 @@ def obj_mesh(path):
                 v.append((-x, z, y))
             elif p and p[0] == "vt":
                 vt.append(tuple(map(float, p[1:3])))
+            elif p and p[0] == "vn":
+                x, y, z = map(float, p[1:4])
+                vn.append((-x, z, y))
             elif p and p[0] == "f":
-                faces.append([tuple(int(i) - 1 if i else None for i in (c.split("/") + [""])[:2]) for c in p[1:]])
+                faces.append([tuple(int(i) - 1 if i else None for i in (c.split("/") + ["", ""])[:3]) for c in p[1:]])
         me = bpy.data.meshes.new(Path(path).stem)
-        me.from_pydata(v, [], [[a for a, _ in f][::-1] for f in faces])    # mirroring flips winding
+        me.from_pydata(v, [], [[c[0] for c in f] for f in faces])   # x-mirror + y/z swap is a rotation: winding stays
         uv = me.uv_layers.new()
         k = 0
         for f in faces:
-            for a, t in f[::-1]:
+            for _, t, _ in f:
                 uv.data[k].uv = vt[t] if t is not None else (0, 0)
                 k += 1
+        if vn:   # the OBJ's own normals (smooth or flat), as TTS shades it
+            me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
+            me.normals_split_custom_set([vn[n] for f in faces for _, _, n in f])
         meshes[path] = me
     return meshes[path]
 

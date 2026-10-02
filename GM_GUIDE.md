@@ -164,9 +164,16 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
-  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats at the east end attack.
-LOOT: the skeleton has a LANTERN OF TRUE SIGHT (magic: once, see through illusions/invisibility
-for a scene) - hint: the princess will be hard to see in the cave.
+  4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
+SIDE PASSAGES (optional, each off the main tunnel):
+  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
+     TRUE SIGHT (magic: once, see through illusions/invisibility for a scene) - hint: the princess will be hard
+     to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
+  B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
+     ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
+     Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
+  C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud.
 ```
 
