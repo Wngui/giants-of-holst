@@ -290,9 +290,11 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
                 ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115, 0.6), ("wicker_shield", 2.6, -3.6, 20, 0.75),
                 ("goods", -2.6, -4.3, 10), ("goods", -4.9, -4.2, 200)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
-               ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
-               ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3), ("thrall", 2.0, 2.2), ("thrall", 7.2, 1.2),
-               ("thrall", 7.4, -2.0), ("thrall", 5.3, 3.6)],
+               # the giants come round the east corner in a wedge, thralls strung out ahead of them on their chains,
+               # and one giant flanks along the ruins in the south
+               ("giant_troll", 7.3, -1.3), ("giant_club", 8.6, -0.5), ("giant_eye", 8.4, -2.8), ("giant_club", 0.5, -6.3),
+               ("thrall", 7.5, 0.9), ("thrall", 7.0, 0.2), ("thrall", 6.4, -0.3), ("thrall", 5.8, -0.9),
+               ("thrall", 4.6, -1.2), ("thrall", 6.0, -1.9), ("thrall", 5.9, -3.0)],
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
