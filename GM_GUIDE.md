@@ -61,10 +61,11 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 
 ## NPCs
 
-- **Giant** HP 60, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Hurl rubble (+5, 2d6+2, range 10); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
-- **Giant** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Leash yank (no roll, -, pulls its thrall back next to it). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
-- **Hill Giant** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Grab (+6, -, target is held: Might DC 14 to break free, 1d6 each turn). WICKER SHIELD: ranged -5. Slow, moves 6.
-- **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off.
+- **Giant** HP 60, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
+- **Giant thrower** HP 50, Def 12. Hurl rubble (+5, 2d6+2, range 10); Hurl cart wheel (no roll, 2d8, a line 6 long, Agility DC 13 for half); Club smash (+6, 2d8+2, melee, reach 2). Hangs back and throws whatever the street offers. Moves 8.
+- **Giant** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
+- **Giant chainmaster** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Crack the chains (no roll, -, every thrall moves 3 and makes a free Rusty knife attack); Reel in (+6, -, range 6: target is dragged next to him and held, Might DC 14 to break free). Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6.
+- **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off.
 - **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
 - **Old Pell (merchant)** HP 8, Def 10. . Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. Out of food. Knows the Bandit Baron's men buy his best wine every night.
@@ -108,7 +109,8 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
 GIANTS: hide them at the start (select, TOGGLE VISIBILITY). After a few minutes the ground shakes: toggle
 them back. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8 (the Hill Giant 6), thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (the Chainmaster 6), thralls 6.
+  The Chainmaster (big, green base) holds every thrall's chain: drop him and the thralls scatter. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene.
 ```

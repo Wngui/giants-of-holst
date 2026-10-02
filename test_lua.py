@@ -407,7 +407,7 @@ end
 """)
 npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
-assert "ProgressBar" in ng.xml and ng.xml.count("<Button") == 3
+assert "ProgressBar" in ng.xml and ng.xml.count("<Button") == len(json.loads(giant["LuaScriptState"])["attacks"])
 assert 'rotation="90 -90 90"' in ng.xml            # upright bar facing the way the figure faces
 ng.applyDamage(None, "+12")
 assert ng.attrs["bar.percentage"] == "80" and ng.attrs["hp.text"].startswith("48/60")

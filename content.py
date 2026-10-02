@@ -136,20 +136,27 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 NPCS = {
     "giant_club": dict(name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
-        ("Hurl rubble", 5, "2d6+2", "range 10"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
+    "giant_thrower": dict(name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
+        ("Hurl rubble", 5, "2d6+2", "range 10"),
+        ("Hurl cart wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
+        ("Club smash", 6, "2d8+2", "melee, reach 2"),
+    ], notes="Hangs back and throws whatever the street offers. Moves 8."),
     "giant_eye": dict(name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
-        ("Leash yank", None, None, "pulls its thrall back next to it"),
+        ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Hill Giant", fig="rpg_CYCLOP", scale=1.2, base=(0.2, 0.45, 0.15), hp=65, defense=11, attacks=[
+    "giant_troll": dict(name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, base=(0.2, 0.45, 0.15), hp=65, defense=11,
+                        attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
-        ("Grab", 6, None, "target is held: Might DC 14 to break free, 1d6 each turn"),
-    ], notes="WICKER SHIELD: ranged -5. Slow, moves 6."),
+        ("Crack the chains", None, None, "every thrall moves 3 and makes a free Rusty knife attack"),
+        ("Reel in", 6, None, "range 6: target is dragged next to him and held, Might DC 14 to break free"),
+    ], notes="Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow "
+             "instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6."),
     "thrall": dict(name="Leashed thrall", fig="rpg_GHOUL", hp=8, defense=11, attacks=[
         ("Rusty knife", 3, "1d6", "melee"),
-    ], notes="Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
+    ], notes="Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Bandit Baron."),
@@ -292,7 +299,7 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
                # the giants come round the east corner in a wedge, thralls strung out ahead of them on their chains,
                # and one giant flanks along the ruins in the south
-               ("giant_troll", 7.3, -1.3), ("giant_club", 8.6, -0.5), ("giant_eye", 8.4, -2.8), ("giant_club", 0.5, -6.3),
+               ("giant_troll", 7.3, -1.3), ("giant_club", 8.6, -0.5), ("giant_eye", 8.4, -2.8), ("giant_thrower", 0.5, -6.3),
                ("thrall", 7.5, 0.9), ("thrall", 7.0, 0.2), ("thrall", 6.4, -0.3), ("thrall", 5.8, -0.9),
                ("thrall", 4.6, -1.2), ("thrall", 6.0, -1.9), ("thrall", 5.9, -3.0)],
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
@@ -306,7 +313,8 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
 GIANTS: hide them at the start (select, TOGGLE VISIBILITY). After a few minutes the ground shakes: toggle
 them back. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8 (the Hill Giant 6), thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (the Chainmaster 6), thralls 6.
+  The Chainmaster (big, green base) holds every thrall's chain: drop him and the thralls scatter. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene."""),
 
