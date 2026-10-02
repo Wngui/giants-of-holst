@@ -39,8 +39,8 @@ function install(sceneIndex)
     for _, d in ipairs(DATA.kits) do
         local g = d.grid
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if g.ring then addRing(o, g.ring) end
             if g.role == "hp" then hpShield(o, g.color, g.max) end
+            if g.role == "sheet" then handAtSheet(g.color, o) end
         end })
     end
     -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
@@ -52,11 +52,6 @@ function install(sceneIndex)
             if o.hasTag("gm") then gmHide(o) end
             if o.hasTag("gmconsole") then console(o) end
         end })
-    end
-    for _, color in ipairs(DATA.colors) do
-        local c = corner(color)
-        Player[color].setHandTransform({ position = { c.x, T.top + 4, T.cz + c.sz * (T.d / 2 + 4) },
-                                         rotation = { 0, c.ry, 0 }, scale = { 12, 5, 4 } })
     end
     -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
     pcall(function()
@@ -118,14 +113,14 @@ function placed(d)
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
-        if g.role == "hp" then t.scaleX, t.scaleY, t.scaleZ = SQ * 1.2, SQ * 1.2, SQ * 1.2 end   -- shield ~2.4 squares
+        if g.role == "hp" then t.scaleX, t.scaleY, t.scaleZ = SQ, SQ, SQ end   -- plaque 2 squares
         if g.role == "sheet" then
             t.rotY = c.ry + 180                       -- tile images face the opposite way to hands
             local sc = T.w * L.sheet_w / L.tile_unit
             t.scaleX, t.scaleY, t.scaleZ = sc, 1, sc
         end
     else
-        -- props drop a little and get pinned; figures are scaled to the grid (RPG kit figures fit a 2-unit square)
+        -- loose props drop a little, scenery spawns locked in place; figures are scaled to the grid (RPG kit figures fit a 2-unit square)
         p = world(g.x, g.z, g.ly and g.ly * SQ or g.lift or (g.k == "fig" and 1 or 0.3))
         for _, c in ipairs(g.inner and d.ContainedObjects or {}) do   -- coins etc. in bags: grid-sized too
             c.Transform.scaleX, c.Transform.scaleY, c.Transform.scaleZ = g.inner * SQ, g.inner * SQ, g.inner * SQ
@@ -149,11 +144,7 @@ function setScene(i)
     local s = DATA.scenes[i]
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
-        local ring, rs = d.grid.ring, d.grid.ring_s
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if ring then addRing(o, ring, rs) end
-            -- let props settle on the table, then pin them
-            if o.hasTag("pin") then Wait.time(function() o.setLock(true) end, 1.5) end
             if o.hasTag("hidden") then hide(o) end
         end })
     end
@@ -263,19 +254,19 @@ function highlightScene()
     end
 end
 
--- ---------------------------------------------------------------- HP shields (instead of TTS counters)
--- A shield at each seat: big number, - and + (right-click: 5 at a time). REST refills it.
+-- ---------------------------------------------------------------- HP plaques (instead of TTS counters)
+-- A square plaque at each seat: big number, big - and + under it (right-click: 5 at a time). REST refills it.
 local shields = {}
 function hpShield(o, color, max)
     shields[color] = o
     hp[color] = hp[color] or max
     o.createButton({ click_function = "noop", function_owner = self, label = tostring(hp[color]),
-                     position = { 0, 0.2, 0 }, width = 0, height = 0, font_size = 0.32 * BTN, font_color = { 1, 0.95, 0.85 } })
+                     position = { 0, 0.12, 0.12 }, width = 0, height = 0, font_size = 0.42 * BTN, font_color = { 1, 0.95, 0.85 } })
     for k, d in ipairs({ -1, 1 }) do
         local fn = "hp" .. color .. (d < 0 and "Down" or "Up")
         _G[fn] = function(_, _, alt) setHP(color, hp[color] + d * (alt and 5 or 1)) end
         o.createButton({ click_function = fn, function_owner = self, label = d < 0 and "-" or "+",
-                         position = { d * 0.62, 0.2, 0 }, width = 0.16 * BTN, height = 0.16 * BTN, font_size = 0.2 * BTN,
+                         position = { d * 0.5, 0.12, -0.55 }, width = 0.4 * BTN, height = 0.3 * BTN, font_size = 0.3 * BTN,
                          color = { 0.15, 0.1, 0.07 }, font_color = { 1, 0.95, 0.85 } })
     end
 end
@@ -286,23 +277,14 @@ function setHP(color, v)
     if shields[color] then shields[color].editButton({ index = 0, label = tostring(hp[color]) }) end
 end
 
--- ---------------------------------------------------------------- coloured bases
--- A thin ring round each figure's base, attached so it moves with it: hero = seat colour, notable NPC = gold,
--- everyone else dark. ponytail: RING (ring radius per unit of figure scale) is a guess at the RPG kit's base size
-RING = 0.95
-function addRing(o, rgb, size)
-    Wait.time(function()
-        if o == nil then return end
-        local p, sc = o.getPosition(), o.getScale().x * RING * (size or 1)
-        spawnObjectData({ data = { Name = "Custom_Model", CustomMesh = DATA.ring, Locked = false,
-                                   ColorDiffuse = { r = rgb[1], g = rgb[2], b = rgb[3] },
-                                   Transform = { posX = p.x, posY = p.y, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
-                                                 scaleX = sc, scaleY = sc, scaleZ = sc } },
-                          callback_function = function(r)
-                              o.addAttachment(r)
-                              if o.hasTag("hidden") then o.setInvisibleTo(PLAYERS) end   -- still hidden as one piece
-                          end })
-    end, 2)
+-- ---------------------------------------------------------------- hands
+-- Each player's hand lies along the bottom edge of their own sheet (the edge nearest them), taken from where the
+-- sheet actually is, so dealt cards always land at that player's kit.
+function handAtSheet(color, sheet)
+    local c, p = corner(color), sheet.getPosition()
+    local half = T.w * DATA.layout.sheet_w / 3             -- half the sheet's depth: it is 3:2, sheet_w of the table wide
+    Player[color].setHandTransform({ position = { p.x, T.top + 1, p.z + c.sz * (half + 2.2) },
+                                     rotation = { 0, c.ry, 0 }, scale = { T.w * DATA.layout.sheet_w, 5, 4 } })
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out

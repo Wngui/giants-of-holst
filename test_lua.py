@@ -190,8 +190,12 @@ assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple", "Black"}
 for col, t in to_py(g.hands).items():
     if col == "Black":   # the GM's hand lies past the GM table at the east end
         assert t["position"][0] > W / 2 + 10 * SQ, t
-    else:
-        assert abs(t["position"][2]) > D / 2, (col, "hand zone should sit past the table edge")
+    else:   # along the bottom of the player's own sheet, on the table
+        sheet = next(o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile"
+                     and o.data.Nickname == to_py(c.DATA.heroes)[col]["name"])
+        st = sheet.data.Transform
+        assert abs(t["position"][0] - st.posX) < 1e-6, col
+        assert abs(st.posZ) < abs(t["position"][2]) < D / 2, (col, st.posZ, t["position"][2])
 
 scenes = to_py(c.DATA.scenes)
 for i, s in enumerate(scenes, 1):
@@ -252,8 +256,8 @@ c[fn](board, "Black")
 assert g.UIattr["sceneTitle.text"] == scenes[0]["title"]
 lit = [i for i in range(1, len(board.buttons) + 1) if to_py(board.buttons[i].color) == [0.85, 0.65, 0.2]]
 assert lit == [2], lit                               # only the current scene's button is lit
-# coloured bases: every hero figure and every living NPC got a ring attached
-assert all(o.attached == 1 for col in ("Red", "Blue", "Green", "Purple") for o in g.getObjectsWithTag("fig_" + col).values())
+# bases: heroes tinted their seat colour
+assert all(o.data.ColorDiffuse.r > 0.5 for o in g.getObjectsWithTag("fig_Red").values())
 # HP shields: -, +, right-click = 5, clamped to 0..max, REST refills
 shield = list(g.getObjectsWithTag("hp_Red").values())[0]
 assert shield.buttons[1].label == "18"

@@ -68,7 +68,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Refugee** HP 6, Def 10. . Hungry and scared.
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
 - **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
-- **Fresh carcass** HP 1, Def 1. . Food.
+- **Giant rat carcass** HP 1, Def 1. . Food.
 - **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
 - **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
 - **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.

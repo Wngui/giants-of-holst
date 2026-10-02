@@ -272,9 +272,9 @@ def tile(url, transform, **kw):
 
 # Everything on the table is positioned by grid square; game.lua measures the table at load and turns
 # "grid" into a world transform (TTS table sizes aren't documented, guessing them made things fall off).
-# per RPG kit model: health bar height above the base (object-UI units) and base ring size, read off screenshots
-UI_HEIGHT = {"rpg_CYCLOP": 690, "rpg_GHOUL": 230, "rpg_KOBOLD": 250, "rpg_RAT": 150, "rpg_WOLF": 170}
-RING_SIZE = {"rpg_CYCLOP": 1.35}
+# per RPG kit model: health bar height above the base (object-UI units), read off screenshots (thralls were right)
+UI_HEIGHT = {"rpg_CYCLOP": 540, "rpg_GHOUL": 230, "rpg_KOBOLD": 230, "rpg_RAT": 130, "rpg_WOLF": 150}
+BLACK, GOLD_BASE = [0.05, 0.05, 0.05], [0.85, 0.65, 0.15]
 
 
 def npc(key, x, z, n, scene, hp=None):
@@ -284,33 +284,34 @@ def npc(key, x, z, n, scene, hp=None):
     ry = (270.0 if x > 0 else 90.0) + (180.0 if t.get("flip") else 0.0)   # flip: model faces backwards
     o = obj(t["fig"], tf(ry=ry), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"],
             grid={"x": x, "z": z, "k": "fig", "s": [t.get("scale", 1)] * 3})
-    o["grid"]["ring"] = [0.85, 0.65, 0.15] if t.get("notable") else [0.12, 0.1, 0.09]   # base: gold notable, else dark
-    o["grid"]["ring_s"] = RING_SIZE.get(t["fig"], 1.0)
+    # an RPG figure's tint colours its base: black, gold for notable NPCs, or the NPC's own base colour
+    o["ColorDiffuse"] = dict(zip("rgb", t.get("base") or (GOLD_BASE if t.get("notable") else BLACK)))
     if t.get("dead"):
         o["RPGdead"] = True
-    if t.get("tint"):
-        o["ColorDiffuse"] = dict(zip("rgb", t["tint"]))
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
-                                          "ui": UI_HEIGHT.get(t["fig"], 430)})
+                                          "ui": UI_HEIGHT.get(t["fig"], 330)})
     return o
+
+
+# small props are loose physics objects (knock them over, push them about); everything else is scenery, spawned
+# locked in place with its own mesh as collider so figures and dice stop at walls instead of passing through
+LOOSE = ("barrel", "keg", "crate", "crates", "sack", "chest", "chest_gold", "coins", "chair", "goods", "door_smashed",
+         "wicker_shield", "giant_club", "lumber", "torch", "candelabra", "hoard", "hoard_b")
 
 
 def prop(spec, n, scene, base, textures):
     name, x, z, *rest = spec
     rot, scale = (list(rest) + [0, 1][len(rest):])[:2]      # optional rot, scale
     s = list(scale) if isinstance(scale, (list, tuple)) else [scale] * 3
-    common = dict(GUID=guid(scene, "prop", n), Tags=["scene", "pin"], Tooltip=False)
+    loose = name in LOOSE
+    common = dict(GUID=guid(scene, "prop", n), Tags=["scene"], Tooltip=False, Locked=not loose)
     if name.startswith("Tileset_"):                       # built-in TTS tileset piece
         return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
-    return obj("Custom_Model", tf(ry=rot), grid={"x": x, "z": z, "k": "model", "s": s}, Nickname="", **common,
-               CustomMesh={"MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{textures[name]}",
-                           # tables get TTS's box collider so dice can rest on them; everything else a flat slab
-                           "NormalURL": "", "ColliderURL": "" if name.startswith("table") else f"{base}props/collider_flat.obj",
-                           "Convex": True,
-                           "MaterialIndex": 1, "TypeIndex": 0, "CastShadows": True})
+    return obj("Custom_Model", tf(ry=rot), grid={"x": x, "z": z, "k": "model", "s": s, "lift": 0.3 if loose else 0},
+               Nickname="", **common, CustomMesh=mesh(base, name, Convex=loose))   # non-convex mesh: locked only
 
 
 def scene_data(s, base, textures):
@@ -348,11 +349,11 @@ def hero_objects(h, n, base):
     sheet["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/rules_{h['key']}.jpg"   # flip: page 2
     return [
         obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
-            grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig",
-                  "ring": [round(min(1, v / 255 * 1.4), 2) for v in RGB[c]]}),
+            ColorDiffuse=dict(zip("rgb", [round(min(1, v / 255 * 1.4), 2) for v in RGB[c]])),   # base in seat colour
+            grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig"}),
         sheet,
         obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=True, Tags=["kit", f"hp_{c}"],
-            CustomMesh=mesh(base, "hp_shield"), grid={"role": "hp", "color": c, "max": h["hp"]}),
+            CustomMesh=mesh(base, "hp_plaque"), grid={"role": "hp", "color": c, "max": h["hp"]}),
         obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
         obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
             CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
@@ -513,7 +514,6 @@ def main(base):
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
                 gm=gm_objects(base), gm_buttons=GM_BUTTONS,
-                ring=mesh(base, "base_ring", Convex=False),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall

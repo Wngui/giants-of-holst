@@ -635,13 +635,20 @@ def bedroll(seed=1):
 
 
 def brazier():
+    """Iron brazier: three splayed legs, a solid bowl (inner and outer wall), coals and a cluster of flame tongues."""
     a = Asset(3)
+    rnd = a.rnd
     for i in range(3):
         t = 2 * math.pi * i / 3
         a.box((0.04, 0.04, 0.7), (0.15 * math.cos(t), 0.15 * math.sin(t), 0.35), "iron", rot=(0.2 * math.sin(t), -0.2 * math.cos(t), 0))
-    a.lathe([(0.08, 0.62), (0.26, 0.72), (0.28, 0.8)], (0, 0, 0), "iron", segs=12, cap_top=False)
-    a.blob(0.18, (0, 0, 0.85), "charcoal", scale=(1, 1, 0.4), jitter=0.2, subdiv=1)
-    a.cyl(0.18, 0.4, (0, 0, 0.84), "flame", segs=7, r2=0.01)
+    a.lathe([(0.08, 0.6), (0.27, 0.7), (0.3, 0.82), (0.26, 0.82), (0.23, 0.73), (0.0, 0.66)], (0, 0, 0), "iron", segs=14,
+            cap_top=False, cap_bottom=True)
+    a.blob(0.2, (0, 0, 0.74), "charcoal", scale=(1, 1, 0.45), jitter=0.2, subdiv=1)
+    for i in range(6):   # flame tongues of different heights leaning out a little
+        t = 2 * math.pi * i / 6 + rnd.uniform(-0.3, 0.3)
+        r, h = (0.0, 0.42) if i == 0 else (0.11, rnd.uniform(0.18, 0.32))
+        a.cyl(0.07 if i == 0 else 0.05, h, (r * math.cos(t), r * math.sin(t), 0.76), "flame", segs=6, r2=0.004,
+              rot=(0.25 * math.sin(t) if i else 0, -0.25 * math.cos(t) if i else 0, 0))
     return a.objs
 
 
@@ -984,25 +991,17 @@ def dice_tray():
     return a.objs
 
 
-def base_ring():
-    """Thin ring that sits round a figure's base (game.lua attaches it and tints it): radius 1 = figure scale."""
-    a = Asset(30)
-    a.lathe([(0.84, 0), (1.0, 0), (1.0, 0.07), (0.84, 0.07)], (0, 0, 0), "plaster_white", segs=32, cap_top=True,
-            cap_bottom=True)
-    return a.objs
-
-
-def hp_shield():
-    """A hero's HP tracker: round wooden shield with an iron rim and a red boss; the number and -/+ are buttons on it.
-    World-unit sized (kits are not scaled to the grid)."""
+def hp_plaque():
+    """A hero's HP tracker: square wooden plaque, iron frame and corner studs, a red panel behind the number
+    (the number and the big -/+ are buttons on it; the panel is at the top as the player sees it, Blender -y)."""
     a = Asset(31)
-    a.cyl(0.95, 0.12, (0, 0, 0), "planks", segs=24)
-    a.lathe([(0.95, 0), (1.02, 0), (1.02, 0.16), (0.9, 0.16), (0.9, 0.12)], (0, 0, 0), "iron", segs=24, cap_bottom=False,
-            cap_top=False)
-    a.cyl(0.42, 0.04, (0, 0, 0.12), "cloth_red", segs=20, r2=0.38)
-    for i in range(8):
-        t = 2 * math.pi * i / 8
-        a.cyl(0.04, 0.05, (0.8 * math.cos(t), 0.8 * math.sin(t), 0.12), "iron", segs=6, r2=0.02)
+    a.box((1.6, 1.6, 0.1), (0, 0, 0.05), "planks")
+    for x, y, w, d in ((0, 0.78, 1.64, 0.08), (0, -0.78, 1.64, 0.08), (0.78, 0, 0.08, 1.64), (-0.78, 0, 0.08, 1.64)):
+        a.box((w, d, 0.06), (x, y, 0.11), "iron")
+    a.box((1.2, 0.72, 0.02), (0, -0.16, 0.11), "cloth_red")
+    for x in (-0.66, 0.66):
+        for y in (-0.66, 0.66):
+            a.cyl(0.045, 0.05, (x, y, 0.13), "gold", segs=8, r2=0.025)
     return a.objs
 
 
@@ -1038,7 +1037,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_board": gm_board, "base_ring": base_ring, "hp_shield": hp_shield, "gm_screen": gm_screen, "dice_tray": dice_tray,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_board": gm_board, "hp_plaque": hp_plaque, "gm_screen": gm_screen, "dice_tray": dice_tray,
 }
 
 if __name__ == "__main__":

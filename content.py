@@ -143,25 +143,25 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Leash yank", None, None, "pulls its thrall back next to it"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Hill Giant", fig="rpg_CYCLOP", scale=1.2, tint=(0.62, 0.8, 0.5), hp=65, defense=11, attacks=[
+    "giant_troll": dict(name="Hill Giant", fig="rpg_CYCLOP", scale=1.2, base=(0.2, 0.45, 0.15), hp=65, defense=11, attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
         ("Grab", 6, None, "target is held: Might DC 14 to break free, 1d6 each turn"),
     ], notes="WICKER SHIELD: ranged -5. Slow, moves 6."),
-    "thrall": dict(name="Leashed thrall", fig="rpg_GHOUL", tint=(0.8, 0.7, 0.6), hp=8, defense=11, attacks=[
+    "thrall": dict(name="Leashed thrall", fig="rpg_GHOUL", hp=8, defense=11, attacks=[
         ("Rusty knife", 3, "1d6", "melee"),
     ], notes="Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Bandit Baron."),
-    "refugee": dict(name="Refugee", fig="rpg_MAGE", tint=(0.55, 0.5, 0.45), hp=6, defense=10, attacks=[], notes="Hungry and scared."),
-    "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", tint=(0.75, 0.45, 0.9), hp=10, defense=12, attacks=[],
+    "refugee": dict(name="Refugee", fig="rpg_MAGE", hp=6, defense=10, attacks=[], notes="Hungry and scared."),
+    "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
     "hunter": dict(name="Hunter", fig="rpg_RANGER", hp=14, defense=13, attacks=[
         ("Short bow", 4, "1d8", "range 10"),
     ], notes="Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. "
              "Trade food for their Wolf-tooth Charm."),
-    "carcass": dict(name="Fresh carcass", fig="rpg_WOLF", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
-    "rat_count": dict(notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", tint=(0.85, 0.3, 0.25), hp=25, defense=13, attacks=[
+    "carcass": dict(name="Giant rat carcass", fig="rpg_RAT", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
+    "rat_count": dict(notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", hp=25, defense=13, attacks=[
         ("Rapier", 5, "1d8+2", "melee"),
         ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
         ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
@@ -186,7 +186,7 @@ NPCS = {
     "princess": dict(notable=True, name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
         ("Moonfire", 6, "2d6", "range 10 (once she's healed)"),
     ], notes="Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.",
-        dead=True, start_hp=4, tint=(1.0, 0.75, 0.85)),
+        dead=True, start_hp=4),
     "giant_rat": dict(name="Giant rat", fig="rpg_RAT", hp=6, defense=12, attacks=[
         ("Bite", 4, "1d6", "melee"),
     ], notes="Only attacks if the bell trap rings or it's cornered."),
@@ -314,7 +314,10 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
                   ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6), ("barrel", 7.9, 4.1), ("sack", 4.6, 0.6, 30), ("sack", 5.0, -0.2),
                   ("crate", 5.6, 1.2, 15), ("keg", -9.2, -0.4, 90), ("rubble", 3.2, 5.2, 0, 0.7)],
          npcs=[("refugee", -6.3, 3.2), ("refugee", -6.6, -1.6), ("refugee", -5, -3.2), ("refugee", 7.5, -4.6),
-               ("noble", 4, -1.5), ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 5.6, -2.9), ("carcass", 6.5, -1.2)],
+               ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 6.6, -2.0), ("carcass", 7.1, -1.2),
+               # the crowd round the hunters, Lady Oriska shouldering her way to the front
+               ("noble", 6.0, -1.0), ("refugee", 5.9, 0.2), ("refugee", 6.8, 0.6), ("refugee", 8.9, 0.5),
+               ("refugee", 9.1, -1.7), ("refugee", 8.6, -3.4), ("refugee", 7.0, -3.6), ("refugee", 5.9, -2.9)],
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
 FOOD SCENE: two rough hunters come in from outside the walls, dragging carcasses from the woods. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
@@ -434,7 +437,7 @@ After: tracks and blood lead to a cave in the hillside."""),
                + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
                   ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1),
                   ("wicker_shield", 4.4, -3.2, 130, 0.7), ("giant_club", 7.6, -3.0, 75, 0.55)],
-         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 1.4, -2.6),
+         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 1.3, -1.4),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
