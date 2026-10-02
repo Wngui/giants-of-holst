@@ -113,7 +113,8 @@ def bake_objects(name, objs, out, size=1024, ao=0.55):
     for uv in list(ob.data.uv_layers):
         if uv.name != "atlas":
             ob.data.uv_layers.remove(uv)
-    bpy.ops.wm.obj_export(filepath=str(out / f"{name}.obj"), export_selected_objects=True, export_materials=False,
+    # triangulated: TTS seemed to drop faces with more than 4 corners (coin tops, the tray's felt)
+    bpy.ops.wm.obj_export(filepath=str(out / f"{name}.obj"), export_selected_objects=True, export_materials=False, export_triangulated_mesh=True,
                           forward_axis="NEGATIVE_Z", up_axis="Y", export_normals=True, export_uv=True)
     print("baked", name, len(ob.data.polygons), "faces", ext)
     return f"{name}.{ext}"

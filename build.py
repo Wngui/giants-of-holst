@@ -169,9 +169,6 @@ def build_images():
     for i, (title, body, fs) in enumerate(screen_panels()):
         art.crop((i * pw, 0, (i + 1) * pw, art.height)).resize((1000, 1500), Image.LANCZOS).save(OUT / f"screen_front_{i}.jpg", quality=88)
         text_panel(title, body, fs=fs).save(OUT / f"screen_back_{i}.jpg", quality=90)
-    console = Image.new("RGB", (1800, 600), (40, 28, 20))
-    ImageDraw.Draw(console).rectangle((0, 0, 1799, 599), outline=GOLD, width=18)
-    console.save(OUT / "gm_console.jpg", quality=90)
     for key in SKIES:
         sky(key).save(OUT / f"sky_{key}.jpg", quality=85)
     wood = Image.open(RAW / "table_wood.png").convert("RGB").resize(TABLE_PX)
@@ -309,9 +306,15 @@ GM_GAP = -0.4                       # GM table's inner edge vs the main table ed
 X0 = EDGE + GM_GAP                  # GM table inner edge; it is 10.4 squares deep (x) and 20.8 wide (z)
 DIE_COLOURS = {"Die_4": (0.55, 0.06, 0.08), "Die_6": (0.55, 0.06, 0.08), "Die_8": (0.55, 0.06, 0.08),
                "Die_10": (0.55, 0.06, 0.08), "Die_12": (0.55, 0.06, 0.08), "Die_20": (0.85, 0.62, 0.12)}
-GM_BUTTONS = [dict(label=s["title"], scene=i + 1) for i, s in enumerate(SCENES)] + [
-    dict(label=t, fn=f) for f, t in (("musicScene", "Scene music"), ("musicBattle", "Battle music"),
-                                     ("musicStop", "Stop music"), ("revealAll", "Reveal enemies"), ("rest", "REST"))]
+TRAY = (7.2, -6.2)                  # dice tray, from X0; it also carries the GM control buttons
+SHORT = {"title": "Title", "outskirts": "Holst City", "sewer": "Sewer", "den": "Den", "passage": "Passage",
+         "cart": "Cart", "cave": "Cave"}
+# control buttons in front of the GM: two rows of six across the table (z), placed relative to the dice tray
+GM_BUTTONS = [dict(label=SHORT[s["key"]], scene=i + 1) for i, s in enumerate(SCENES)] + [
+    dict(label=t, fn=f) for f, t in (("musicScene", "Music"), ("musicBattle", "Battle"), ("musicStop", "Stop"),
+                                     ("revealAll", "Reveal"), ("rest", "REST"))]
+for n, b in enumerate(GM_BUTTONS):
+    b["x"], b["z"] = round(8.4 + 0.9 * (n // 6) - TRAY[0], 2), round(-2.75 + 1.1 * (n % 6) - TRAY[1], 2)
 
 
 def gm_objects(base):
@@ -326,10 +329,8 @@ def gm_objects(base):
                  grid={"x": X0 + 5.2, "z": 0, "k": "model", "lift": -0.02}),            # a hair low: no flicker at the seam
            model("gm_screen", GUID=guid("gm", "screen"), Nickname="GM screen", Locked=True, Tags=["gmscreen"],
                  grid={"x": X0 + 1.0, "z": 0, "k": "model", "lift": 0}),
-           model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False, **gm,
-                 grid={"x": X0 + 7.2, "z": -6.2, "k": "model", "lift": 0}),
-           tile(f"{base}art/out/gm_console.jpg", tf(ry=90.0), GUID=guid("gm", "console"), Nickname="GM controls", Locked=True,
-                Tags=["gm", "gmconsole"], grid={"x": X0 + 9.0, "z": 0, "k": "tile", "s": [6, 1, 6]}),
+           model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False,
+                 Tags=["gm", "gmconsole"], grid={"x": X0 + TRAY[0], "z": TRAY[1], "k": "model", "lift": 0}),
            obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
                CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
                grid={"x": X0 + 2.6, "z": -6.9, "k": "tile", "s": [1.8, 1, 1.8]})]

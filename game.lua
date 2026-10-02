@@ -216,23 +216,19 @@ function gmShow(o)
     o.removeTag("gm")
 end
 
--- GM controls on the GM table: the floating panel's buttons as object buttons, two rows of six. Clicks from
--- anyone but Black are ignored (the board is hidden from players anyway).
--- ponytail: BTN = button units per local unit of the board is a guess at TTS's scale; tweak if buttons are off
-BTN = 1000
+-- GM controls: object buttons carried by the dice tray, laid out in front of the GM (positions from build.py, in
+-- squares relative to the tray). Clicks from anyone but Black are ignored (the tray is hidden from players anyway).
+-- ponytail: BTN = button units per square is read off one screenshot (1000 was ~3x too big); tweak if needed
+BTN = 300
 function console(o)
-    local n = #DATA.gm_buttons
-    local cols = math.ceil(n / 2)
     for i, b in ipairs(DATA.gm_buttons) do
         local fn = "gmButton" .. i
         _G[fn] = function(_, color)
             if color ~= "Black" then return end
             if b.scene then setScene(b.scene) else _G[b.fn]() end
         end
-        local col, row = (i - 1) % cols, math.floor((i - 1) / cols)
-        o.createButton({ click_function = fn, function_owner = self, label = b.label,
-                         position = { -1 + (col + 0.5) * 2 / cols, 0.15, (row == 0 and -1 or 1) * 0.15 },
-                         width = 0.3 * BTN, height = 0.12 * BTN, font_size = 0.035 * BTN,
+        o.createButton({ click_function = fn, function_owner = self, label = b.label, position = { b.x, 0.05, b.z },
+                         rotation = { 0, 90, 0 }, width = 0.95 * BTN, height = 0.75 * BTN, font_size = 0.14 * BTN,
                          color = { 0.23, 0.16, 0.1 }, font_color = { 0.94, 0.85, 0.63 } })
     end
 end
