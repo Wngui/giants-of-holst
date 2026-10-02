@@ -1,12 +1,14 @@
 -- NPC: healthbar everyone sees; HP, damage box and attack buttons only the GM (Black seat / host) sees.
 -- Damage box: "12" or "+12" deals damage, "-5" heals. Attack buttons roll and whisper the result to the GM.
--- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_POS (z negative = higher) or UI_ROT.
-UI_POS, UI_SCALE = "0 0 -420", "0.4 0.4 0.4"
+-- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_HEIGHT in build.py or UI_ROT here.
+UI_SCALE = "0.4 0.4 0.4"
 -- the bar stands upright and faces where the figure faces (its +z): Euler (90, -90, 90) in the object-UI frame
 -- (x = object x, z = object down). "0 0 180" lay flat; "(yaw - 90) -90 90" stood up facing south.
 UI_ROT = "90 -90 90"
 local GM = "Black"   -- not "Host": the host sitting in a player seat would still see GM-only UI
 local S
+-- the panel is placed by its centre; put the health bar (its bottom row) at S.ui above the base, per model (build.py)
+function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (60 + 44 * #S.attacks) * 0.4 / 2)) end
 
 function onLoad(saved)
     S = JSON.decode(saved)
@@ -19,7 +21,7 @@ function draw()
     -- top to bottom: attack buttons and HP/damage (GM only), then the health bar right above the figure
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="%d"><VerticalLayout spacing="4" childForceExpandHeight="false">',
-        UI_POS, UI_ROT, UI_SCALE, 60 + 44 * #S.attacks) }
+        uiPos(), UI_ROT, UI_SCALE, 60 + 44 * #S.attacks) }
     for i, a in ipairs(S.attacks) do
         x[#x + 1] = '<Button id="a' .. i .. '" onClick="attack" visibility="' .. GM ..
             '" preferredHeight="40" fontSize="16" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0">' ..

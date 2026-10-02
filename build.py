@@ -207,8 +207,7 @@ def build_images():
     for i in range(len(ITEMS)):
         items.paste(make_item_card(i), ((i % 4) * 500, (i // 4) * 700))
     items.save(OUT / "items.jpg", quality=90)
-    Image.open(RAW / "screen_art.png").convert("RGB").crop((512, 0, 1024, 768)).resize((256, 384)).crop((0, 64, 256, 320)) \
-        .save(OUT / "portrait_gm.jpg", quality=90)
+    Image.open(RAW / "portrait_gm.png").convert("RGB").resize((256, 256)).save(OUT / "portrait_gm.jpg", quality=90)
     art = Image.open(upscaled("screen_art")).convert("RGB")
     pw = art.width // 3
     for i, (title, body, fs) in enumerate(screen_panels()):
@@ -273,6 +272,11 @@ def tile(url, transform, **kw):
 
 # Everything on the table is positioned by grid square; game.lua measures the table at load and turns
 # "grid" into a world transform (TTS table sizes aren't documented, guessing them made things fall off).
+# per RPG kit model: health bar height above the base (object-UI units) and base ring size, read off screenshots
+UI_HEIGHT = {"rpg_CYCLOP": 690, "rpg_GHOUL": 230, "rpg_KOBOLD": 250, "rpg_RAT": 150, "rpg_WOLF": 170}
+RING_SIZE = {"rpg_CYCLOP": 1.35}
+
+
 def npc(key, x, z, n, scene, hp=None):
     t = NPCS[key]
     hp = hp or t["hp"]
@@ -280,15 +284,17 @@ def npc(key, x, z, n, scene, hp=None):
     ry = (270.0 if x > 0 else 90.0) + (180.0 if t.get("flip") else 0.0)   # flip: model faces backwards
     o = obj(t["fig"], tf(ry=ry), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"],
             grid={"x": x, "z": z, "k": "fig", "s": [t.get("scale", 1)] * 3})
+    o["grid"]["ring"] = [0.85, 0.65, 0.15] if t.get("notable") else [0.12, 0.1, 0.09]   # base: gold notable, else dark
+    o["grid"]["ring_s"] = RING_SIZE.get(t["fig"], 1.0)
     if t.get("dead"):
         o["RPGdead"] = True
     if t.get("tint"):
         o["ColorDiffuse"] = dict(zip("rgb", t["tint"]))
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
-        o["grid"]["ring"] = [0.85, 0.65, 0.15] if t.get("notable") else [0.12, 0.1, 0.09]   # base: gold notable, else dark
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
-                                          "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks})
+                                          "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
+                                          "ui": UI_HEIGHT.get(t["fig"], 430)})
     return o
 
 
@@ -318,7 +324,7 @@ def scene_data(s, base, textures):
         spawns.append(o)
     if s["key"] == "den":   # Baron's Bones dice on the gambling table
         spawns += [obj("Die_6_Rounded", tf(ry=30.0 * i), GUID=guid("den", "die", i), Tags=["scene"], Nickname="Baron's Bones",
-                       ColorDiffuse={"r": 0.93, "g": 0.87, "b": 0.72},     # old bone, for the Baron's Bones
+                       ColorDiffuse={"r": 0.06, "g": 0.06, "b": 0.06},     # black, white pips: readable from across the table
                        grid={"x": -0.45 + 0.45 * i, "z": 0, "k": "fig", "s": [1.3, 1.3, 1.3], "lift": 4}) for i in range(3)]
     _, rgb, bright = SKIES[s["key"]]
     return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
@@ -366,18 +372,17 @@ TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM
 # GM control panel, like the floating one: bottom left of the red mat as the GM sees it (GM looks west, so "down" is
 # +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
 PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.52
-GM_BUTTONS = ([dict(label="The Giants of Holst", row=0, kind="title")] +
+GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
               [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
                enumerate((("musicScene", "Scene music"), ("musicBattle", "Battle"), ("musicStop", "Stop")))] +
               [dict(label="Reveal all enemies", fn="revealAll", row=len(SCENES) + 2),
                dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)])
 for b in GM_BUTTONS:
-    b["x"] = round(PANEL_X0 + ROW * b["row"] - TRAY[0], 2)
+    b["x"] = round(TRAY[0] - (PANEL_X0 + ROW * b["row"]), 2)   # mirrored: rows came out bottom-to-top in TTS
     b["z"] = round(PANEL_Z + (b["slot"] - 1) * 1.1 - TRAY[1] if "slot" in b else PANEL_Z - TRAY[1], 2)
     b["w"] = 1.0 if "slot" in b else 3.2
-GM_PANEL = dict(x=round(PANEL_X0 + ROW * (len(SCENES) + 3) / 2 - TRAY[0], 2), z=round(PANEL_Z - TRAY[1], 2),
-                w=3.6, h=round(ROW * (len(SCENES) + 4) + 0.2, 2))
+
 
 
 def gm_objects(base):
@@ -394,6 +399,8 @@ def gm_objects(base):
                  grid={"x": X0 + 1.0, "z": 0, "k": "model", "lift": 0}),
            model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False,
                  Tags=["gm", "gmconsole"], grid={"x": X0 + TRAY[0], "z": TRAY[1], "k": "model", "lift": 0}),
+           model("gm_board", GUID=guid("gm", "board"), Nickname="GM controls", Locked=True, **gm,
+                 grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 3) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
            obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
                CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
                grid={"x": X0 + 2.6, "z": -6.9, "k": "tile", "s": [1.8, 1, 1.8]})]
@@ -505,7 +512,7 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS, gm_panel=GM_PANEL,
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS,
                 ring=mesh(base, "base_ring", Convex=False),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))

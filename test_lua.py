@@ -243,15 +243,15 @@ assert len(desk) == len(c.DATA.gm) - 2 and all(o.invisible for o in desk), [o.da
 assert all(o.data.Transform.posX > W / 2 for o in desk), [(o.data.Nickname, o.data.Transform.posX) for o in desk]
 assert len(screen) == 1 and not screen[0].invisible and screen[0].data.Transform.posX > W / 2   # on the GM table
 board = list(g.getObjectsWithTag("gmconsole").values())[0]
-assert len(board.buttons) == len(c.DATA.gm_buttons) + 1   # + the panel's dark backing
-fn = board.buttons[3].click_function                 # backing, title, then scene 1
+assert len(board.buttons) == len(c.DATA.gm_buttons)
+fn = board.buttons[2].click_function                 # title, then scene 1
 g.UIattr["sceneTitle.text"] = ""
 c[fn](board, "Red")                                  # players can't press GM buttons
 assert g.UIattr["sceneTitle.text"] == ""
 c[fn](board, "Black")
 assert g.UIattr["sceneTitle.text"] == scenes[0]["title"]
 lit = [i for i in range(1, len(board.buttons) + 1) if to_py(board.buttons[i].color) == [0.85, 0.65, 0.2]]
-assert lit == [3], lit                               # only the current scene's button is lit
+assert lit == [2], lit                               # only the current scene's button is lit
 # coloured bases: every hero figure and every living NPC got a ring attached
 assert all(o.attached == 1 for col in ("Red", "Blue", "Green", "Purple") for o in g.getObjectsWithTag("fig_" + col).values())
 # HP shields: -, +, right-click = 5, clamped to 0..max, REST refills

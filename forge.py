@@ -1006,6 +1006,16 @@ def hp_shield():
     return a.objs
 
 
+def gm_board():
+    """Dark backing board for the GM control buttons (they float just above it): 6.0 deep (x) by 3.6 wide (y),
+    with a thin gold edge."""
+    a = Asset(32)
+    a.box((6.0, 3.6, 0.03), (0, 0, 0.015), "charcoal")
+    for x, y, w, d in ((0, 1.8, 6.04, 0.04), (0, -1.8, 6.04, 0.04), (3.0, 0, 0.04, 3.6), (-3.0, 0, 0.04, 3.6)):
+        a.box((w, d, 0.035), (x, y, 0.0175), "gold")
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -1028,7 +1038,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "base_ring": base_ring, "hp_shield": hp_shield, "gm_screen": gm_screen, "dice_tray": dice_tray,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_board": gm_board, "base_ring": base_ring, "hp_shield": hp_shield, "gm_screen": gm_screen, "dice_tray": dice_tray,
 }
 
 if __name__ == "__main__":

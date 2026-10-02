@@ -22,6 +22,8 @@ def jobs():
     yield "table_wood", ("a bare dark old oak tabletop of long worn wooden planks seen from directly above, scratched and "
                          f"weathered, filling the whole frame, {STYLE}"), 1536, 1024
     yield "card_back", f"ornate symmetrical celtic knotwork pattern, gold filigree on deep crimson leather, no symbols, {STYLE}", 640, 896
+    yield "portrait_gm", ("portrait of a hooded storyteller game master behind a candlelit table with dice, a map and "
+                          f"a quill, knowing smile, grey beard, warm light, {STYLE}"), 768, 768
     # GM desk art, appended so earlier jobs keep their seeds
     for i, (_, _, prompt, _) in enumerate(ITEMS):
         yield f"item_{i}", f"{prompt}, {STYLE}", 768, 640

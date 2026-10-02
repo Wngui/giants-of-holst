@@ -18,6 +18,7 @@ dice_tray dice_tray.jpg
 door_smashed door_smashed.jpg
 fence fence.jpg
 giant_club giant_club.jpg
+gm_board gm_board.jpg
 gm_screen gm_screen.jpg
 gm_table gm_table.jpg
 goods goods.jpg

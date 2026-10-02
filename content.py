@@ -11,9 +11,9 @@ GROUND_STYLE = ("seen from directly above, flat top-down game ground texture, ha
 GROUNDS = {
     "outskirts": "seamless tileable texture of worn grey medieval cobblestones filling the whole image, mud patches, "
                  "puddles, scattered straw and splinters",
-    "sewer": "wet dark grey flagstone floor of a huge underground sewer, a single straight channel of dark murky brown-green "
-             "water running from the top edge to the bottom edge through the middle, worn stone kerbs along the channel, "
-             "puddles and moss in the cracks",
+    "sewer": "a flat battle map tile: wet dark grey flagstones fill the whole image edge to edge, and a channel of dark murky "
+             "brown-green water winds from the top edge down to the bottom edge through the middle, curving and splitting "
+             "around a few islands of stone, bordered by flat stone kerbs, puddles and moss in the cracks",
     "den": "seamless tileable texture of large worn dark grey flagstones evenly filling the whole image, dust and cracks",
     "passage": "dark dungeon floor of cracked flagstones, puddles, patches of moss",
     "cart": "a straight horizontal muddy dirt road crossing the middle of the image from left edge to right edge, "
@@ -177,7 +177,7 @@ NPCS = {
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
     "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
                       notes="Thieves' guild. Search: 3 gold, a guild token, cart keys.", dead=True),
-    "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_RANGER", scale=1.9, tint=(0.85, 0.72, 0.6), notable=True,
+    "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, notable=True,
                         hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
     ], notes="Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes."),
@@ -309,11 +309,11 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
                + wall_line("wall", 10.4, -6, 10.4, 4.8, spacing=1.8)
                + [("tent", -8, 3.6, 30), ("tent", -8.3, -3.4, 150), ("tent", -5.8, 4.8, 10),
                   ("bed", -6.2, 2.4, 90), ("bed", -7, -1.2, 0), ("bed", -5.4, -4.6, 60), ("bed", -9, 1.3, 20),
-                  ("torch", -6, 0.6), ("torch", -3.8, -5.2), ("torch", 8.6, -3.4), ("torch", 4.4, 4.6),
-                  ("bridge", 0, 0.6), ("bridge", 0.1, -4.4, 5),
-                  ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6), ("barrel", 7.9, 4.1), ("sack", 3.4, 0.2, 30), ("sack", 3.8, -0.4),
+                  ("torch", -6, 0.6), ("torch", -6, -5.6), ("torch", 8.6, -3.4), ("torch", 4.4, 4.6),
+                  ("bridge", 0.6, 4.2), ("bridge", -1.4, -0.2, 5), ("bridge", 2.6, -1.0, -5),
+                  ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6), ("barrel", 7.9, 4.1), ("sack", 4.6, 0.6, 30), ("sack", 5.0, -0.2),
                   ("crate", 5.6, 1.2, 15), ("keg", -9.2, -0.4, 90), ("rubble", 3.2, 5.2, 0, 0.7)],
-         npcs=[("refugee", -6.3, 3.2), ("refugee", -6.6, -1.6), ("refugee", -3.6, -3), ("refugee", 4.3, -4.5),
+         npcs=[("refugee", -6.3, 3.2), ("refugee", -6.6, -1.6), ("refugee", -5, -3.2), ("refugee", 7.5, -4.6),
                ("noble", 4, -1.5), ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 5.6, -2.9), ("carcass", 6.5, -1.2)],
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
@@ -434,7 +434,7 @@ After: tracks and blood lead to a cave in the hillside."""),
                + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
                   ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1),
                   ("wicker_shield", 4.4, -3.2, 130, 0.9), ("giant_club", 7.6, -3.0, 75, 0.55)],
-         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 6, -4.8),
+         npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 1.4, -2.6),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."

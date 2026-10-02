@@ -113,11 +113,12 @@ function placed(d)
     if g.role then                                    -- player kit in its corner
         local c, k = corner(g.color), SQ / 2
         local zs, zr = T.cz + c.sz * T.d * L.sheet_z, T.cz + c.sz * T.d * L.row_z
-        local spots = { sheet = { 0, zs, 0.2 }, deck = { -3 * k, zr, 1 }, hp = { 0.5 * k, zr, 0.3 },
-                        d20 = { 3 * k, zr, 1 } }
+        local spots = { sheet = { 0, zs, 0.2 }, deck = { -4 * k, zr, 1 }, hp = { 0, zr, 0.3 },
+                        d20 = { 4 * k, zr, 1 } }
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
+        if g.role == "hp" then t.scaleX, t.scaleY, t.scaleZ = SQ * 1.2, SQ * 1.2, SQ * 1.2 end   -- shield ~2.4 squares
         if g.role == "sheet" then
             t.rotY = c.ry + 180                       -- tile images face the opposite way to hands
             local sc = T.w * L.sheet_w / L.tile_unit
@@ -148,9 +149,9 @@ function setScene(i)
     local s = DATA.scenes[i]
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
-        local ring = d.grid.ring
+        local ring, rs = d.grid.ring, d.grid.ring_s
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if ring then addRing(o, ring) end
+            if ring then addRing(o, ring, rs) end
             -- let props settle on the table, then pin them
             if o.hasTag("pin") then Wait.time(function() o.setLock(true) end, 1.5) end
             if o.hasTag("hidden") then hide(o) end
@@ -236,10 +237,6 @@ function noop() end
 
 function console(o)
     panel = o
-    local P = DATA.gm_panel
-    o.createButton({ click_function = "noop", function_owner = self, label = "", position = { P.x, 0.04, P.z },
-                     rotation = { 0, 90, 0 }, width = P.w * BTN, height = P.h * BTN,
-                     color = { 0.1, 0.08, 0.06 } })                     -- the panel's dark backing
     for i, b in ipairs(DATA.gm_buttons) do
         local fn = "noop"
         if b.kind ~= "title" then
@@ -253,7 +250,7 @@ function console(o)
                          rotation = { 0, 90, 0 }, width = b.w * BTN - 15, height = 0.44 * BTN,
                          font_size = (b.kind == "title" and 0.2 or 0.15) * BTN,
                          color = b.kind == "title" and { 0.1, 0.08, 0.06 } or BROWN, font_color = CREAM })
-        if b.scene then sceneButton[b.scene] = i end   -- button index i (0 is the backing)
+        if b.scene then sceneButton[b.scene] = i - 1 end   -- createButton indices start at 0
     end
     highlightScene()
 end
@@ -293,10 +290,10 @@ end
 -- A thin ring round each figure's base, attached so it moves with it: hero = seat colour, notable NPC = gold,
 -- everyone else dark. ponytail: RING (ring radius per unit of figure scale) is a guess at the RPG kit's base size
 RING = 0.95
-function addRing(o, rgb)
+function addRing(o, rgb, size)
     Wait.time(function()
         if o == nil then return end
-        local p, sc = o.getPosition(), o.getScale().x * RING
+        local p, sc = o.getPosition(), o.getScale().x * RING * (size or 1)
         spawnObjectData({ data = { Name = "Custom_Model", CustomMesh = DATA.ring, Locked = false,
                                    ColorDiffuse = { r = rgb[1], g = rgb[2], b = rgb[3] },
                                    Transform = { posX = p.x, posY = p.y, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
