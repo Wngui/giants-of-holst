@@ -7,6 +7,13 @@ from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
+# only an object's own onNumberTyped can cancel TTS dealing to every player; setHidden: game.lua's hide() calls it
+POUCH_LUA = f"""function onNumberTyped(color, n)
+    getObjectFromGUID("{CONTROLLER}").call("pouchTyped", {{ o = self, color = color, n = n }})
+    return true
+end
+function setHidden() end
+"""
 RAW, OUT = ROOT / "art" / "raw", ROOT / "art" / "out"
 COLS, ROWS = 22, 22 / 1.5   # grid squares across/down the 3:2 scene art
 TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
@@ -425,7 +432,7 @@ def gm_objects(base):
     coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.",
-                   Tags=["gm", "goldpouch"],
+                   Tags=["gm", "goldpouch"], LuaScript=POUCH_LUA,
                    ContainedObjects=[coin], grid={"x": X0 + 7.8, "z": 6.9, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
     return out
 

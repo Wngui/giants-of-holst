@@ -374,18 +374,17 @@ function moveZones(color, x, y, z, ry, scale)
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out
--- The gold pouch: TTS's own "hover + number" deals that many to every seated player. For the GM it puts that many
--- coins in the GM's hand instead (returning true cancels TTS's default), to hand to the right player.
-function onObjectNumberTyped(o, color, n)
-    if not o.hasTag("goldpouch") then return end
-    if color ~= "Black" then return true end
+-- The gold pouch: TTS's own "hover + number" deals that many to every seated player. The pouch's own onNumberTyped
+-- (only an object's own handler can cancel that) calls this: the GM gets n coins in hand to give to the right player.
+function pouchTyped(p)
+    local o, n = p.o, p.n
+    if p.color ~= "Black" then return end
     local zone = (handZones("Black") or {})[1]
-    if not zone then return true end
-    local p = zone.getPosition()
+    if not zone then return end
+    local z = zone.getPosition()
     for i = 1, n do
-        o.takeObject({ position = { p.x + (i - 1) * 0.3 - (n - 1) * 0.15, p.y + 1 + i * 0.2, p.z }, smooth = false })
+        o.takeObject({ position = { z.x + (i - 1) * 0.3 - (n - 1) * 0.15, z.y + 1 + i * 0.2, z.z }, smooth = false })
     end
-    return true
 end
 
 function onObjectLeaveContainer(container, o)
