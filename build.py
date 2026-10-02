@@ -350,7 +350,7 @@ def hero_objects(h, n, base):
              for i, (cid, (title, text, _)) in enumerate(zip(ids, h["cards"]))]
     colour = dict(zip("rgb", [v / 255 for v in RGB[c]]))
     sheet = tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=False,
-                 Tags=["kit"], grid={"role": "sheet", "color": c})
+                 Tags=["kit", f"sheet_{c}"], grid={"role": "sheet", "color": c})
     sheet["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/rules_{h['key']}.jpg"   # flip: page 2
     return [
         obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],

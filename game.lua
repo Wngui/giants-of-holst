@@ -27,6 +27,7 @@ function start(s)
         install(s.scene or 1)
     end
     Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
+    Wait.time(applyHands, 2, 15)   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
 end
 
 function onSave()
@@ -40,7 +41,6 @@ function install(sceneIndex)
         local g = d.grid
         spawnObjectData({ data = placed(d), callback_function = function(o)
             if g.role == "hp" then hpShield(o, g.color, g.max) end
-            if g.role == "sheet" then handAtSheet(g.color, o) end
         end })
     end
     -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
@@ -54,9 +54,6 @@ function install(sceneIndex)
         end })
     end
     -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
-    pcall(function()
-        setHand("Black", T.cx + T.w / 2 + DATA.layout.gm_hand * SQ, T.top + 4, T.cz, 270, { 12, 5, 4 })
-    end)
     local tabs = Notes.getNotebookTabs()
     for i = #tabs, 1, -1 do Notes.removeNotebookTab(tabs[i].index) end
     for _, t in ipairs(DATA.notebook) do Notes.addNotebookTab(t) end
@@ -330,10 +327,11 @@ function handAtSheet(color, sheet)
     setHand(color, p.x, T.top + 1, p.z + c.sz * (half + 2.2), c.ry, { T.w * DATA.layout.sheet_w, 5, 4 })
 end
 
--- Hand zones are objects (type "Hand", getValue() = owner colour, Hands.getHands() lists them), and Object.setPosition
--- is plain world space. Player.setHandTransform is not to be trusted here: in TTS it put the position turned 90 degrees
--- round the table (asked (x, z), got (-z, x); the rotation was not turned). So move the zones themselves, every zone of
--- that colour (deal() goes to hand 1), and spawn one for a colour that has none (the GM: the save only has the 4 seats).
+-- Hand zones are objects (type "Hand", getValue() = owner colour, Hands.getHands() lists them). TTS resets them all to
+-- the table's default seat layout after the RPG -> custom table switch on load, a few seconds later, overwriting a
+-- one-off placement (cards then landed at the default zones: Green's default is where Aldric's sheet is). So the
+-- zones are re-applied (applyHands) for a while after loading, before dealing and before REST. Every zone of a colour
+-- is moved (deal() goes to hand 1), and one is spawned for a colour that has none (the GM).
 function handZones(color)   -- nil if the zone API fails
     local ok, r = pcall(function()
         local r = {}
@@ -345,20 +343,28 @@ function handZones(color)   -- nil if the zone API fails
     return ok and r or nil
 end
 
+function applyHands()
+    for _, color in ipairs(DATA.colors) do
+        local sheet = kit("sheet_" .. color)
+        if sheet then handAtSheet(color, sheet) end
+    end
+    setHand("Black", T.cx + T.w / 2 + DATA.layout.gm_hand * SQ, T.top + 4, T.cz, 270, { 12, 5, 4 })
+end
+
 function setHand(color, x, y, z, ry, scale)
     if pcall(moveZones, color, x, y, z, ry, scale) then return end
-    -- fallback if the zone API fails: setHandTransform with the position turned back by the 90 degrees TTS adds
-    local dx, dz = x - T.cx, z - T.cz
-    pcall(function()
-        Player[color].setHandTransform({ position = { T.cx + dz, y, T.cz - dx }, rotation = { 0, ry, 0 }, scale = scale })
+    pcall(function()   -- fallback if the zone API fails (setHandTransform is world space too: the getter agrees)
+        Player[color].setHandTransform({ position = { x, y, z }, rotation = { 0, ry, 0 }, scale = scale })
     end)
 end
 
+local spawning = {}
 function moveZones(color, x, y, z, ry, scale)
     local zones = assert(handZones(color))
-    if #zones == 0 then
+    if #zones == 0 and not spawning[color] then
+        spawning[color] = true
         spawnObject({ type = "HandTrigger", position = { x, y, z }, rotation = { 0, ry, 0 }, scale = scale,
-                      callback_function = function(h) h.setValue(color) end })
+                      callback_function = function(h) h.setValue(color); spawning[color] = nil end })
     end
     for _, h in ipairs(zones) do
         h.setPosition({ x, y, z })
@@ -412,7 +418,8 @@ function onPlayerChangeColor(color)
     refreshPick()
     if DATA.heroes[color] and Player[color].seated and not setupDone[color] then
         setupDone[color] = true
-        setupHero(color)
+        applyHands()
+        Wait.frames(function() setupHero(color) end, 5)   -- zones moved first, then deal into them
     end
 end
 
@@ -441,6 +448,7 @@ end
 -- ---------------------------------------------------------------- rest
 -- Every played card goes back to its owner's hand, HP counters reset to max.
 function rest()
+    applyHands()
     for _, color in ipairs(DATA.colors) do
         local h = DATA.heroes[color]
         setHP(color, h.hp)
