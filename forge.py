@@ -984,6 +984,28 @@ def dice_tray():
     return a.objs
 
 
+def base_ring():
+    """Thin ring that sits round a figure's base (game.lua attaches it and tints it): radius 1 = figure scale."""
+    a = Asset(30)
+    a.lathe([(0.84, 0), (1.0, 0), (1.0, 0.07), (0.84, 0.07)], (0, 0, 0), "plaster_white", segs=32, cap_top=True,
+            cap_bottom=True)
+    return a.objs
+
+
+def hp_shield():
+    """A hero's HP tracker: round wooden shield with an iron rim and a red boss; the number and -/+ are buttons on it.
+    World-unit sized (kits are not scaled to the grid)."""
+    a = Asset(31)
+    a.cyl(0.95, 0.12, (0, 0, 0), "planks", segs=24)
+    a.lathe([(0.95, 0), (1.02, 0), (1.02, 0.16), (0.9, 0.16), (0.9, 0.12)], (0, 0, 0), "iron", segs=24, cap_bottom=False,
+            cap_top=False)
+    a.cyl(0.42, 0.04, (0, 0, 0.12), "cloth_red", segs=20, r2=0.38)
+    for i in range(8):
+        t = 2 * math.pi * i / 8
+        a.cyl(0.04, 0.05, (0.8 * math.cos(t), 0.8 * math.sin(t), 0.12), "iron", segs=6, r2=0.02)
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -1006,7 +1028,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_screen": gm_screen, "dice_tray": dice_tray,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "base_ring": base_ring, "hp_shield": hp_shield, "gm_screen": gm_screen, "dice_tray": dice_tray,
 }
 
 if __name__ == "__main__":

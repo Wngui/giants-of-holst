@@ -81,7 +81,9 @@ function run(code, self)   -- a script with its own globals, falling back to the
   assert(load(code, "script", "t", env))()
   return env
 end
+autoguid = 0
 function makeObj(d)
+  if not d.GUID then autoguid = autoguid + 1; d.GUID = "auto" .. autoguid end   -- TTS assigns one
   local o = {data = d, tags = {}, type = d.Name == "Deck" and "Deck" or (d.Name == "Card" and "Card" or "Other")}
   for _, t in ipairs(d.Tags or {}) do o.tags[t] = true end
   function o.getGUID() return d.GUID end
@@ -90,6 +92,9 @@ function makeObj(d)
   function o.addTag(t) o.tags[t] = true end
   function o.getRotation() return {x = 0, y = d.Transform and d.Transform.rotY or 0, z = 0} end
   function o.createButton(b) o.buttons = o.buttons or {}; o.buttons[#o.buttons + 1] = b end
+  function o.editButton(e) for k, v in pairs(e) do if k ~= "index" then o.buttons[e.index + 1][k] = v end end end
+  function o.getScale() local t = d.Transform or {} return {x = t.scaleX or 1, y = t.scaleY or 1, z = t.scaleZ or 1} end
+  function o.addAttachment(r) o.attached = (o.attached or 0) + 1; objects[r.getGUID()] = nil end
   function o.setInvisibleTo(t) o.invisible = #t > 0 end
   function o.getPosition()
     local p = o.pos or {d.Transform.posX, d.Transform.posY, d.Transform.posZ}
@@ -219,7 +224,7 @@ c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
-gm_bar = 'visibility="Black|Host" percentage'
+gm_bar = 'visibility="Black" percentage'
 assert giants and all(o.invisible and o.hasTag("hidden") and gm_bar in o.xml for o in giants)
 assert kids and not any(o.invisible for o in kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
@@ -238,13 +243,25 @@ assert len(desk) == len(c.DATA.gm) - 2 and all(o.invisible for o in desk), [o.da
 assert all(o.data.Transform.posX > W / 2 for o in desk), [(o.data.Nickname, o.data.Transform.posX) for o in desk]
 assert len(screen) == 1 and not screen[0].invisible and screen[0].data.Transform.posX > W / 2   # on the GM table
 board = list(g.getObjectsWithTag("gmconsole").values())[0]
-assert len(board.buttons) == len(c.DATA.gm_buttons)
-fn = board.buttons[1].click_function
+assert len(board.buttons) == len(c.DATA.gm_buttons) + 1   # + the panel's dark backing
+fn = board.buttons[3].click_function                 # backing, title, then scene 1
 g.UIattr["sceneTitle.text"] = ""
 c[fn](board, "Red")                                  # players can't press GM buttons
 assert g.UIattr["sceneTitle.text"] == ""
 c[fn](board, "Black")
 assert g.UIattr["sceneTitle.text"] == scenes[0]["title"]
+lit = [i for i in range(1, len(board.buttons) + 1) if to_py(board.buttons[i].color) == [0.85, 0.65, 0.2]]
+assert lit == [3], lit                               # only the current scene's button is lit
+# coloured bases: every hero figure and every living NPC got a ring attached
+assert all(o.attached == 1 for col in ("Red", "Blue", "Green", "Purple") for o in g.getObjectsWithTag("fig_" + col).values())
+# HP shields: -, +, right-click = 5, clamped to 0..max, REST refills
+shield = list(g.getObjectsWithTag("hp_Red").values())[0]
+assert shield.buttons[1].label == "18"
+down, up = shield.buttons[2].click_function, shield.buttons[3].click_function
+c[down](shield, "Red", False); c[down](shield, "Red", True)
+assert shield.buttons[1].label == "12"
+c[up](shield, "Red", True); c[up](shield, "Red", True)
+assert shield.buttons[1].label == "18"
 pouch = next(o for o in desk if o.data.Name == "Infinite_Bag")
 assert pouch.data.ContainedObjects[1].Transform.scaleX == SQ          # coins inside sized to the grid
 card = next(o for o in desk if o.data.Name == "Card")
@@ -264,6 +281,9 @@ assert all(s["sky"].endswith(".jpg") and len(s["light"]) == 4 for s in scenes)
 sheet = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile" and "Wren" in o.data.Nickname][0]
 assert sheet.data.Transform.rotY == 180, "Red's sheet faces the player (tile images are flipped vs hands)"
 
+gm = g.mkplayer("gm", "White")
+c.pick(gm, None, "pick_Black")                       # the Game Master option
+assert gm.color == "Black" and g.UIattr["pick_Black.interactable"] == "false"
 bob = g.mkplayer("bob", "White")
 c.pick(bob, None, "pick_Red")
 assert bob.color == "Red" and g.UIattr["pick_Red.interactable"] == "false"
@@ -276,7 +296,9 @@ assert eve.color == "White" and "taken" in g.log[len(g.log)]
 played = next(o for o in g.getObjectsWithTag("card_Red").values() if o.inHand == "Red")
 played.inHand = None                                  # card played on the table
 assert hand("Red") == 5
+c[down](shield, "Red", True)
 c.rest()
+assert shield.buttons[1].label == "18"
 assert played.pos is not None                          # sent back toward the hand
 assert "HP back to full" in g.log[len(g.log)]
 
@@ -298,7 +320,7 @@ assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (coun
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 
 # ---- npc.lua on a giant
-giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant raider")
+giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")
 npc = LuaRuntime(unpack_returned_tuples=True)
 ng = npc.globals()
 ng.JSON = npc.table_from({})

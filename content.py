@@ -11,8 +11,9 @@ GROUND_STYLE = ("seen from directly above, flat top-down game ground texture, ha
 GROUNDS = {
     "outskirts": "seamless tileable texture of worn grey medieval cobblestones filling the whole image, mud patches, "
                  "puddles, scattered straw and splinters",
-    "sewer": "wet dark stone floor of a huge underground sewer, one channel of murky green water running from the top edge "
-             "to the bottom edge through the middle, slime, puddles",
+    "sewer": "wet dark grey flagstone floor of a huge underground sewer, a single straight channel of dark murky brown-green "
+             "water running from the top edge to the bottom edge through the middle, worn stone kerbs along the channel, "
+             "puddles and moss in the cracks",
     "den": "seamless tileable texture of large worn dark grey flagstones evenly filling the whole image, dust and cracks",
     "passage": "dark dungeon floor of cracked flagstones, puddles, patches of moss",
     "cart": "a straight horizontal muddy dirt road crossing the middle of the image from left edge to right edge, "
@@ -28,7 +29,12 @@ HEROES = [
     dict(key="thief", name="Wren the Thief", color="Red", fig="rpg_THIEF", hp=18, defense=13,
          stats=dict(Might=0, Agility=3, Wits=2),
          attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing knife", 5, "1d4+3", "range 6")],
-         blurb="Quick hands, quicker feet. Advantage on sneaking and lockpicks.",
+         blurb="Has never paid for anything twice. Rarely once.",
+         traits=["Sneaky: advantage on sneaking and lockpicking (roll 2 d20, keep the best).",
+                 "Street smart: knows how thieves' guilds think, talk and hide things."],
+         background="Grew up in the alleys of Aldmere's capital and talked his way into the King's service "
+                    "instead of the King's dungeon.",
+         gear="Twin daggers, throwing knives, lockpicks, rope, a hooded cloak.",
          portrait="a hooded young rogue man with twin daggers, sly smile, short stubble, leather armour, city rooftops at dusk",
          cards=[
              ("Shadowstep", "Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
@@ -47,7 +53,11 @@ HEROES = [
     dict(key="fighter", name="Brannoc the Fighter", color="Blue", fig="rpg_KNIGHT", hp=30, defense=15,
          stats=dict(Might=3, Agility=1, Wits=0),
          attacks=[("Longsword", 5, "1d8+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
-         blurb="Veteran of the border wars. The only one who speaks a little Dravic.",
+         blurb="Has been hit by more things than most people have seen.",
+         traits=["Speaks a little Dravic: understands simple words and can say a few. Anything harder: Wits DC 12.",
+                 "Hard to shift: advantage on checks to hold a door, a line or a giant's leash."],
+         background="Veteran of the goblin wars. Picked up his Dravic in border taverns, mostly the rude words.",
+         gear="Longsword, dented shield, chainmail, a flask of something strong.",
          portrait="a scarred armoured knight with longsword and dented shield, stern face, stormy sky",
          cards=[
              ("Cleave", "Make one attack roll against every enemy adjacent to you.",
@@ -66,7 +76,11 @@ HEROES = [
     dict(key="healer", name="Sister Maelis the Healer", color="Green", fig="rpg_WARRIOR", hp=22, defense=13,
          stats=dict(Might=1, Agility=0, Wits=3),
          attacks=[("Mace", 3, "1d6+1", "melee"), ("Sacred flame", 5, "1d8+1", "range 8, ignores shields")],
-         blurb="Battle priest of the Dawn. Keeps everyone breathing.",
+         blurb="Will heal you. Will also tell you it was your own fault.",
+         traits=["Healer: stabilising a downed ally is automatic for her (no roll), and still just one action.",
+                 "Dawn lore: knows the dying, the undead and what holy symbols mean."],
+         background="Battle priest of the Dawn. Keeps everyone breathing, whether they like it or not.",
+         gear="Flanged mace, sun pendant, bandages, a small pot of honey for bribing children.",
          portrait="a stout middle-aged battle priestess in chainmail holding a flanged mace, a golden sun pendant on her chest, kind stern face, braided hair, warm light",
          cards=[
              ("Mending Touch", "Heal an adjacent ally 2d8+3.",
@@ -85,7 +99,11 @@ HEROES = [
     dict(key="wizard", name="Aldric the Wizard", color="Purple", fig="rpg_MAGE", hp=16, defense=11,
          stats=dict(Might=0, Agility=1, Wits=3),
          attacks=[("Staff", 2, "1d6", "melee"), ("Arcane bolt", 5, "1d10", "range 10")],
-         blurb="Royal court wizard. Fragile, clever, and loud.",
+         blurb="Knows four hundred spells. Six of them are useful.",
+         traits=["Arcane lore: recognises magic items, runes and spells on sight.",
+                 "Old friends: he taught Princess Isolde her first sorcery. She trusts his voice."],
+         background="Royal court wizard. Fragile, clever and loud. Tutor to the princess, and not about to lose her.",
+         gear="Crooked staff, spellbook, star-embroidered robe, a pipe he is not allowed to light indoors.",
          portrait="an old bearded wizard with a crooked staff and star-embroidered robe, arcane glow",
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
@@ -103,12 +121,12 @@ HEROES = [
          ]),
 ]
 
-RULES = """d20 LITE - HOW TO PLAY
+RULES = """D20 LITE - HOW TO PLAY
 Check or attack: roll d20 + stat. Meet or beat the target.
   Attacks vs the enemy's Defense.  Checks: easy 10, hard 14, heroic 18.
   Natural 20: double damage dice. Natural 1: something goes wrong.
 Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thing).
-HP: track it on your counter. At 0 you are down; an ally can spend an action to stabilise you.
+HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk)."""
@@ -116,16 +134,16 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 # ---------------------------------------------------------------- npcs
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
-    "giant_club": dict(name="Giant raider", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
+    "giant_club": dict(name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Hurl rubble", 5, "2d6+2", "range 10"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
-    "giant_eye": dict(name="Cyclops raider", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
+    "giant_eye": dict(name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Leash yank", None, None, "pulls its thrall back next to it"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Hill giant", fig="rpg_CYCLOP", hp=65, defense=11, attacks=[
+    "giant_troll": dict(name="Hill Giant", fig="rpg_CYCLOP", scale=1.2, tint=(0.62, 0.8, 0.5), hp=65, defense=11, attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
         ("Grab", 6, None, "target is held: Might DC 14 to break free, 1d6 each turn"),
     ], notes="WICKER SHIELD: ranged -5. Slow, moves 6."),
@@ -136,14 +154,14 @@ NPCS = {
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Bandit Baron."),
     "refugee": dict(name="Refugee", fig="rpg_MAGE", tint=(0.55, 0.5, 0.45), hp=6, defense=10, attacks=[], notes="Hungry and scared."),
-    "noble": dict(name="Lady Oriska (noble)", fig="rpg_MAGE", tint=(0.75, 0.45, 0.9), hp=10, defense=12, attacks=[],
+    "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", tint=(0.75, 0.45, 0.9), hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
     "hunter": dict(name="Hunter", fig="rpg_RANGER", hp=14, defense=13, attacks=[
         ("Short bow", 4, "1d8", "range 10"),
     ], notes="Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. "
              "Trade food for their Wolf-tooth Charm."),
     "carcass": dict(name="Fresh carcass", fig="rpg_WOLF", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
-    "rat_count": dict(name="Vasko, the Bandit Baron", fig="rpg_THIEF", tint=(0.85, 0.3, 0.25), hp=25, defense=13, attacks=[
+    "rat_count": dict(notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", tint=(0.85, 0.3, 0.25), hp=25, defense=13, attacks=[
         ("Rapier", 5, "1d8+2", "melee"),
         ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
         ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
@@ -152,19 +170,20 @@ NPCS = {
     "guard": dict(name="Baron's bruiser", fig="rpg_ORC", hp=20, defense=14, attacks=[
         ("Axe", 4, "1d10+2", "melee"),
     ], notes="Two of them. Loyal while Vasko is winning."),
-    "log_giant": dict(name="Grask the Log-Thrower", fig="rpg_CYCLOP", hp=70, defense=12, attacks=[
+    "log_giant": dict(name="Giant", fig="rpg_CYCLOP", hp=70, defense=12, attacks=[
         ("Log throw", None, "3d6", "2x2 area, Agility DC 14 for half; opening move"),
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Roar", None, None, "all heroes within 6: Wits DC 12 or lose next move"),
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
     "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
                       notes="Thieves' guild. Search: 3 gold, a guild token, cart keys.", dead=True),
-    "dying_giant": dict(name="Hrothgul, dying giant", fig="rpg_CYCLOP", hp=6, defense=8, attacks=[
+    "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_RANGER", scale=1.9, tint=(0.85, 0.72, 0.6), notable=True,
+                        hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
     ], notes="Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes."),
     "dead_human": dict(name="Fallen guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
                        dead=True),
-    "princess": dict(name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
+    "princess": dict(notable=True, name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
         ("Moonfire", 6, "2d6", "range 10 (once she's healed)"),
     ], notes="Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.",
         dead=True, start_hp=4, tint=(1.0, 0.75, 0.85)),
@@ -263,11 +282,12 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
                 ("cart", -5.6, -3.4, 70, 0.9), ("crate", -6.4, -2.4, 20), ("barrel", -6.8, -1.9), ("barrel", -6.3, -1.6),
                 ("sack", 1.6, 3.2, 20), ("sack", 2.1, 2.8, 70), ("lumber", 5.6, 2.9, 20),
                 ("rubble", -3, 3.3, 10), ("rubble", 6.2, -3, 60), ("rubble", 3.3, -3.3, 20, 0.8), ("crates", 5.4, -4, 30),
-                ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115), ("wicker_shield", 2.6, -3.6, 20),
+                ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115, 0.6), ("wicker_shield", 2.6, -3.6, 20),
                 ("goods", -2.6, -4.3, 10), ("goods", -4.9, -4.2, 200)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
                ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
-               ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3)],
+               ("thrall", 3, 4), ("thrall", 4, -1), ("thrall", 4, -3), ("thrall", 2.0, 2.2), ("thrall", 7.2, 1.2),
+               ("thrall", 7.4, -2.0), ("thrall", 5.3, 3.6)],
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
@@ -278,7 +298,7 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Press REVEAL ALL ENEMIES. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8 (hill giant 6), thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (the Hill Giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene."""),
 
@@ -314,8 +334,8 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
                + [("wall_door", 9.4, 0, 90)]
                + [("pillar", round(6.6 * math.cos(math.radians(t)), 2), round(4.8 * math.sin(math.radians(t)), 2))
                   for t in (40, 90, 140, 220, 270, 320)]                       # cistern columns
-               + [("rug", 0, 0, 15), ("table_feast", 0, 0, 0, 1.5), ("chair", -1.1, 0, 270, 1.2), ("chair", 0, 1.1, 0, 1.2),
-                  ("chair", 0, -1.1, 180, 1.2), ("throne_dais", 5.0, 0, 270), ("banner", 6.1, 1.4, 90), ("banner", 6.1, -1.4, 90),
+               + [("rug", 0, 0, 15), ("table_feast", 0, 0, 0, 1.5), ("chair", -1.1, 0, 90, 1.2), ("chair", 0, 1.1, 180, 1.2),
+                  ("chair", 0, -1.1, 0, 1.2), ("throne_dais", 5.0, 0, 270), ("banner", 6.1, 1.4, 90), ("banner", 6.1, -1.4, 90),
                   ("candelabra", -1.7, 1.7), ("candelabra", -1.7, -1.7), ("candelabra", 3.6, 1.3), ("candelabra", 3.6, -1.3),
                   ("torch", -3, 3), ("torch", 3, 3.4), ("torch", -3, -3), ("torch", 3, -3.4),
                   ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20), ("coins", 5.9, 4.6),
@@ -396,7 +416,7 @@ INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the
 OUTWARD, scorched. Something burned its way out. Giant footprints lead north-east.
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
-AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. Grask's LOG THROW
+AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
 opens the fight (2x2 on the cart). Switch to BATTLE music, press REVEAL ALL ENEMIES. 3 giants.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
@@ -413,18 +433,18 @@ After: tracks and blood lead to a cave in the hillside."""),
                + [("stalagmite", x, z, (x * 31) % 360) for x, z in [(-5.5, 3.8), (4.8, 4.2), (-6, -2.8), (5.6, 1.5), (-3, 5)]]
                + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
                   ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1),
-                  ("wicker_shield", 4.4, -3.2, 130, 0.9), ("giant_club", 7.6, -3.0, 75, 0.9)],
+                  ("wicker_shield", 4.4, -3.2, 130, 0.9), ("giant_club", 7.6, -3.0, 75, 0.55)],
          npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 6, -4.8),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
-three bodies around a burnt-out fire. In the corner, slumped against the rock, a giant. Still breathing."
-HROTHGUL (dying giant): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
-gets a few words. He is not hostile, just dying. What he knows:
+three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
+HROTHGA (dying giantess): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
+gets a few words. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - He carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
+  - She carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).

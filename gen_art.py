@@ -18,7 +18,9 @@ def jobs():
         yield f"portrait_{h['key']}", f"portrait of {h['portrait']}, {STYLE}", 768, 768
         for i, (_, _, prompt) in enumerate(h["cards"]):
             yield f"card_{h['key']}_{i}", f"{prompt}, {STYLE}", 768, 640
-    yield "table_wood", f"top-down view of a dark old oak tavern tabletop, long wooden planks, worn, scratches, candle wax, no objects, {STYLE}", 1536, 1024
+    # bare planks: "candle wax" + "no objects" painted candles and emblems onto the border
+    yield "table_wood", ("a bare dark old oak tabletop of long worn wooden planks seen from directly above, scratched and "
+                         f"weathered, filling the whole frame, {STYLE}"), 1536, 1024
     yield "card_back", f"ornate symmetrical celtic knotwork pattern, gold filigree on deep crimson leather, no symbols, {STYLE}", 640, 896
     # GM desk art, appended so earlier jobs keep their seeds
     for i, (_, _, prompt, _) in enumerate(ITEMS):

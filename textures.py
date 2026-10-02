@@ -55,7 +55,14 @@ def placeholder(name, colour):
         x, y, r = rnd.randrange(256), rnd.randrange(256), rnd.randrange(4, 14)
         k = rnd.uniform(0.9, 1.08)
         d.ellipse((x - r, y - r, x + r, y + r), fill=tuple(min(255, int(c * k)) for c in colour))
-    return im.filter(ImageFilter.GaussianBlur(4))
+    im = im.filter(ImageFilter.GaussianBlur(4))
+    if name == "canvas":   # tents and bedrolls: faded striped ticking instead of a flat beige
+        d = ImageDraw.Draw(im)
+        for x in range(0, 256, 64):
+            d.rectangle((x, 0, x + 22, 255), fill=(112, 58, 44))
+            d.rectangle((x + 30, 0, x + 34, 255), fill=(150, 120, 80))
+        im = im.filter(ImageFilter.GaussianBlur(1.5))
+    return im
 
 
 def seamless(im):

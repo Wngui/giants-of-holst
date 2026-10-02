@@ -50,24 +50,66 @@ def make_card(hero, i):
 
 
 def make_sheet(hero):
+    """Page 1 (front): the character. Page 2 (tile back, flip it): the D20 LITE rules."""
     im = Image.new("RGB", (1500, 1000), (236, 222, 190))
     d = ImageDraw.Draw(im)
     col = RGB[hero["color"]]
+    ink = (30, 20, 10)
     d.rectangle((0, 0, 1499, 999), outline=col, width=16)
-    im.paste(Image.open(RAW / f"portrait_{hero['key']}.png").convert("RGB").resize((540, 540)), (30, 30))
-    d.text((600, 40), hero["name"], font=font(56, True), fill=col)
-    wrap(d, (600, 120), hero["blurb"], 28, 52)
-    for n, (label, val) in enumerate([("HP", hero["hp"]), ("DEFENSE", hero["defense"])]):
-        x = 600 + n * 260
-        d.rounded_rectangle((x, 200, x + 230, 330), 14, outline=col, width=5)
-        d.text((x + 115, 230), label, font=font(26, True), fill=col, anchor="mm")
-        d.text((x + 115, 290), str(val), font=font(56, True), fill=(30, 20, 10), anchor="mm")
-    stats = "    ".join(f"{k} {v:+d}" for k, v in hero["stats"].items())
-    d.text((600, 360), stats, font=font(36, True), fill=(30, 20, 10))
-    d.text((600, 430), "ATTACKS  (d20 + bonus vs Defense)", font=font(26, True), fill=col)
+    im.paste(Image.open(RAW / f"portrait_{hero['key']}.png").convert("RGB").resize((430, 430)), (36, 36))
+    d.rectangle((36, 36, 466, 466), outline=col, width=4)
+    d.text((500, 40), hero["name"], font=font(54, True), fill=col)
+    wrap(d, (500, 112), "\u201c" + hero["blurb"] + "\u201d", 27, 58, fill=(90, 70, 50))
+    boxes = [("HP", str(hero["hp"]), 190), ("DEFENSE", str(hero["defense"]), 190)] + \
+            [(k.upper(), f"{v:+d}", 150) for k, v in hero["stats"].items()]
+    x = 500
+    for label, val, w in boxes:
+        d.rounded_rectangle((x, 180, x + w, 300), 14, outline=col, width=5)
+        d.text((x + w // 2, 205), label, font=font(22, True), fill=col, anchor="mm")
+        d.text((x + w // 2, 262), val, font=font(50, True), fill=ink, anchor="mm")
+        x += w + 18
+    d.text((500, 330), "ATTACKS", font=font(26, True), fill=col)
     for n, (name, bonus, dmg, note) in enumerate(hero["attacks"]):
-        d.text((600, 475 + n * 45), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=(30, 20, 10))
-    wrap(d, (40, 600), RULES, 24, 105, spacing=8)
+        d.text((500, 368 + n * 40), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=ink)
+    y = 500
+    for title, body in (("TRAITS", "\n".join("\u2022 " + t for t in hero["traits"])), ("BACKGROUND", hero["background"]),
+                        ("GEAR", hero["gear"])):
+        d.text((40, y), title, font=font(28, True), fill=col)
+        lines = [l for para in body.split("\n") for l in textwrap.wrap(para, 92, subsequent_indent="  " if title == "TRAITS" else "")]
+        d.multiline_text((40, y + 40), "\n".join(lines), font=font(27), fill=ink, spacing=9)
+        y += 40 + len(lines) * 37 + 30
+    d.text((750, 968), "Flip the sheet for the D20 LITE rules", font=font(20), fill=(110, 90, 60), anchor="mm")
+    return im
+
+
+def rules_page(col):
+    """The sheet's back: D20 LITE rules laid out as headed boxes, plus the difficulty badges."""
+    im = Image.new("RGB", (1500, 1000), (236, 222, 190))
+    d = ImageDraw.Draw(im)
+    ink = (30, 20, 10)
+    d.rectangle((0, 0, 1499, 999), outline=col, width=16)
+    d.text((750, 70), "D20 LITE", font=font(72, True), fill=col, anchor="mm")
+    d.text((750, 128), "how to play", font=font(28), fill=(110, 90, 60), anchor="mm")
+    sections = []
+    for line in RULES.splitlines()[1:]:
+        if line.startswith(" ") and sections:
+            sections[-1][1] += " " + line.strip()
+        else:
+            head, _, body = line.partition(":")
+            sections.append([head.strip(), body.strip()])
+    for n, (head, body) in enumerate(sections):
+        x, y = (60 if n % 2 == 0 else 770), 180 + (n // 2) * 245
+        d.rounded_rectangle((x, y, x + 670, y + 225), 16, outline=col, width=3, fill=(244, 236, 214))
+        d.text((x + 24, y + 18), head.upper(), font=font(28, True), fill=col)
+        wrap(d, (x + 24, y + 62), body[:1].upper() + body[1:], 24, 52, fill=ink, spacing=7)
+    x0 = 770 if len(sections) % 2 else 60   # free slot: the difficulty badges
+    y0 = 180 + (len(sections) // 2) * 245
+    d.text((x0 + 24, y0 + 18), "DIFFICULTY", font=font(28, True), fill=col)
+    for n, (label, dc) in enumerate((("Easy", 10), ("Hard", 14), ("Heroic", 18))):
+        cx = x0 + 110 + n * 220
+        d.ellipse((cx - 70, y0 + 66, cx + 70, y0 + 206), outline=col, width=6, fill=(244, 236, 214))
+        d.text((cx, y0 + 125), str(dc), font=font(56, True), fill=ink, anchor="mm")
+        d.text((cx, y0 + 178), label, font=font(22, True), fill=col, anchor="mm")
     return im
 
 
@@ -158,12 +200,15 @@ def build_images():
             sheet.paste(make_card(h, i), ((i % 3) * 500, (i // 3) * 700))
         sheet.save(OUT / f"cards_{h['key']}.jpg", quality=90)
         make_sheet(h).save(OUT / f"sheet_{h['key']}.jpg", quality=90)
+        rules_page(RGB[h["color"]]).save(OUT / f"rules_{h['key']}.jpg", quality=90)
         Image.open(RAW / f"portrait_{h['key']}.png").convert("RGB").resize((256, 256)).save(OUT / f"portrait_{h['key']}.jpg")
     Image.open(RAW / "card_back.png").convert("RGB").resize((500, 700)).save(OUT / "card_back.jpg", quality=90)
     items = Image.new("RGB", (2000, 1400))
     for i in range(len(ITEMS)):
         items.paste(make_item_card(i), ((i % 4) * 500, (i // 4) * 700))
     items.save(OUT / "items.jpg", quality=90)
+    Image.open(RAW / "screen_art.png").convert("RGB").crop((512, 0, 1024, 768)).resize((256, 384)).crop((0, 64, 256, 320)) \
+        .save(OUT / "portrait_gm.jpg", quality=90)
     art = Image.open(upscaled("screen_art")).convert("RGB")
     pw = art.width // 3
     for i, (title, body, fs) in enumerate(screen_panels()):
@@ -213,6 +258,12 @@ def obj(name, transform, **kw):
     return o
 
 
+def mesh(base, name, **kw):
+    """CustomMesh block for one of our baked props."""
+    return {"MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{TEXTURES[name]}", "NormalURL": "",
+            "ColliderURL": "", "Convex": True, "MaterialIndex": 1, "TypeIndex": 0, "CastShadows": True} | kw
+
+
 def tile(url, transform, **kw):
     transform["scaleY"] = 1.0   # keep tiles thin; scale only stretches X/Z
     return obj("Custom_Tile", transform, CustomImage={
@@ -228,12 +279,13 @@ def npc(key, x, z, n, scene, hp=None):
     attacks = [dict(name=a, hit=b, dmg=c, note=d) for a, b, c, d in t["attacks"]]
     ry = (270.0 if x > 0 else 90.0) + (180.0 if t.get("flip") else 0.0)   # flip: model faces backwards
     o = obj(t["fig"], tf(ry=ry), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"], GMNotes=t["notes"],
-            grid={"x": x, "z": z, "k": "fig"})
+            grid={"x": x, "z": z, "k": "fig", "s": [t.get("scale", 1)] * 3})
     if t.get("dead"):
         o["RPGdead"] = True
     if t.get("tint"):
         o["ColorDiffuse"] = dict(zip("rgb", t["tint"]))
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
+        o["grid"]["ring"] = [0.85, 0.65, 0.15] if t.get("notable") else [0.12, 0.1, 0.09]   # base: gold notable, else dark
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks})
@@ -265,8 +317,9 @@ def scene_data(s, base, textures):
             o["Tags"] = o["Tags"] + ["hidden"]
         spawns.append(o)
     if s["key"] == "den":   # Baron's Bones dice on the gambling table
-        spawns += [obj("Die_6", tf(), GUID=guid("den", "die", i), Tags=["scene"], grid={"x": -0.4 + 0.4 * i, "z": 0, "k": "fig", "lift": 4})
-                   for i in range(3)]
+        spawns += [obj("Die_6_Rounded", tf(ry=30.0 * i), GUID=guid("den", "die", i), Tags=["scene"], Nickname="Baron's Bones",
+                       ColorDiffuse={"r": 0.93, "g": 0.87, "b": 0.72},     # old bone, for the Baron's Bones
+                       grid={"x": -0.45 + 0.45 * i, "z": 0, "k": "fig", "s": [1.3, 1.3, 1.3], "lift": 4}) for i in range(3)]
     _, rgb, bright = SKIES[s["key"]]
     return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
                 sky=f"{base}art/out/sky_{s['key']}.jpg", light=[*rgb, bright],
@@ -284,13 +337,16 @@ def hero_objects(h, n, base):
                  CustomDeck={str(n + 1): cdeck}, GUID=guid(c, "card", i))
              for i, (cid, (title, text, _)) in enumerate(zip(ids, h["cards"]))]
     colour = dict(zip("rgb", [v / 255 for v in RGB[c]]))
+    sheet = tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=False,
+                 Tags=["kit"], grid={"role": "sheet", "color": c})
+    sheet["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/rules_{h['key']}.jpg"   # flip: page 2
     return [
         obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
-            grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig"}),
-        tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=True,
-             Tags=["kit"], grid={"role": "sheet", "color": c}),
-        obj("Counter", tf(), GUID=guid(c, "counter"), Nickname=f"{h['name']} HP", Counter={"value": h["hp"]},
-            Tags=["kit", f"counter_{c}"], grid={"role": "counter", "color": c}),
+            grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig",
+                  "ring": [round(min(1, v / 255 * 1.4), 2) for v in RGB[c]]}),
+        sheet,
+        obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=True, Tags=["kit", f"hp_{c}"],
+            CustomMesh=mesh(base, "hp_shield"), grid={"role": "hp", "color": c, "max": h["hp"]}),
         obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
         obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
             CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
@@ -306,15 +362,22 @@ GM_GAP = -0.4                       # GM table's inner edge vs the main table ed
 X0 = EDGE + GM_GAP                  # GM table inner edge; it is 10.4 squares deep (x) and 20.8 wide (z)
 DIE_COLOURS = {"Die_4": (0.55, 0.06, 0.08), "Die_6": (0.55, 0.06, 0.08), "Die_8": (0.55, 0.06, 0.08),
                "Die_10": (0.55, 0.06, 0.08), "Die_12": (0.55, 0.06, 0.08), "Die_20": (0.85, 0.62, 0.12)}
-TRAY = (7.2, -6.2)                  # dice tray, from X0; it also carries the GM control buttons
-SHORT = {"title": "Title", "outskirts": "Holst City", "sewer": "Sewer", "den": "Den", "passage": "Passage",
-         "cart": "Cart", "cave": "Cave"}
-# control buttons in front of the GM: two rows of six across the table (z), placed relative to the dice tray
-GM_BUTTONS = [dict(label=SHORT[s["key"]], scene=i + 1) for i, s in enumerate(SCENES)] + [
-    dict(label=t, fn=f) for f, t in (("musicScene", "Music"), ("musicBattle", "Battle"), ("musicStop", "Stop"),
-                                     ("revealAll", "Reveal"), ("rest", "REST"))]
-for n, b in enumerate(GM_BUTTONS):
-    b["x"], b["z"] = round(8.4 + 0.9 * (n // 6) - TRAY[0], 2), round(-2.75 + 1.1 * (n % 6) - TRAY[1], 2)
+TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM control panel's buttons
+# GM control panel, like the floating one: bottom left of the red mat as the GM sees it (GM looks west, so "down" is
+# +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
+PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.52
+GM_BUTTONS = ([dict(label="The Giants of Holst", row=0, kind="title")] +
+              [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
+              [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
+               enumerate((("musicScene", "Scene music"), ("musicBattle", "Battle"), ("musicStop", "Stop")))] +
+              [dict(label="Reveal all enemies", fn="revealAll", row=len(SCENES) + 2),
+               dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)])
+for b in GM_BUTTONS:
+    b["x"] = round(PANEL_X0 + ROW * b["row"] - TRAY[0], 2)
+    b["z"] = round(PANEL_Z + (b["slot"] - 1) * 1.1 - TRAY[1] if "slot" in b else PANEL_Z - TRAY[1], 2)
+    b["w"] = 1.0 if "slot" in b else 3.2
+GM_PANEL = dict(x=round(PANEL_X0 + ROW * (len(SCENES) + 3) / 2 - TRAY[0], 2), z=round(PANEL_Z - TRAY[1], 2),
+                w=3.6, h=round(ROW * (len(SCENES) + 4) + 0.2, 2))
 
 
 def gm_objects(base):
@@ -337,7 +400,8 @@ def gm_objects(base):
     for n, (die, rgb) in enumerate(DIE_COLOURS.items()):
         out.append(obj(die, tf(), GUID=guid("gm", "die", n), Nickname="GM " + die.replace("Die_", "d"), **gm,
                        ColorDiffuse=dict(zip("rgb", rgb)),
-                       grid={"x": X0 + 6.6 + 0.6 * (n % 3), "z": -6.8 + 0.9 * (n // 3), "k": "tile", "s": [1, 1, 1], "lift": 1.5}))
+                       grid={"x": X0 + TRAY[0] - 0.6 + 0.6 * (n % 3), "z": TRAY[1] - 0.45 + 0.9 * (n // 3), "k": "tile",
+                             "s": [1, 1, 1], "lift": 1.5}))
     deck = {"FaceURL": f"{base}art/out/items.jpg", "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 4,
             "NumHeight": 2, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
     spots = [(X0 + x, z) for x in (1.3, 3.4, 5.5) for z in (3.9, 5.4, 6.9, 8.4)]   # tight block, top right
@@ -357,7 +421,7 @@ def xml_ui(base):
     on = f'onClick="{CONTROLLER}/'   # UI lives in Global, handlers live on the controller object
     scenes = "".join(f'<Button id="scene_{i + 1}" {on}onSceneButton" {btn}>{s["title"]}</Button>'
                      for i, s in enumerate(SCENES))
-    gm = f"""<Panel id="gm" visibility="Black|Host" rectAlignment="UpperRight" offsetXY="-10 -80" width="260"
+    gm = f"""<Panel id="gm" visibility="Black" rectAlignment="UpperRight" offsetXY="-10 -80" width="260"
  height="{80 + 38 * (len(SCENES) + 4)}" color="#1b1410ee" padding="8 8 8 8">
 <VerticalLayout spacing="4" childForceExpandHeight="false">
 <Text id="sceneTitle" fontSize="18" color="#f0d9a0" fontStyle="Bold" preferredHeight="40">GM</Text>
@@ -370,12 +434,15 @@ def xml_ui(base):
     picks = "".join(f"""<VerticalLayout spacing="4"><Image image="portrait_{h['key']}" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
+    picks += f"""<VerticalLayout spacing="4"><Image image="portrait_gm" preserveAspect="true"/>
+<Button id="pick_Black" {on}pick" {btn}>Game Master</Button></VerticalLayout>"""
     pick = f"""<Panel id="pick" visibility="White|Brown|Orange|Yellow|Teal|Pink|Grey" rectAlignment="UpperCenter"
- offsetXY="0 -60" width="760" height="260" color="#1b1410ee" padding="10 10 10 10">
+ offsetXY="0 -60" width="940" height="260" color="#1b1410ee" padding="10 10 10 10">
 <VerticalLayout spacing="6"><Text fontSize="24" color="#f0d9a0" fontStyle="Bold" preferredHeight="36">Choose your adventurer</Text>
 <HorizontalLayout spacing="10">{picks}</HorizontalLayout></VerticalLayout></Panel>"""
     # Lua's UI.setXml wants lowercase name/url (the save-file format's Name/URL gives a null-reference error)
-    assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES]
+    assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES] + [
+        {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}]
     return gm + pick, assets
 
 
@@ -438,7 +505,8 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS,
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS, gm_panel=GM_PANEL,
+                ring=mesh(base, "base_ring", Convex=False),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall

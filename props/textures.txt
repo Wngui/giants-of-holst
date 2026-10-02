@@ -1,5 +1,6 @@
 banner banner.jpg
 barrel barrel.jpg
+base_ring base_ring.jpg
 bed bed.jpg
 bridge bridge.jpg
 broken_cart broken_cart.jpg
@@ -29,6 +30,7 @@ house_c house_c.jpg
 house_d house_d.jpg
 house_e house_e.jpg
 house_f house_f.jpg
+hp_shield hp_shield.jpg
 keg keg.jpg
 kerb kerb.jpg
 log_large log_large.jpg

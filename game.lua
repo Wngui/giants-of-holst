@@ -4,7 +4,7 @@
 DATA = {} --@DATA@
 VERSION = DATA.version
 
-local scene, setupDone = 1, {}
+local scene, setupDone, hp = 1, {}, {}
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
 function onLoad(saved)
@@ -22,7 +22,7 @@ end
 function start(s)
     measure()
     if s.version == VERSION then
-        scene, setupDone = s.scene, s.setupDone
+        scene, setupDone, hp = s.scene, s.setupDone, s.hp or {}
     else
         install(s.scene or 1)
     end
@@ -30,13 +30,19 @@ function start(s)
 end
 
 function onSave()
-    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone })
+    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp })
 end
 
 -- First load or a new version: fresh hero kits and notebook, same scene, re-deal to seated players.
 function install(sceneIndex)
     for _, o in ipairs(getObjectsWithTag("kit")) do o.destruct() end
-    for _, d in ipairs(DATA.kits) do spawnObjectData({ data = placed(d) }) end
+    for _, d in ipairs(DATA.kits) do
+        local g = d.grid
+        spawnObjectData({ data = placed(d), callback_function = function(o)
+            if g.ring then addRing(o, g.ring) end
+            if g.role == "hp" then hpShield(o, g.color, g.max) end
+        end })
+    end
     -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
     for _, tag in ipairs({ "gm", "gmscreen", "gmtable" }) do
         for _, o in ipairs(getObjectsWithTag(tag)) do o.destruct() end
@@ -107,7 +113,7 @@ function placed(d)
     if g.role then                                    -- player kit in its corner
         local c, k = corner(g.color), SQ / 2
         local zs, zr = T.cz + c.sz * T.d * L.sheet_z, T.cz + c.sz * T.d * L.row_z
-        local spots = { sheet = { 0, zs, 0.2 }, deck = { -3 * k, zr, 1 }, counter = { 0.5 * k, zr, 0.5 },
+        local spots = { sheet = { 0, zs, 0.2 }, deck = { -3 * k, zr, 1 }, hp = { 0.5 * k, zr, 0.3 },
                         d20 = { 3 * k, zr, 1 } }
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
@@ -142,7 +148,9 @@ function setScene(i)
     local s = DATA.scenes[i]
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
+        local ring = d.grid.ring
         spawnObjectData({ data = placed(d), callback_function = function(o)
+            if ring then addRing(o, ring) end
             -- let props settle on the table, then pin them
             if o.hasTag("pin") then Wait.time(function() o.setLock(true) end, 1.5) end
             if o.hasTag("hidden") then hide(o) end
@@ -158,6 +166,7 @@ function setScene(i)
         end
     end
     backdrop(s)
+    highlightScene()
     UI.setAttribute("sceneTitle", "text", s.title)
     play(s.music)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
@@ -216,21 +225,87 @@ function gmShow(o)
     o.removeTag("gm")
 end
 
--- GM controls: object buttons carried by the dice tray, laid out in front of the GM (positions from build.py, in
--- squares relative to the tray). Clicks from anyone but Black are ignored (the tray is hidden from players anyway).
--- ponytail: BTN = button units per square is read off one screenshot (1000 was ~3x too big); tweak if needed
+-- GM controls: the floating panel again, as object buttons on the dice tray laid out bottom left of the red mat
+-- (positions from build.py, in squares relative to the tray). The current scene's button is lit gold.
+-- Clicks from anyone but Black are ignored (the tray is hidden from players anyway).
+-- ponytail: BTN = button units per local unit of the host object (full width), read off one screenshot
 BTN = 300
+local sceneButton, panel = {}, nil
+local BROWN, GOLD, CREAM, INK = { 0.23, 0.16, 0.1 }, { 0.85, 0.65, 0.2 }, { 0.94, 0.85, 0.63 }, { 0.12, 0.08, 0.05 }
+function noop() end
+
 function console(o)
+    panel = o
+    local P = DATA.gm_panel
+    o.createButton({ click_function = "noop", function_owner = self, label = "", position = { P.x, 0.04, P.z },
+                     rotation = { 0, 90, 0 }, width = P.w * BTN, height = P.h * BTN,
+                     color = { 0.1, 0.08, 0.06 } })                     -- the panel's dark backing
     for i, b in ipairs(DATA.gm_buttons) do
-        local fn = "gmButton" .. i
-        _G[fn] = function(_, color)
-            if color ~= "Black" then return end
-            if b.scene then setScene(b.scene) else _G[b.fn]() end
+        local fn = "noop"
+        if b.kind ~= "title" then
+            fn = "gmButton" .. i
+            _G[fn] = function(_, color)
+                if color ~= "Black" then return end
+                if b.scene then setScene(b.scene) else _G[b.fn]() end
+            end
         end
-        o.createButton({ click_function = fn, function_owner = self, label = b.label, position = { b.x, 0.05, b.z },
-                         rotation = { 0, 90, 0 }, width = 0.95 * BTN, height = 0.75 * BTN, font_size = 0.14 * BTN,
-                         color = { 0.23, 0.16, 0.1 }, font_color = { 0.94, 0.85, 0.63 } })
+        o.createButton({ click_function = fn, function_owner = self, label = b.label, position = { b.x, 0.06, b.z },
+                         rotation = { 0, 90, 0 }, width = b.w * BTN - 15, height = 0.44 * BTN,
+                         font_size = (b.kind == "title" and 0.2 or 0.15) * BTN,
+                         color = b.kind == "title" and { 0.1, 0.08, 0.06 } or BROWN, font_color = CREAM })
+        if b.scene then sceneButton[b.scene] = i end   -- button index i (0 is the backing)
     end
+    highlightScene()
+end
+
+function highlightScene()
+    if not panel then return end
+    for sc, i in pairs(sceneButton) do
+        local on = sc == scene
+        panel.editButton({ index = i, color = on and GOLD or BROWN, font_color = on and INK or CREAM })
+    end
+end
+
+-- ---------------------------------------------------------------- HP shields (instead of TTS counters)
+-- A shield at each seat: big number, - and + (right-click: 5 at a time). REST refills it.
+local shields = {}
+function hpShield(o, color, max)
+    shields[color] = o
+    hp[color] = hp[color] or max
+    o.createButton({ click_function = "noop", function_owner = self, label = tostring(hp[color]),
+                     position = { 0, 0.2, 0 }, width = 0, height = 0, font_size = 0.32 * BTN, font_color = { 1, 0.95, 0.85 } })
+    for k, d in ipairs({ -1, 1 }) do
+        local fn = "hp" .. color .. (d < 0 and "Down" or "Up")
+        _G[fn] = function(_, _, alt) setHP(color, hp[color] + d * (alt and 5 or 1)) end
+        o.createButton({ click_function = fn, function_owner = self, label = d < 0 and "-" or "+",
+                         position = { d * 0.62, 0.2, 0 }, width = 0.16 * BTN, height = 0.16 * BTN, font_size = 0.2 * BTN,
+                         color = { 0.15, 0.1, 0.07 }, font_color = { 1, 0.95, 0.85 } })
+    end
+end
+
+function setHP(color, v)
+    local max = DATA.heroes[color].hp
+    hp[color] = math.max(0, math.min(max, v))
+    if shields[color] then shields[color].editButton({ index = 0, label = tostring(hp[color]) }) end
+end
+
+-- ---------------------------------------------------------------- coloured bases
+-- A thin ring round each figure's base, attached so it moves with it: hero = seat colour, notable NPC = gold,
+-- everyone else dark. ponytail: RING (ring radius per unit of figure scale) is a guess at the RPG kit's base size
+RING = 0.95
+function addRing(o, rgb)
+    Wait.time(function()
+        if o == nil then return end
+        local p, sc = o.getPosition(), o.getScale().x * RING
+        spawnObjectData({ data = { Name = "Custom_Model", CustomMesh = DATA.ring, Locked = false,
+                                   ColorDiffuse = { r = rgb[1], g = rgb[2], b = rgb[3] },
+                                   Transform = { posX = p.x, posY = p.y, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
+                                                 scaleX = sc, scaleY = sc, scaleZ = sc } },
+                          callback_function = function(r)
+                              o.addAttachment(r)
+                              if o.hasTag("hidden") then o.setInvisibleTo(PLAYERS) end   -- still hidden as one piece
+                          end })
+    end, 2)
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out
@@ -266,7 +341,7 @@ function musicStop() MusicPlayer.pause() end
 
 -- ---------------------------------------------------------------- class pick
 function pick(player, _, id)
-    local color = id:sub(6)
+    local color = id:sub(6)   -- a hero's seat colour, or Black for the Game Master
     if Player[color].seated then
         broadcastToColor("That adventurer is taken, pick another.", player.color, { 1, 0.6, 0.2 })
         return
@@ -285,6 +360,9 @@ end
 function onPlayerDisconnect() refreshPick() end
 
 function refreshPick()
+    local gm = Player.Black
+    UI.setAttribute("pick_Black", "text", gm.seated and ("GM - " .. gm.steam_name) or "Game Master")
+    UI.setAttribute("pick_Black", "interactable", gm.seated and "false" or "true")
     for _, color in ipairs(DATA.colors) do
         local h = DATA.heroes[color]
         local p = Player[color]
@@ -306,8 +384,7 @@ end
 function rest()
     for _, color in ipairs(DATA.colors) do
         local h = DATA.heroes[color]
-        local counter = kit("counter_" .. color)
-        if counter then counter.Counter.setValue(h.hp) end
+        setHP(color, h.hp)
         if Player[color].seated then
             local inHand = {}
             for _, o in ipairs(Player[color].getHandObjects()) do inHand[o.getGUID()] = true end

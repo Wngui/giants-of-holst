@@ -13,12 +13,12 @@
 ## Rules
 
 ```
-d20 LITE - HOW TO PLAY
+D20 LITE - HOW TO PLAY
 Check or attack: roll d20 + stat. Meet or beat the target.
   Attacks vs the enemy's Defense.  Checks: easy 10, hard 14, heroic 18.
   Natural 20: double damage dice. Natural 1: something goes wrong.
 Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thing).
-HP: track it on your counter. At 0 you are down; an ally can spend an action to stabilise you.
+HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
@@ -60,9 +60,9 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 
 ## NPCs
 
-- **Giant raider** HP 60, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Hurl rubble (+5, 2d6+2, range 10); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
-- **Cyclops raider** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Leash yank (no roll, -, pulls its thrall back next to it). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
-- **Hill giant** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Grab (+6, -, target is held: Might DC 14 to break free, 1d6 each turn). WICKER SHIELD: ranged -5. Slow, moves 6.
+- **Giant** HP 60, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Hurl rubble (+5, 2d6+2, range 10); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
+- **Giant** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Leash yank (no roll, -, pulls its thrall back next to it). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
+- **Hill Giant** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Grab (+6, -, target is held: Might DC 14 to break free, 1d6 each turn). WICKER SHIELD: ranged -5. Slow, moves 6.
 - **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off.
 - **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
@@ -71,9 +71,9 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Fresh carcass** HP 1, Def 1. . Food.
 - **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
 - **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
-- **Grask the Log-Thrower** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
+- **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
-- **Hrothgul, dying giant** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes.
+- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes.
 - **Fallen guildsman** HP 1, Def 1. . Died fighting.
 - **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.
 - **Giant rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
@@ -105,7 +105,7 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
 GIANTS: after a few minutes, ground shakes. Press REVEAL ALL ENEMIES. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8 (hill giant 6), thralls 6. Let them feel the danger: first giant hit is big.
+  Switch to BATTLE music. Giants move 8 (the Hill Giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene.
 ```
@@ -186,7 +186,7 @@ INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the
 OUTWARD, scorched. Something burned its way out. Giant footprints lead north-east.
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
-AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. Grask's LOG THROW
+AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
 opens the fight (2x2 on the cart). Switch to BATTLE music, press REVEAL ALL ENEMIES. 3 giants.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
@@ -198,14 +198,14 @@ After: tracks and blood lead to a cave in the hillside.
 
 ```
 Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
-three bodies around a burnt-out fire. In the corner, slumped against the rock, a giant. Still breathing."
-HROTHGUL (dying giant): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
-gets a few words. He is not hostile, just dying. What he knows:
+three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
+HROTHGA (dying giantess): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
+gets a few words. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - He carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
+  - She carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
