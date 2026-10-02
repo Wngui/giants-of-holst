@@ -354,7 +354,7 @@ def hero_objects(h, n, base):
             ColorDiffuse=dict(zip("rgb", [round(min(1, v / 255 * 1.4), 2) for v in RGB[c]])),   # base in seat colour
             grid={"x": SCENES[0]["heroes"][n][0], "z": SCENES[0]["heroes"][n][1], "k": "fig"}),
         sheet,
-        obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=True, Tags=["kit", f"hp_{c}"],
+        obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=False, Tags=["kit", f"hp_{c}"],
             CustomMesh=mesh(base, "hp_plaque"), grid={"role": "hp", "color": c, "max": h["hp"]}),
         obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
         obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
