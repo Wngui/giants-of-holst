@@ -35,7 +35,6 @@ keg keg.jpg
 kerb kerb.jpg
 log_large log_large.jpg
 lumber lumber.jpg
-merchant merchant.jpg
 oak oak.jpg
 oaks oaks.jpg
 pillar pillar.jpg
@@ -43,10 +42,6 @@ pine pine.jpg
 pine_b pine_b.jpg
 pines pines.jpg
 ration ration.jpg
-refugee_a refugee_a.jpg
-refugee_b refugee_b.jpg
-refugee_c refugee_c.jpg
-refugee_d refugee_d.jpg
 rock_a rock_a.jpg
 rock_b rock_b.jpg
 rock_c rock_c.jpg

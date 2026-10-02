@@ -284,17 +284,19 @@ UI_HEIGHT = {"rpg_CYCLOP": 540, "rpg_GHOUL": 230, "rpg_KOBOLD": 230, "rpg_RAT": 
 BLACK, GOLD_BASE = [0.05, 0.05, 0.05], [0.85, 0.65, 0.15]
 
 
-def npc(key, x, z, n, scene, hp=None, base="", face=None):
+def npc(key, x, z, n, scene, hp=None, face=None):
     t = NPCS[key]
     hp = hp or t["hp"]
     attacks = [dict(name=a, hit=b, dmg=c, note=d) for a, b, c, d in t["attacks"]]
     # face: a point to look at (rotY 0 looks down +z, 90 down +x); otherwise towards the middle of the map
     ry = math.degrees(math.atan2(face[0] - x, face[1] - z)) % 360 if face else (270.0 if x > 0 else 90.0)
-    models = t.get("models")
-    if models:   # our own forged figure (dark or gold base baked in); it faces the opposite way to RPG figures
-        o = obj("Custom_Model", tf(ry=(ry + 180) % 360), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"],
-                GMNotes=t["notes"], grid={"x": x, "z": z, "k": "model", "s": [t.get("scale", 1)] * 3, "lift": 0.3},
-                CustomMesh=mesh(base, models[n % len(models)]))
+    bundles = t.get("bundles")
+    if bundles:   # an animated workshop figure (Custom AssetBundle): (url, scale, health bar height)
+        url, scale, _ = bundles[n % len(bundles)]
+        o = obj("Custom_Assetbundle", tf(ry=ry), GUID=guid(scene, key, n), Nickname=t["name"], Tags=["scene"],
+                GMNotes=t["notes"], grid={"x": x, "z": z, "k": "fig", "s": [scale * t.get("scale", 1)] * 3},
+                CustomAssetbundle={"AssetbundleURL": url, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
+                                   "TypeIndex": 1, "LoopingEffectIndex": 0})
     else:
         o = obj(t["fig"], tf(ry=ry + (180.0 if t.get("flip") else 0.0)), GUID=guid(scene, key, n), Nickname=t["name"],
                 Tags=["scene"], GMNotes=t["notes"], grid={"x": x, "z": z, "k": "fig", "s": [t.get("scale", 1)] * 3})
@@ -306,8 +308,8 @@ def npc(key, x, z, n, scene, hp=None, base="", face=None):
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
-                                          "ui": 130 if models else UI_HEIGHT.get(t["fig"], 330),
-                                          "uis": 0.2 if models else 0.4, "ctl": CONTROLLER})   # models: twice a figure's scale
+                                          "ui": bundles[n % len(bundles)][2] if bundles else UI_HEIGHT.get(t["fig"], 330),
+                                          "ctl": CONTROLLER})
     return o
 
 
@@ -337,7 +339,7 @@ def scene_data(s, base, textures):
     for n, spec in enumerate(s.get("props", [])):
         spawns.append(prop(spec, n, s["key"], base, textures))
     for n, spec in enumerate(s["npcs"]):
-        o = npc(*spec[:3], n, s["key"], *spec[3:], base=base, face=s.get("face", {}).get(spec[0]))
+        o = npc(*spec[:3], n, s["key"], *spec[3:], face=s.get("face", {}).get(spec[0]))
         if FOG and s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
             o["Tags"] = o["Tags"] + ["hidden"]
         if spec[0] in s.get("stealth", ()):   # ...or until the GM reveals them by hand

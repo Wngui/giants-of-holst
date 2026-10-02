@@ -132,6 +132,22 @@ Cards: play any time it makes sense (most are an action). Each card works once,
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk)."""
 
 # ---------------------------------------------------------------- npcs
+# Animated townsfolk from the Steam workshop packs "Male Human Commoners" (2960527540) and "Female Human
+# Commoners" (2960282601), author unknown: (AssetBundle URL, scale from the pack, health bar height)
+_CLOUD = "https://cdn.steamusercontent.com/ugc/"
+COMMONERS = [
+    (_CLOUD + "958612978740073009/0941CF7608D1890E7002C59090D4D639374DA092/", 1.1, 330),    # 0 bearded man
+    (_CLOUD + "958612978740069542/4DCF1509DEDEF8FCDAA2F4201589C4C401384CB4/", 1.1, 330),    # 1 man, green hood
+    (_CLOUD + "958612978740063710/4AE48EC4E1F00FFBB189B31EB0BB7BC72FD8FD27/", 1.1, 330),    # 2 dark-bearded man
+    (_CLOUD + "958612978740071434/9BD461ECD41C30E85C4AFC32A12B5748D71EB7D0/", 1.1, 330),    # 3 man with gear (merchant)
+    (_CLOUD + "958612978740069092/1B8136C7DDE9DABB71A0717AB52F2237BC2F2D59/", 1.05, 320),   # 4 nun
+    (_CLOUD + "958612978740067720/83B9248C1E52C5BFFB7AE23FBD3D3DD3BE8A46EA/", 1.05, 320),   # 5 woman
+    (_CLOUD + "958612978740068146/7DDE308151FA11F8C69AE0A6F2A7DD244F222C94/", 1.05, 320),   # 6 woman
+    (_CLOUD + "958612978740068602/C63269FB10AB77491AE7BB4B3F2603C5900238C6/", 1.05, 320),   # 7 woman, patterned dress
+    (_CLOUD + "948467195537886829/9BE3266C8259847AB482E8E5BD83128D3976592C/", 0.88, 290),   # 8 scared woman
+    (_CLOUD + "948467195537887846/0A8425DBDCE9C90372C4699239E64716691516EE/", 0.88, 290),   # 9 scared woman
+]
+
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
     "giant_club": dict(name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
@@ -160,9 +176,9 @@ NPCS = {
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Bandit Baron."),
-    "refugee": dict(name="Refugee", models=["refugee_a", "refugee_b", "refugee_c", "refugee_d"], hp=6, defense=10,
+    "refugee": dict(name="Refugee", bundles=[COMMONERS[i] for i in (0, 4, 1, 8, 5, 2, 9, 6, 7)], hp=6, defense=10,
                     attacks=[], notes="Hungry and scared."),
-    "merchant": dict(notable=True, name="Old Pell (merchant)", models=["merchant"], hp=8, defense=10, attacks=[],
+    "merchant": dict(notable=True, name="Old Pell (merchant)", bundles=[COMMONERS[3]], hp=8, defense=10, attacks=[],
                      notes="Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. "
                            "Out of food. Knows the Bandit Baron's men buy his best wine every night."),
     "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", hp=10, defense=12, attacks=[],

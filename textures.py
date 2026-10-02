@@ -40,10 +40,6 @@ TEXTURES = {
     "plaster_white": (1.2, (190, 186, 176), None), "plaster_rose": (1.2, (176, 140, 128), None),
     "shingle": (0.8, (110, 70, 52), None), "wicker": (0.7, (140, 110, 60), None),
     "sewer_stone": (2.0, (70, 76, 72), None), "dirt_road": (2.5, (104, 86, 64), None),
-    # peasant figures: skin and plain wool cloaks
-    "skin": (0.5, (196, 150, 118), None), "wool_brown": (0.5, (104, 80, 58), None),
-    "wool_grey": (0.5, (112, 110, 102), None), "wool_green": (0.5, (72, 86, 62), None),
-    "wool_blue": (0.5, (66, 78, 98), None),
     # painted pieces copied in by forge.py (art/raw/gm_top.png, build.py's art/out/screen_*): placeholders until then
     "gm_top": (None, (60, 30, 28), None),
     **{f"screen_{side}_{i}": (None, (200, 180, 150), None) for side in ("out", "in") for i in range(3)},
