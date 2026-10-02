@@ -257,18 +257,19 @@ fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
     json.dump({"W": W, "D": D, "TOP": TOP, "SQ": SQ, "scenes": dump}, open(os.environ["DUMP"], "w"))
-# fog of war is off: Holst City's giants start visible, its stealthy street kids hidden (and see-through for the GM);
+# fog of war is off: every living NPC in Holst City starts hidden (see-through for the GM);
 # the GM selects some and toggles them hidden and back
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
 gm_bar = 'visibility="Black" percentage'
-assert giants and kids and not any(o.invisible for o in giants)
-assert all(o.invisible and o.tint.a < 1 and o.lit and gm_bar in o.xml for o in kids)
+assert giants and kids and all(o.invisible and o.tint.a < 1 and o.lit and gm_bar in o.xml for o in giants + kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
 g.selected = lua.table_from(giants)
 c.toggleSelected(g.Player.Black)
+assert not any(o.invisible or o.lit for o in giants)   # the GM shows them...
+c.toggleSelected(g.Player.Black)                       # ...and hides them again
 assert all(o.invisible and o.hasTag("hidden") and o.lit and o.tint.a < 1 and gm_bar in o.xml for o in giants)
 gp = giants[0].getPosition()
 hero.pos = lua.table_from([gp.x + 1, gp.y, gp.z])
@@ -281,7 +282,7 @@ c.hotkeys["Toggle visibility (GM)"]("Red", giants[1])     # players can't
 assert giants[1].invisible
 g.selected = lua.table_from(giants[1:])
 c.toggleSelected(g.Player.Black)
-assert count("hidden") == len(kids)
+assert not any(o.invisible for o in giants) and all(o.invisible for o in kids)
 # GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
 desk = list(g.getObjectsWithTag("gm").values())
 screen = list(g.getObjectsWithTag("gmscreen").values())
@@ -341,6 +342,14 @@ die.type = "Dice"
 assert c.onPlayerAction(red, "PickUp", to_lua([giants[0]])) is False and c.onPlayerAction(red, "PickUp", to_lua([barrel])) is False
 assert c.onPlayerAction(gmp, "PickUp", to_lua([giants[0]])) is True
 assert c.onPlayerAction(red, "PickUp", to_lua([die])) is True and c.onPlayerAction(red, "PickUp", to_lua([hero])) is True
+blue = to_lua({"color": "Blue"})
+assert c.onPlayerAction(blue, "PickUp", to_lua([hero])) is False                # other heroes' kit is off limits
+assert c.onPlayerAction(gmp, "PickUp", to_lua([hero])) is True
+red_hp = lambda: json.loads(c.onSave())["hp"]["Red"]
+before = red_hp()
+c.hpRedDown(None, "Blue", False); assert red_hp() == before                    # nor their HP buttons
+c.hpRedDown(None, "Red", False); assert red_hp() == before - 1
+c.setHP("Red", before)
 
 sheet = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile" and "Wren" in o.data.Nickname][0]
 assert sheet.data.Transform.rotY == 180, "Red's sheet faces the player (tile images are flipped vs hands)"

@@ -299,7 +299,7 @@ Nobody speaks Dravic except the Fighter (a little). Give them 10 gold and 3 rati
 Background (GM only): the giants' sacred Hearthstone was stolen from their mountain shrine and
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else."""),
 
-    dict(key="outskirts", title="1. Holst City", fog=True, music="outskirts.mp3", battle=True,
+    dict(key="outskirts", title="1. Holst City", fog=True, music="outskirts.mp3", battle=True, hidden=True,
          stealth=["street_kid"],   # hidden until the GM presses their Reveal button (not by walking past)
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
          heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
@@ -326,8 +326,8 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
-GIANTS: hide them at the start (select, TOGGLE VISIBILITY). After a few minutes the ground shakes: toggle
-them back. Four giants round the
+GIANTS and thralls start hidden (see-through for you). After a few minutes the ground shakes: select them and
+TOGGLE VISIBILITY. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
   Switch to BATTLE music. Giants move 8 (the Chainmaster 6), thralls 6.
   The Chainmaster (big, green base) holds every thrall's chain: drop him and the thralls scatter. Let them feel the danger: first giant hit is big.
@@ -438,7 +438,7 @@ SIDE PASSAGES (optional, each off the main tunnel):
      The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
 
-    dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True,
+    dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True, hidden=True,
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
          heroes=[(-1, -6), (0, -6), (1, -6), (0, -5)],
          props=[("broken_cart", 0.2, 0.6, 60, 1.2), ("log_large", 2.8, 2, 25),
@@ -448,7 +448,9 @@ Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks i
                 ("pine_b", -6.8, -6.6), ("oak", 6.7, 2.9, 40),
                 ("stump", -6.4, 2.8, 0, 1.4), ("stump", 6.5, -1.8, 0, 1.4), ("rock_c", -6.5, -2.5, 30, 1.2), ("rock_a", 6.3, 5)],
          npcs=[("dead_thug", -1.6, 1.4), ("dead_thug", 1.6, -0.3), ("dead_thug", -0.6, -1.9),
-               ("log_giant", 8.3, 4.4, 45), ("giant_club", -8.3, -2.4, 35), ("giant_eye", 8, -3.8, 35)],
+               ("log_giant", 8.3, 4.4, 45), ("giant_club", -8.3, -2.4, 35), ("giant_eye", 8, -3.8, 35),
+               # only if the Chainmaster survived Holst City
+               ("giant_troll", -7.2, 4.0), ("thrall", -5.4, 4.6), ("thrall", -5.0, 3.4), ("thrall", -6.0, 2.0)],
          notes="""Read aloud: "The tracks lead north into the pines. An hour later you find the cart - or what's
 left of it. It's been stamped flat. So have the men who drove it."
 INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the cart - empty, bent
@@ -456,7 +458,8 @@ OUTWARD, scorched. Something burned its way out. Giant footprints lead north-eas
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
-opens the fight (2x2 on the cart). Switch to BATTLE music; if you hid the giants, select them and TOGGLE VISIBILITY. 3 giants.
+opens the fight (2x2 on the cart). Switch to BATTLE music; select the giants and TOGGLE VISIBILITY (all start hidden). 3 giants.
+CHAINMASTER (north-west, with 3 thralls): only if he survived Holst City. Otherwise leave him and his thralls hidden.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
 If the party arrives badly hurt from the traps, let them REST at the passage exit first.

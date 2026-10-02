@@ -340,7 +340,8 @@ def scene_data(s, base, textures):
         spawns.append(prop(spec, n, s["key"], base, textures))
     for n, spec in enumerate(s["npcs"]):
         o = npc(*spec[:3], n, s["key"], *spec[3:], face=s.get("face", {}).get(spec[0]))
-        if FOG and s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
+        # living NPCs stay invisible to players until a hero comes near (fog) or the GM reveals them (hidden scenes)
+        if ((FOG and s["fog"]) or s.get("hidden")) and o["LuaScript"]:
             o["Tags"] = o["Tags"] + ["hidden"]
         if spec[0] in s.get("stealth", ()):   # ...or until the GM reveals them by hand
             o["Tags"] = o["Tags"] + ["hidden", "manual"] if "hidden" not in o["Tags"] else o["Tags"] + ["manual"]

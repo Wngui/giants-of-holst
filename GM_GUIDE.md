@@ -106,8 +106,8 @@ STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make 
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
-GIANTS: hide them at the start (select, TOGGLE VISIBILITY). After a few minutes the ground shakes: toggle
-them back. Four giants round the
+GIANTS and thralls start hidden (see-through for you). After a few minutes the ground shakes: select them and
+TOGGLE VISIBILITY. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
   Switch to BATTLE music. Giants move 8 (the Chainmaster 6), thralls 6.
   The Chainmaster (big, green base) holds every thrall's chain: drop him and the thralls scatter. Let them feel the danger: first giant hit is big.
@@ -194,7 +194,8 @@ OUTWARD, scorched. Something burned its way out. Giant footprints lead north-eas
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
-opens the fight (2x2 on the cart). Switch to BATTLE music; if you hid the giants, select them and TOGGLE VISIBILITY. 3 giants.
+opens the fight (2x2 on the cart). Switch to BATTLE music; select the giants and TOGGLE VISIBILITY (all start hidden). 3 giants.
+CHAINMASTER (north-west, with 3 thralls): only if he survived Holst City. Otherwise leave him and his thralls hidden.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
 If the party arrives badly hurt from the traps, let them REST at the passage exit first.

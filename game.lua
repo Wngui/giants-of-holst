@@ -112,6 +112,9 @@ function placed(d)
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
+        if g.role == "d20" then                       -- players' own die: big enough to grab and read
+            t.scaleX, t.scaleY, t.scaleZ = 1.8, 1.8, 1.8
+        end
         if g.role == "hp" then                        -- plaque 2.6 squares wide, turned to read from the seat
             t.scaleX, t.scaleY, t.scaleZ, t.rotY = SQ, SQ, SQ, c.ry + 180
         end
@@ -224,6 +227,11 @@ function onPlayerAction(player, _, targets)
     for _, o in ipairs(targets or {}) do
         local gmOnly = o.hasTag("scene") or o.hasTag("gm") or o.hasTag("gmtable") or o.hasTag("gmscreen")
         if gmOnly and o.type ~= "Dice" then return false end
+        for _, c in ipairs(DATA.colors) do   -- another hero's figure, sheet or HP counter
+            if c ~= player.color and (o.hasTag("fig_" .. c) or o.hasTag("sheet_" .. c) or o.hasTag("hp_" .. c)) then
+                return false
+            end
+        end
     end
     return true
 end
@@ -311,7 +319,9 @@ function hpShield(o, color, max)
                      position = { 0, 0.12, 0 }, width = 0, height = 0, font_size = 0.5 * BTN, font_color = { 1, 0.95, 0.85 } })
     for k, d in ipairs({ -1, 1 }) do
         local fn = "hp" .. color .. (d < 0 and "Down" or "Up")
-        _G[fn] = function(_, _, alt) setHP(color, hp[color] + d * (alt and 5 or 1)) end
+        _G[fn] = function(_, who, alt)   -- only that hero's player (or the GM) changes their HP
+            if who == color or who == "Black" then setHP(color, hp[color] + d * (alt and 5 or 1)) end
+        end
         -- the plaque is turned 180 to face its player, so local +x is their left: "-" goes there
         o.createButton({ click_function = fn, function_owner = self, label = d < 0 and "-" or "+",
                          position = { -d * 0.88, 0.12, 0 }, width = 0.7 * BTN, height = 0.66 * BTN, font_size = 0.55 * BTN,
