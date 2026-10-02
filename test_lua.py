@@ -315,6 +315,14 @@ assert not card.invisible and not card.hasTag("gm")
 card.pos = lua.table_from([W / 2 + 5 * SQ, TOP, 0])
 c.onObjectDrop("Black", card)                        # and back on the desk -> GM-only again
 assert card.invisible and card.hasTag("gm")
+taken = []
+pouch.takeObject = lambda p: taken.append(to_py(p)["position"])
+assert c.onObjectNumberTyped(pouch, "Black", 5) is True and len(taken) == 5     # GM: 5 coins to the GM hand
+gmz = next(z for z in g.Hands.getHands().values() if z.getValue() == "Black").getPosition()
+assert all(abs(t[2] - gmz.z) < 1e-6 for t in taken)
+taken.clear()
+assert c.onObjectNumberTyped(pouch, "Red", 3) is True and not taken             # nobody else draws from it
+assert c.onObjectNumberTyped(card, "Black", 2) is None                          # other objects: TTS default
 coin = g.makeObj(to_lua({"Name": "Custom_Model", "GUID": "c01n00", "Transform": {"posX": W / 2 + 5, "posY": 2, "posZ": 0}}))
 c.onObjectLeaveContainer(pouch, coin)
 assert coin.invisible and coin.hasTag("gm")

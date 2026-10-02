@@ -424,7 +424,8 @@ def gm_objects(base):
                        GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
     coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
-                   Description="Endless gold. Hover and press a number: that many coins go to your hand.", **gm,
+                   Description="Endless gold. Hover and press a number: that many coins go to your hand.",
+                   Tags=["gm", "goldpouch"],
                    ContainedObjects=[coin], grid={"x": X0 + 7.8, "z": 6.9, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
     return out
 
