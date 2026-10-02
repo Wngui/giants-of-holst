@@ -334,12 +334,15 @@ end
 -- is plain world space. Player.setHandTransform is not to be trusted here: in TTS it put the position turned 90 degrees
 -- round the table (asked (x, z), got (-z, x); the rotation was not turned). So move the zones themselves, every zone of
 -- that colour (deal() goes to hand 1), and spawn one for a colour that has none (the GM: the save only has the 4 seats).
-function handZones(color)
-    local r = {}
-    for _, h in ipairs(Hands.getHands()) do
-        if h.getValue() == color then r[#r + 1] = h end
-    end
-    return r
+function handZones(color)   -- nil if the zone API fails
+    local ok, r = pcall(function()
+        local r = {}
+        for _, h in ipairs(Hands.getHands()) do
+            if h.getValue() == color then r[#r + 1] = h end
+        end
+        return r
+    end)
+    return ok and r or nil
 end
 
 function setHand(color, x, y, z, ry, scale)
@@ -352,7 +355,7 @@ function setHand(color, x, y, z, ry, scale)
 end
 
 function moveZones(color, x, y, z, ry, scale)
-    local zones = handZones(color)
+    local zones = assert(handZones(color))
     if #zones == 0 then
         spawnObject({ type = "HandTrigger", position = { x, y, z }, rotation = { 0, ry, 0 }, scale = scale,
                       callback_function = function(h) h.setValue(color) end })
@@ -444,7 +447,7 @@ function rest()
         if Player[color].seated then
             local inHand = {}
             for _, o in ipairs(Player[color].getHandObjects()) do inHand[o.getGUID()] = true end
-            local hand = handZones(color)[1]
+            local hand = (handZones(color) or {})[1]
             for _, card in ipairs(getObjectsWithTag("card_" .. color)) do
                 if hand and card.type == "Card" and not inHand[card.getGUID()] then
                     local p = hand.getPosition()
