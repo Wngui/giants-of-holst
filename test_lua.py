@@ -188,6 +188,8 @@ for i, a in enumerate(boxes):
         assert abs(a[1] - b[1]) >= a[3] + b[3] or abs(a[2] - b[2]) >= a[4] + b[4], ("kit overlap", a, b)
 assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple", "Black"}
 for col, t in to_py(g.hands).items():
+    p = t["position"]                                # where TTS will put it: it turns (x, z) into (-z, x)
+    t["position"] = [-p[2], p[1], p[0]]
     if col == "Black":   # the GM's hand lies past the GM table at the east end
         assert t["position"][0] > W / 2 + 10 * SQ, t
     else:   # along the bottom of the player's own sheet, on the table

@@ -55,8 +55,7 @@ function install(sceneIndex)
     end
     -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
     pcall(function()
-        Player.Black.setHandTransform({ position = { T.cx + T.w / 2 + DATA.layout.gm_hand * SQ, T.top + 4, T.cz },
-                                        rotation = { 0, 270, 0 }, scale = { 12, 5, 4 } })
+        setHand("Black", T.cx + T.w / 2 + DATA.layout.gm_hand * SQ, T.top + 4, T.cz, 270, { 12, 5, 4 })
     end)
     local tabs = Notes.getNotebookTabs()
     for i = #tabs, 1, -1 do Notes.removeNotebookTab(tabs[i].index) end
@@ -283,8 +282,15 @@ end
 function handAtSheet(color, sheet)
     local c, p = corner(color), sheet.getPosition()
     local half = T.w * DATA.layout.sheet_w / 3             -- half the sheet's depth: it is 3:2, sheet_w of the table wide
-    Player[color].setHandTransform({ position = { p.x, T.top + 1, p.z + c.sz * (half + 2.2) },
-                                     rotation = { 0, c.ry, 0 }, scale = { T.w * DATA.layout.sheet_w, 5, 4 } })
+    setHand(color, p.x, T.top + 1, p.z + c.sz * (half + 2.2), c.ry, { T.w * DATA.layout.sheet_w, 5, 4 })
+end
+
+-- In TTS the hand position came out turned 90 degrees round the table centre: asked (x, z), got (-z, x) (Maelis's
+-- cards at Aldric's sheet; twice, matching to the unit). Only the position turns, not the hand. So ask for the
+-- position turned back: to land at (X, Z), pass (Z, -X), relative to the table centre.
+function setHand(color, x, y, z, ry, scale)
+    local dx, dz = x - T.cx, z - T.cz
+    Player[color].setHandTransform({ position = { T.cx + dz, y, T.cz - dx }, rotation = { 0, ry, 0 }, scale = scale })
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out
