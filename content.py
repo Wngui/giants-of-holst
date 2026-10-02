@@ -273,6 +273,7 @@ Background (GM only): the giants' sacred Hearthstone was stolen from their mount
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else."""),
 
     dict(key="outskirts", title="1. Holst City", fog=True, music="outskirts.mp3", battle=True,
+         stealth=["street_kid"],   # hidden until the GM presses their Reveal button (not by walking past)
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
          heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
          props=[("house_a", -8.2, 5.6, 180), ("ruin_b", -2.8, 5.6, 180), ("tavern", 2.9, 5.4, 180), ("house_b", 7.9, 5.7, 180),
@@ -291,6 +292,8 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
+STREET KIDS are hidden at the start (walking near them doesn't show them): press the Reveal button over each kid
+  when they step out.
 STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
   - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the

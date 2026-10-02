@@ -98,6 +98,8 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
 Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
+STREET KIDS are hidden at the start (walking near them doesn't show them): press the Reveal button over each kid
+  when they step out.
 STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
   - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the

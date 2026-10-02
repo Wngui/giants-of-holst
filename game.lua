@@ -179,16 +179,25 @@ function reveal(o)
     o.call("setHidden", { hidden = false })
 end
 
+-- NPCs tagged "manual" (Holst City's street kids) only show up when the GM presses their Reveal button
 function revealAll()
-    for _, o in ipairs(getObjectsWithTag("hidden")) do reveal(o) end
+    for _, o in ipairs(getObjectsWithTag("hidden")) do
+        if not o.hasTag("manual") then reveal(o) end
+    end
 end
 
 function revealNear(p)
     local r = DATA.layout.reveal * SQ
     for _, o in ipairs(getObjectsWithTag("hidden")) do
         local q = o.getPosition()
-        if (q.x - p[1]) ^ 2 + (q.z - p[3]) ^ 2 <= r * r then reveal(o) end
+        if not o.hasTag("manual") and (q.x - p[1]) ^ 2 + (q.z - p[3]) ^ 2 <= r * r then reveal(o) end
     end
+end
+
+-- an NPC's own GM-only Reveal button
+function revealGuid(p)
+    local o = getObjectFromGUID(p.guid)
+    if o then reveal(o) end
 end
 
 function onObjectDrop(player, o)

@@ -292,7 +292,7 @@ def npc(key, x, z, n, scene, hp=None):
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
-                                          "ui": UI_HEIGHT.get(t["fig"], 330)})
+                                          "ui": UI_HEIGHT.get(t["fig"], 330), "ctl": CONTROLLER})
     return o
 
 
@@ -322,6 +322,8 @@ def scene_data(s, base, textures):
         o = npc(*spec[:3], n, s["key"], *spec[3:])
         if s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
             o["Tags"] = o["Tags"] + ["hidden"]
+        if spec[0] in s.get("stealth", ()):   # ...or until the GM reveals them by hand
+            o["Tags"] = o["Tags"] + ["manual"]
         spawns.append(o)
     if s["key"] == "den":   # Baron's Bones dice on the gambling table
         spawns += [obj("Die_6_Rounded", tf(ry=30.0 * i), GUID=guid("den", "die", i), Tags=["scene"], Nickname="Baron's Bones",

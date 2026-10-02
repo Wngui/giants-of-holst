@@ -8,7 +8,7 @@ UI_ROT = "90 -90 90"
 local GM = "Black"   -- not "Host": the host sitting in a player seat would still see GM-only UI
 local S
 -- the panel is placed by its centre; put the health bar (its bottom row) at S.ui above the base, per model (build.py)
-function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (60 + 44 * #S.attacks) * 0.4 / 2)) end
+function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (60 + 44 * (#S.attacks + (S.hidden and 1 or 0))) * 0.4 / 2)) end
 
 function onLoad(saved)
     S = JSON.decode(saved)
@@ -21,7 +21,11 @@ function draw()
     -- top to bottom: attack buttons and HP/damage (GM only), then the health bar right above the figure
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="%d"><VerticalLayout spacing="4" childForceExpandHeight="false">',
-        uiPos(), UI_ROT, UI_SCALE, 60 + 44 * #S.attacks) }
+        uiPos(), UI_ROT, UI_SCALE, 60 + 44 * (#S.attacks + (S.hidden and 1 or 0))) }
+    if S.hidden then   -- GM-only: show this NPC to the players now
+        x[#x + 1] = '<Button id="reveal" onClick="revealMe" visibility="' .. GM ..
+            '" preferredHeight="40" fontSize="16" colors="#5a4a10|#7a6418|#3a2a08|#5a4a10" textColor="#f0d9a0">Reveal</Button>'
+    end
     for i, a in ipairs(S.attacks) do
         x[#x + 1] = '<Button id="a' .. i .. '" onClick="attack" visibility="' .. GM ..
             '" preferredHeight="40" fontSize="16" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0">' ..
@@ -35,6 +39,10 @@ function draw()
         '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>'
     x[#x + 1] = '</VerticalLayout></Panel>'
     self.UI.setXml(table.concat(x))
+end
+
+function revealMe(player)
+    if player.color == "Black" then getObjectFromGUID(S.ctl).call("revealGuid", { guid = self.getGUID() }) end
 end
 
 -- called by the controller: while hidden from players, the health bar is GM-only too

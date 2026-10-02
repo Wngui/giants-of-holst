@@ -232,14 +232,24 @@ giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
 gm_bar = 'visibility="Black" percentage'
 assert giants and all(o.invisible and o.hasTag("hidden") and gm_bar in o.xml for o in giants)
-assert kids and not any(o.invisible for o in kids)
+assert kids and all(o.invisible and o.hasTag("manual") for o in kids)   # street kids: GM reveals them by hand
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
 gp = giants[0].getPosition()
 hero.pos = lua.table_from([gp.x + 1, gp.y, gp.z])
 c.onObjectDrop("Red", hero)
 assert not giants[0].invisible and gm_bar not in giants[0].xml    # visible again, bar for everyone
 c.revealAll()
-assert count("hidden") == 0 and not any(o.invisible for o in giants)
+assert not any(o.invisible for o in giants) and all(o.invisible for o in kids)   # "all enemies" skips the kids
+kp = kids[0].getPosition()
+hero.pos = lua.table_from([kp.x + 1, kp.y, kp.z])
+c.onObjectDrop("Red", hero)
+assert kids[0].invisible                             # walking past doesn't reveal them either
+assert 'id="reveal"' in kids[0].xml
+c.revealGuid(to_lua({"guid": kids[0].getGUID()}))   # the kid's own GM Reveal button
+assert not kids[0].invisible and 'id="reveal"' not in kids[0].xml
+for k in kids[1:]:
+    c.revealGuid(to_lua({"guid": k.getGUID()}))
+assert count("hidden") == 0
 # GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
 desk = list(g.getObjectsWithTag("gm").values())
 screen = list(g.getObjectsWithTag("gmscreen").values())
