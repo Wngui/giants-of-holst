@@ -294,6 +294,15 @@ c.onObjectLeaveContainer(pouch, coin)
 assert coin.invisible and coin.hasTag("gm")
 assert all(s["sky"].endswith(".jpg") and len(s["light"]) == 4 for s in scenes)
 
+# players can't touch scenery or NPCs (GM only), but can roll any dice and handle their own kit
+red, gmp = to_lua({"color": "Red"}), to_lua({"color": "Black"})
+barrel = g.makeObj(to_lua({"Name": "Custom_Model", "GUID": "ba44e1", "Tags": ["scene"]}))
+die = g.makeObj(to_lua({"Name": "Die_6", "GUID": "d1e600", "Tags": ["scene"]}))
+die.type = "Dice"
+assert c.onPlayerAction(red, "PickUp", to_lua([giants[0]])) is False and c.onPlayerAction(red, "PickUp", to_lua([barrel])) is False
+assert c.onPlayerAction(gmp, "PickUp", to_lua([giants[0]])) is True
+assert c.onPlayerAction(red, "PickUp", to_lua([die])) is True and c.onPlayerAction(red, "PickUp", to_lua([hero])) is True
+
 sheet = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile" and "Wren" in o.data.Nickname][0]
 assert sheet.data.Transform.rotY == 180, "Red's sheet faces the player (tile images are flipped vs hands)"
 

@@ -194,6 +194,18 @@ function revealNear(p)
     end
 end
 
+-- Players only handle their own things (hero, cards, sheet, HP, dice) and what the GM hands them (gold, items).
+-- Scenery, NPCs and the GM table are the GM's: any player action on them is refused. Dice stay free to roll,
+-- the Baron's Bones included. Returning false from onPlayerAction cancels the action in TTS.
+function onPlayerAction(player, _, targets)
+    if player.color == "Black" then return true end
+    for _, o in ipairs(targets or {}) do
+        local gmOnly = o.hasTag("scene") or o.hasTag("gm") or o.hasTag("gmtable") or o.hasTag("gmscreen")
+        if gmOnly and o.type ~= "Dice" then return false end
+    end
+    return true
+end
+
 -- an NPC's own GM-only Reveal button
 function revealGuid(p)
     local o = getObjectFromGUID(p.guid)
