@@ -292,14 +292,13 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
-STREET KIDS are hidden at the start (walking near them doesn't show them): press the Reveal button over each kid
-  when they step out.
 STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
   - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
   - Ignore/threaten them -> they vanish; one tries to pickpocket (Pickpocket button).
-GIANTS: after a few minutes, ground shakes. Press REVEAL ALL ENEMIES. Four giants round the
+GIANTS: hide them at the start (select, TOGGLE VISIBILITY). After a few minutes the ground shakes: toggle
+them back. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
   Switch to BATTLE music. Giants move 8 (the Hill Giant 6), thralls 6. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
@@ -423,7 +422,7 @@ OUTWARD, scorched. Something burned its way out. Giant footprints lead north-eas
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
-opens the fight (2x2 on the cart). Switch to BATTLE music, press REVEAL ALL ENEMIES. 3 giants.
+opens the fight (2x2 on the cart). Switch to BATTLE music; if you hid the giants, select them and TOGGLE VISIBILITY. 3 giants.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
 If the party arrives badly hurt from the traps, let them REST at the passage exit first.

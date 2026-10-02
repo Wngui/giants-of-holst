@@ -314,13 +314,16 @@ def prop(spec, n, scene, base, textures):
                Nickname="", **common, CustomMesh=mesh(base, name, Convex=loose))   # non-convex mesh: locked only
 
 
+FOG = False   # hidden enemies revealed by walking near: off for now, the GM toggles visibility by hand
+
+
 def scene_data(s, base, textures):
     spawns = []
     for n, spec in enumerate(s.get("props", [])):
         spawns.append(prop(spec, n, s["key"], base, textures))
     for n, spec in enumerate(s["npcs"]):
         o = npc(*spec[:3], n, s["key"], *spec[3:])
-        if s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
+        if FOG and s["fog"] and o["LuaScript"]:   # living NPCs stay invisible to players until a hero comes near
             o["Tags"] = o["Tags"] + ["hidden"]
         if spec[0] in s.get("stealth", ()):   # ...or until the GM reveals them by hand
             o["Tags"] = o["Tags"] + ["manual"]
@@ -379,7 +382,7 @@ GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
               [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
                enumerate((("musicScene", "Scene music"), ("musicBattle", "Battle"), ("musicStop", "Stop")))] +
-              [dict(label="Reveal all enemies", fn="revealAll", row=len(SCENES) + 2),
+              [dict(label="Toggle visibility (selected)", fn="toggleSelected", row=len(SCENES) + 2),
                dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)])
 for b in GM_BUTTONS:
     b["x"] = round(TRAY[0] - (PANEL_X0 + ROW * b["row"]), 2)   # mirrored: rows came out bottom-to-top in TTS
@@ -438,7 +441,7 @@ def xml_ui(base):
 {scenes}
 <HorizontalLayout spacing="4" preferredHeight="34"><Button {on}musicScene" {btn}>Scene music</Button>
 <Button {on}musicBattle" {btn}>Battle</Button><Button {on}musicStop" {btn}>Stop</Button></HorizontalLayout>
-<Button {on}revealAll" {btn}>Reveal all enemies</Button>
+<Button {on}toggleSelected" {btn}>Toggle visibility (selected)</Button>
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 </VerticalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image image="portrait_{h['key']}" preserveAspect="true"/>
@@ -478,8 +481,9 @@ def gm_guide():
            "- Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.",
            "- NPC controls (HP, damage box, attack buttons) float over each NPC, GM-only. Type `12` (or `+12`) to hurt, `-5` to heal.",
            "- Attack buttons whisper the roll to you (Black). Crits add an extra set of damage dice.",
-           "- Hidden enemies: NPCs start invisible to players (you see them). Dropping a hero within 7 squares reveals",
-           "  them; *Reveal all enemies* shows everyone at once for set pieces.",
+           "- Hiding things: select NPCs or props (drag a box) and press *Toggle visibility (selected)* in a GM menu, or",
+           "  bind the *Toggle visibility (GM)* hotkey (Options > Game Keys). Hidden things vanish for players and show",
+           "  see-through with an outline for you. Press again to show them.",
            "- The same text as below sits in the Notebook (GM-only tabs).\n",
            "## Rules\n", "```", RULES, "```\n", "## Heroes\n"]
     for h in HEROES:
@@ -515,7 +519,7 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS,
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG,
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall

@@ -154,7 +154,7 @@ function setScene(i)
         if fig then
             local p = world(s.heroes[n][1], s.heroes[n][2], 1)
             fig.setPositionSmooth(p, false, true)
-            Wait.frames(function() revealNear(p) end, 2)   -- after the scene's NPCs have spawned
+            if DATA.fog then Wait.frames(function() revealNear(p) end, 2) end   -- after the scene's NPCs have spawned
             fig.setRotationSmooth({ 0, 90, 0 })   -- face east, into the scene
         end
     end
@@ -168,15 +168,33 @@ end
 -- ---------------------------------------------------------------- hidden enemies (instead of TTS's fog box)
 PLAYERS = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey" }
 
+-- Hidden from players; for the GM it turns see-through and gets an outline so it reads as hidden at a glance.
+local tints = {}
 function hide(o)
     o.setInvisibleTo(PLAYERS)
-    o.call("setHidden", { hidden = true })
+    o.addTag("hidden")
+    local t = o.getColorTint()
+    tints[o.getGUID()] = tints[o.getGUID()] or t
+    o.setColorTint({ r = t.r, g = t.g, b = t.b, a = 0.35 })
+    o.highlightOn({ 0.6, 0.8, 1 })
+    if o.getLuaScript() ~= "" then o.call("setHidden", { hidden = true }) end   -- NPCs: bar GM-only too
 end
 
 function reveal(o)
     o.setInvisibleTo({})
     o.removeTag("hidden")
-    o.call("setHidden", { hidden = false })
+    if tints[o.getGUID()] then o.setColorTint(tints[o.getGUID()]) end
+    o.highlightOff()
+    if o.getLuaScript() ~= "" then o.call("setHidden", { hidden = false }) end
+end
+
+-- GM: select NPCs/props (or hover one) and toggle them hidden <-> shown. From either GM menu or the hotkey.
+function toggleSelected(player, hovered)
+    local list = Player.Black.getSelectedObjects()
+    if #list == 0 and hovered then list = { hovered } end
+    for _, o in ipairs(list) do
+        if o.hasTag("hidden") then reveal(o) else hide(o) end
+    end
 end
 
 -- NPCs tagged "manual" (Holst City's street kids) only show up when the GM presses their Reveal button
@@ -216,7 +234,7 @@ function onObjectDrop(player, o)
     for _, color in ipairs(DATA.colors) do
         if o.hasTag("fig_" .. color) then
             local q = o.getPosition()
-            revealNear({ q.x, q.y, q.z })
+            if DATA.fog then revealNear({ q.x, q.y, q.z }) end
         end
     end
     -- GM desk: what the GM puts down on it disappears for players; what the GM puts anywhere else appears
@@ -247,6 +265,9 @@ BTN = 300
 local sceneButton, panel = {}, nil
 local BROWN, GOLD, CREAM, INK = { 0.23, 0.16, 0.1 }, { 0.85, 0.65, 0.2 }, { 0.94, 0.85, 0.63 }, { 0.12, 0.08, 0.05 }
 function noop() end
+addHotkey("Toggle visibility (GM)", function(color, hovered)
+    if color == "Black" then toggleSelected(Player[color], hovered) end
+end)
 
 function console(o)
     panel = o
@@ -256,7 +277,7 @@ function console(o)
             fn = "gmButton" .. i
             _G[fn] = function(_, color)
                 if color ~= "Black" then return end
-                if b.scene then setScene(b.scene) else _G[b.fn]() end
+                if b.scene then setScene(b.scene) else _G[b.fn](Player[color]) end
             end
         end
         o.createButton({ click_function = fn, function_owner = self, label = b.label, position = { b.x, 0.06, b.z },
@@ -309,12 +330,29 @@ function handAtSheet(color, sheet)
     setHand(color, p.x, T.top + 1, p.z + c.sz * (half + 2.2), c.ry, { T.w * DATA.layout.sheet_w, 5, 4 })
 end
 
--- In TTS the hand position came out turned 90 degrees round the table centre: asked (x, z), got (-z, x) (Maelis's
--- cards at Aldric's sheet; twice, matching to the unit). Only the position turns, not the hand. So ask for the
--- position turned back: to land at (X, Z), pass (Z, -X), relative to the table centre.
+-- Hand zones are objects (type "Hand", getValue() = owner colour, Hands.getHands() lists them), and Object.setPosition
+-- is plain world space. Player.setHandTransform is not to be trusted here: in TTS it put the position turned 90 degrees
+-- round the table (asked (x, z), got (-z, x); the rotation was not turned). So move the zones themselves, every zone of
+-- that colour (deal() goes to hand 1), and spawn one for a colour that has none (the GM: the save only has the 4 seats).
+function handZones(color)
+    local r = {}
+    for _, h in ipairs(Hands.getHands()) do
+        if h.getValue() == color then r[#r + 1] = h end
+    end
+    return r
+end
+
 function setHand(color, x, y, z, ry, scale)
-    local dx, dz = x - T.cx, z - T.cz
-    Player[color].setHandTransform({ position = { T.cx + dz, y, T.cz - dx }, rotation = { 0, ry, 0 }, scale = scale })
+    local zones = handZones(color)
+    if #zones == 0 then
+        spawnObject({ type = "HandTrigger", position = { x, y, z }, rotation = { 0, ry, 0 }, scale = scale,
+                      callback_function = function(h) h.setValue(color) end })
+    end
+    for _, h in ipairs(zones) do
+        h.setPosition({ x, y, z })
+        h.setRotation({ 0, ry, 0 })
+        h.setScale(scale)
+    end
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out
@@ -397,11 +435,12 @@ function rest()
         if Player[color].seated then
             local inHand = {}
             for _, o in ipairs(Player[color].getHandObjects()) do inHand[o.getGUID()] = true end
-            local hand = Player[color].getHandTransform()
+            local hand = handZones(color)[1]
             for _, card in ipairs(getObjectsWithTag("card_" .. color)) do
-                if card.type == "Card" and not inHand[card.getGUID()] then
-                    card.setRotation(hand.rotation)
-                    card.setPositionSmooth(hand.position + Vector(0, 2, 0), false, true)
+                if hand and card.type == "Card" and not inHand[card.getGUID()] then
+                    local p = hand.getPosition()
+                    card.setRotation(hand.getRotation())
+                    card.setPositionSmooth({ p.x, p.y + 2, p.z }, false, true)
                 elseif card.type == "Deck" then
                     card.deal(#card.getObjects(), color)
                 end

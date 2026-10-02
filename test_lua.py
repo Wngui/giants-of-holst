@@ -90,6 +90,11 @@ function makeObj(d)
   function o.hasTag(t) return o.tags[t] == true end
   function o.removeTag(t) o.tags[t] = nil end
   function o.addTag(t) o.tags[t] = true end
+  function o.getColorTint() return o.tint or {r = 1, g = 1, b = 1, a = 1} end
+  function o.setColorTint(t) o.tint = t end
+  function o.highlightOn() o.lit = true end
+  function o.highlightOff() o.lit = false end
+  function o.getLuaScript() return d.LuaScript or "" end
   function o.getRotation() return {x = 0, y = d.Transform and d.Transform.rotY or 0, z = 0} end
   function o.createButton(b) o.buttons = o.buttons or {}; o.buttons[#o.buttons + 1] = b end
   function o.editButton(e) for k, v in pairs(e) do if k ~= "index" then o.buttons[e.index + 1][k] = v end end end
@@ -125,6 +130,9 @@ end
 function spawnObjectData(p) local o = makeObj(p.data); if p.callback_function then p.callback_function(o) end; return o end
 function getObjectFromGUID(g) return objects[g] end
 function getObjectsWithTag(t) local r = {} for _, o in pairs(objects) do if o.hasTag(t) then r[#r+1] = o end end return r end
+hotkeys = {}
+function addHotkey(name, f) hotkeys[name] = f end
+selected = {}
 function emit(ev, ...)   -- universal events reach every script
   if loader[ev] then loader[ev](...) end
   for _, o in pairs(objects) do if o.env and o.env[ev] then o.env[ev](...) end end
@@ -135,6 +143,7 @@ for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
   Player[c] = setmetatable({}, {__index = function(_, k)
     if k == "seated" then return seated[c] ~= nil end
     if k == "steam_name" then return seated[c] end
+    if k == "getSelectedObjects" then return function() return selected end end
     if k == "getHandObjects" then return function() local r = {} for _, o in pairs(objects) do if o.inHand == c then r[#r+1] = o end end return r end end
     if k == "getHandTransform" then return function() return {position = Vector(0, 0, 0), rotation = {0, 0, 0}} end end
     if k == "setHandTransform" then return function(t) hands[c] = t end end
@@ -225,30 +234,28 @@ fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
     json.dump({"W": W, "D": D, "TOP": TOP, "SQ": SQ, "scenes": dump}, open(os.environ["DUMP"], "w"))
-# hidden enemies: Holst City giants start invisible, the kids near the heroes don't; a drop next to a giant reveals it
+# fog of war is off: Holst City's NPCs start visible; the GM selects some and toggles them hidden and back
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
 gm_bar = 'visibility="Black" percentage'
-assert giants and all(o.invisible and o.hasTag("hidden") and gm_bar in o.xml for o in giants)
-assert kids and all(o.invisible and o.hasTag("manual") for o in kids)   # street kids: GM reveals them by hand
+assert giants and kids and not any(o.invisible for o in giants + kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
+g.selected = lua.table_from(giants)
+c.toggleSelected(g.Player.Black)
+assert all(o.invisible and o.hasTag("hidden") and o.lit and o.tint.a < 1 and gm_bar in o.xml for o in giants)
 gp = giants[0].getPosition()
 hero.pos = lua.table_from([gp.x + 1, gp.y, gp.z])
 c.onObjectDrop("Red", hero)
-assert not giants[0].invisible and gm_bar not in giants[0].xml    # visible again, bar for everyone
-c.revealAll()
-assert not any(o.invisible for o in giants) and all(o.invisible for o in kids)   # "all enemies" skips the kids
-kp = kids[0].getPosition()
-hero.pos = lua.table_from([kp.x + 1, kp.y, kp.z])
-c.onObjectDrop("Red", hero)
-assert kids[0].invisible                             # walking past doesn't reveal them either
-assert 'id="reveal"' in kids[0].xml
-c.revealGuid(to_lua({"guid": kids[0].getGUID()}))   # the kid's own GM Reveal button
-assert not kids[0].invisible and 'id="reveal"' not in kids[0].xml
-for k in kids[1:]:
-    c.revealGuid(to_lua({"guid": k.getGUID()}))
+assert giants[0].invisible                           # walking up no longer reveals anything
+g.selected = lua.table_from([])
+c.hotkeys["Toggle visibility (GM)"]("Black", giants[0])   # hotkey on the hovered giant
+assert not giants[0].invisible and not giants[0].lit and giants[0].tint.a == 1 and gm_bar not in giants[0].xml
+c.hotkeys["Toggle visibility (GM)"]("Red", giants[1])     # players can't
+assert giants[1].invisible
+g.selected = lua.table_from(giants[1:])
+c.toggleSelected(g.Player.Black)
 assert count("hidden") == 0
 # GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
 desk = list(g.getObjectsWithTag("gm").values())
