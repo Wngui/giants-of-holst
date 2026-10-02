@@ -343,6 +343,15 @@ function handZones(color)
 end
 
 function setHand(color, x, y, z, ry, scale)
+    if pcall(moveZones, color, x, y, z, ry, scale) then return end
+    -- fallback if the zone API fails: setHandTransform with the position turned back by the 90 degrees TTS adds
+    local dx, dz = x - T.cx, z - T.cz
+    pcall(function()
+        Player[color].setHandTransform({ position = { T.cx + dz, y, T.cz - dx }, rotation = { 0, ry, 0 }, scale = scale })
+    end)
+end
+
+function moveZones(color, x, y, z, ry, scale)
     local zones = handZones(color)
     if #zones == 0 then
         spawnObject({ type = "HandTrigger", position = { x, y, z }, rotation = { 0, ry, 0 }, scale = scale,

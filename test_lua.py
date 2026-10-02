@@ -62,7 +62,28 @@ Tables = { getTableObject = function() return { getBounds = function()
            setCustomURL = function(u) tableURL = u end,
            getTable = function() return tableName end, setTable = function(n) tableName = n end }
 tableName = "Table_RPG"   -- the published Holst.json still starts on the RPG table
-hands = {}
+-- hand zones are objects; the save brings one per seat colour, spawnObject({type = "HandTrigger"}) makes more
+handzones = {}
+function handZone(color, t)
+  local h = {type = "Hand", color = color, pos = t.position, rot = t.rotation, scale = t.scale}
+  function h.getValue() return h.color end
+  function h.setValue(c) h.color = c end
+  function h.setPosition(p) h.pos = p end
+  function h.setRotation(r) h.rot = r end
+  function h.setScale(s) h.scale = s end
+  function h.getPosition() return {x = h.pos[1], y = h.pos[2], z = h.pos[3]} end
+  function h.getRotation() return {x = h.rot[1], y = h.rot[2], z = h.rot[3]} end
+  handzones[#handzones + 1] = h
+  return h
+end
+for _, c in ipairs({"Red", "Blue", "Green", "Purple"}) do handZone(c, {position = {0, 4, 0}, rotation = {0, 0, 0}, scale = {11, 5, 4}}) end
+Hands = { getHands = function() return handzones end }
+function spawnObject(p)
+  assert(p.type == "HandTrigger", p.type)
+  local h = handZone(nil, p)
+  if p.callback_function then p.callback_function(h) end
+  return h
+end
 Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do r[i] = {index = i - 1, title = t.title} end return r end,
           removeNotebookTab = function(i) table.remove(tabs, i + 1) end,
           addNotebookTab = function(t) tabs[#tabs + 1] = t end }
@@ -145,8 +166,6 @@ for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
     if k == "steam_name" then return seated[c] end
     if k == "getSelectedObjects" then return function() return selected end end
     if k == "getHandObjects" then return function() local r = {} for _, o in pairs(objects) do if o.inHand == c then r[#r+1] = o end end return r end end
-    if k == "getHandTransform" then return function() return {position = Vector(0, 0, 0), rotation = {0, 0, 0}} end end
-    if k == "setHandTransform" then return function(t) hands[c] = t end end
   end})
 end
 function mkplayer(name, color)
@@ -195,10 +214,10 @@ for o in g.getObjectsWithTag("kit").values():
 for i, a in enumerate(boxes):
     for b in boxes[i + 1:]:
         assert abs(a[1] - b[1]) >= a[3] + b[3] or abs(a[2] - b[2]) >= a[4] + b[4], ("kit overlap", a, b)
-assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple", "Black"}
-for col, t in to_py(g.hands).items():
-    p = t["position"]                                # where TTS will put it: it turns (x, z) into (-z, x)
-    t["position"] = [-p[2], p[1], p[0]]
+zones = {z.color: {"position": to_py(z.pos), "rotation": to_py(z.rot)} for z in g.handzones.values()}
+assert len(zones) == len(g.handzones) == 5 and set(zones) == {"Red", "Blue", "Green", "Purple", "Black"}, zones
+assert all(zones[c]["rotation"][1] == (0 if c in ("Red", "Blue") else 180) for c in ("Red", "Blue", "Green", "Purple"))   # facing their own seat
+for col, t in zones.items():
     if col == "Black":   # the GM's hand lies past the GM table at the east end
         assert t["position"][0] > W / 2 + 10 * SQ, t
     else:   # along the bottom of the player's own sheet, on the table
@@ -349,6 +368,7 @@ ctl2 = g.getObjectFromGUID(CTL)
 assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
 assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
 assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6
+assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 
 # ---- npc.lua on a giant
