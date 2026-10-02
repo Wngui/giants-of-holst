@@ -112,7 +112,9 @@ function placed(d)
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
-        if g.role == "hp" then t.scaleX, t.scaleY, t.scaleZ = SQ, SQ, SQ end   -- plaque 2 squares
+        if g.role == "hp" then                        -- plaque 2.6 squares wide, turned to read from the seat
+            t.scaleX, t.scaleY, t.scaleZ, t.rotY = SQ, SQ, SQ, c.ry + 180
+        end
         if g.role == "sheet" then
             t.rotY = c.ry + 180                       -- tile images face the opposite way to hands
             local sc = T.w * L.sheet_w / L.tile_unit
@@ -254,18 +256,19 @@ function highlightScene()
 end
 
 -- ---------------------------------------------------------------- HP plaques (instead of TTS counters)
--- A square plaque at each seat: big number, big - and + under it (right-click: 5 at a time). REST refills it.
+-- A plaque at each seat, one row: [-] [HP] [+] (right-click: 5 at a time). REST refills it.
 local shields = {}
 function hpShield(o, color, max)
     shields[color] = o
     hp[color] = hp[color] or max
     o.createButton({ click_function = "noop", function_owner = self, label = tostring(hp[color]),
-                     position = { 0, 0.12, 0.12 }, width = 0, height = 0, font_size = 0.42 * BTN, font_color = { 1, 0.95, 0.85 } })
+                     position = { 0, 0.12, 0 }, width = 0, height = 0, font_size = 0.5 * BTN, font_color = { 1, 0.95, 0.85 } })
     for k, d in ipairs({ -1, 1 }) do
         local fn = "hp" .. color .. (d < 0 and "Down" or "Up")
         _G[fn] = function(_, _, alt) setHP(color, hp[color] + d * (alt and 5 or 1)) end
+        -- the plaque is turned 180 to face its player, so local +x is their left: "-" goes there
         o.createButton({ click_function = fn, function_owner = self, label = d < 0 and "-" or "+",
-                         position = { d * 0.5, 0.12, -0.55 }, width = 0.4 * BTN, height = 0.3 * BTN, font_size = 0.3 * BTN,
+                         position = { -d * 0.88, 0.12, 0 }, width = 0.7 * BTN, height = 0.66 * BTN, font_size = 0.55 * BTN,
                          color = { 0.15, 0.1, 0.07 }, font_color = { 1, 0.95, 0.85 } })
     end
 end

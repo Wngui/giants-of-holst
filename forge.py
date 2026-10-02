@@ -992,16 +992,15 @@ def dice_tray():
 
 
 def hp_plaque():
-    """A hero's HP tracker: square wooden plaque, iron frame and corner studs, a red panel behind the number
-    (the number and the big -/+ are buttons on it; the panel is at the top as the player sees it, Blender -y)."""
+    """A hero's HP tracker, one compact row: [-] [HP] [+]. Wooden bar with an iron frame and a red panel in the middle
+    behind the number (the number and -/+ are buttons on it). 2.6 wide (x) by 0.9 deep (y)."""
     a = Asset(31)
-    a.box((1.6, 1.6, 0.1), (0, 0, 0.05), "planks")
-    for x, y, w, d in ((0, 0.78, 1.64, 0.08), (0, -0.78, 1.64, 0.08), (0.78, 0, 0.08, 1.64), (-0.78, 0, 0.08, 1.64)):
+    a.box((2.6, 0.9, 0.1), (0, 0, 0.05), "planks")
+    for x, y, w, d in ((0, 0.43, 2.64, 0.06), (0, -0.43, 2.64, 0.06), (1.3, 0, 0.06, 0.9), (-1.3, 0, 0.06, 0.9)):
         a.box((w, d, 0.06), (x, y, 0.11), "iron")
-    a.box((1.2, 0.72, 0.02), (0, -0.16, 0.11), "cloth_red")
-    for x in (-0.66, 0.66):
-        for y in (-0.66, 0.66):
-            a.cyl(0.045, 0.05, (x, y, 0.13), "gold", segs=8, r2=0.025)
+    a.box((0.95, 0.72, 0.02), (0, 0, 0.11), "cloth_red")
+    for x in (-0.48, 0.48):   # iron dividers between the number and the buttons
+        a.box((0.04, 0.8, 0.05), (x, 0, 0.11), "iron")
     return a.objs
 
 
