@@ -32,7 +32,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - Card *Backstab*: Play after you hit: add +2d6 damage.
 - Card *Nimble Fingers*: Auto-succeed one lockpick, pickpocket or trap-disarm check.
 - Card *Smoke Bomb*: Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.
-- Card *Loaded Die*: Reroll any one die on the table, yours or anyone else's. Great at games of chance.
+- Card *Luck*: Reroll any one die on the table, yours or anyone else's.
 - Card *Poisoned Blade*: Your next hit also deals 1d6 at the start of the target's next 3 turns.
 
 **Brannoc the Fighter** (Blue) HP 30, Def 15, Might +3, Agility +1, Wits +0
@@ -41,7 +41,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - Card *Taunt*: All enemies that can see you must attack you this round.
 - Card *Second Wind*: Heal 1d10+5 HP. Free action.
 - Card *Mighty Heave*: Throw an object or a human-sized foe up to 4 squares: 2d6 damage to what it hits.
-- Card *Street Dravic*: Understand and speak Dravic for one whole conversation. +5 to persuade or intimidate.
+- Card *Giant-Talk*: Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.
 
 **Sister Maelis the Healer** (Green) HP 22, Def 13, Might +1, Agility +0, Wits +3
 - Card *Mending Touch*: Heal an adjacent ally 2d8+3.
@@ -49,15 +49,15 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - Card *Blessing*: One ally adds +1d4 to all rolls until the end of the fight.
 - Card *Sanctuary*: Target can't be attacked until it attacks or the fight ends.
 - Card *Revive*: An ally at 0 HP stands up with half their HP.
-- Card *Speak with the Dying*: Ask a dying or dead creature 3 questions. It answers in a language you understand.
+- Card *Kind Heart*: One NPC nearby warms to you: until the talk ends it treats the party as trusted friends, and every ally gets +5 to persuade it.
 
 **Aldric the Wizard** (Purple) HP 16, Def 11, Might +0, Agility +1, Wits +3
 - Card *Fireball*: 3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.
-- Card *Tongues*: For this scene the whole party understands and speaks every language, including Giantish.
+- Card *Shrink*: One giant nearby shrinks to human size until the end of its next turn: half damage, and it can be grappled and shoved.
 - Card *Levitate*: Lift yourself or one ally up to 10 squares straight up, and set them down gently.
 - Card *Mirror Image*: Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.
 - Card *Frost Nova*: Enemies adjacent to you take 1d6 and can't move on their next turn.
-- Card *Detect Magic*: The GM points out every magic item and magical trap in this scene.
+- Card *Detect Magic*: The GM points out every magic item and magical trap nearby.
 
 ## NPCs
 
@@ -66,7 +66,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Giant** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
 - **Giant chainmaster** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Crack the chains (no roll, -, every thrall moves 3 and makes a free Rusty knife attack); Reel in (+6, -, range 6: target is dragged next to him and held, Might DC 14 to break free). Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6.
 - **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off.
-- **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
+- **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
 - **Old Pell (merchant)** HP 8, Def 10. . Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. Out of food. Knows the Bandit Baron's men buy his best wine every night.
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
@@ -76,7 +76,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
 - **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
-- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes.
+- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giant (Giant-Talk, or Brannoc's few words). See scene notes.
 - **Fallen guildsman** HP 1, Def 1. . Died fighting.
 - **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.
 - **Giant rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
@@ -90,7 +90,7 @@ Read aloud:
   land of Dravmark. She went as royal envoy to renew the Mountain Pact with the giants.
   Word is the giants have come down from the mountains and are raiding the towns. Find her.
   Bring her home."
-Nobody speaks Dravic except the Fighter (a little). Give them 10 gold and 3 rations each.
+Give them 10 gold and 3 rations each.
 Background (GM only): the giants' sacred Hearthstone was stolen from their mountain shrine and
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else.
 ```
@@ -101,7 +101,7 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
 Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
-STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
+STREET KIDS: hands out, "Coin? Spare a coin? We're hungry."
   - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
@@ -127,7 +127,7 @@ Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favou
   - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
     Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
-ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
+ASKING ABOUT THE PRINCESS:
   "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."
 Anyone who asks around gets pointed to the Bandit Baron's den (east). If they paid the kids, a kid appears and leads them.
 REST here is allowed (press REST): full HP, all cards back to hand.
@@ -144,14 +144,14 @@ RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
-  One hero plays, others may "help" (cards: Loaded Die rerolls one die; Blessing adds +1d4 to the total).
+  One hero plays, others may "help" (cards: Luck rerolls one die; Blessing adds +1d4 to the total).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
     for "fairness" (no more ring rerolls) - and now it's on the table.
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
-  VASKO'S LUCKY RING (magic): once per scene, reroll any die you can see.
+  VASKO'S LUCKY RING (magic): once per fight, reroll any die you can see.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -174,7 +174,7 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
-     TRUE SIGHT (magic: once, see through illusions/invisibility for a scene) - hint: the princess will be hard
+     TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
      to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
@@ -207,8 +207,8 @@ After: tracks and blood lead to a cave in the hillside.
 ```
 Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
-HROTHGA (dying giantess): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
-gets a few words. She is not hostile, just dying. What she knows:
+HROTHGA (dying giantess): speaks Giant only. Brannoc's Giant-Talk lets them talk; without it
+he gets a few words (Wits DC 12 for anything more). Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)

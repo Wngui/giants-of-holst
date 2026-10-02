@@ -38,14 +38,14 @@ HEROES = [
          portrait="a hooded young rogue man with twin daggers, sly smile, short stubble, leather armour, city rooftops at dusk",
          cards=[
              ("Shadowstep", "Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
-              "a rogue melting into deep shadow between buildings, only eyes visible"),
+              "a hooded rogue melting into deep shadow in a narrow medieval alley between timber-framed houses, lantern light, only glowing eyes visible"),
              ("Backstab", "Play after you hit: add +2d6 damage.",
               "a dagger striking from behind a pillar, dramatic motion"),
              ("Nimble Fingers", "Auto-succeed one lockpick, pickpocket or trap-disarm check.",
               "delicate hands picking an ornate lock with thin tools, candlelight"),
              ("Smoke Bomb", "Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.",
               "a burst of thick grey smoke in a narrow street, silhouettes escaping"),
-             ("Loaded Die", "Reroll any one die on the table, yours or anyone else's. Great at games of chance.",
+             ("Luck", "Reroll any one die on the table, yours or anyone else's.",
               "close-up of a single ivory six-sided die with round pips on a worn wooden table, candlelight, blank table surface"),
              ("Poisoned Blade", "Your next hit also deals 1d6 at the start of the target's next 3 turns.",
               "a dagger dripping green poison over a vial"),
@@ -54,9 +54,9 @@ HEROES = [
          stats=dict(Might=3, Agility=1, Wits=0),
          attacks=[("Longsword", 5, "1d8+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
          blurb="Veteran of the goblin wars. First in, last out.",
-         traits=["Speaks a little Dravic: understands simple words and can say a few. Anything harder: Wits DC 12.",
+         traits=["Speaks a little Giant: understands simple words and can say a few. Anything harder: Wits DC 12.",
                  "Hard to shift: advantage on checks to hold a door, a line or a giant's leash."],
-         background="Veteran of the goblin wars. Picked up his Dravic in border taverns, mostly the rude words.",
+         background="Veteran of the goblin wars. Picked up some Giant guarding a captured one for a winter, mostly the rude words.",
          gear="Longsword, dented shield, chainmail, a flask of something strong.",
          portrait="a scarred armoured knight with longsword and dented shield, stern face, stormy sky",
          cards=[
@@ -70,8 +70,8 @@ HEROES = [
               "a wounded knight rising to his feet, breathing hard, golden light"),
              ("Mighty Heave", "Throw an object or a human-sized foe up to 4 squares: 2d6 damage to what it hits.",
               "a knight hurling a heavy barrel at an enemy"),
-             ("Street Dravic", "Understand and speak Dravic for one whole conversation. +5 to persuade or intimidate.",
-              "a knight speaking with a ragged street child in a foreign city"),
+             ("Giant-Talk", "Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.",
+              "a scarred knight in chainmail shouting up at a huge bearded hill giant in furs and leather, the giant a big rough man with a wild beard, ruined medieval town street"),
          ]),
     dict(key="healer", name="Sister Maelis the Healer", color="Green", fig="rpg_WARRIOR", hp=22, defense=13,
          stats=dict(Might=1, Agility=0, Wits=3),
@@ -93,30 +93,30 @@ HEROES = [
               "a translucent golden dome protecting a kneeling figure"),
              ("Revive", "An ally at 0 HP stands up with half their HP.",
               "a fallen adventurer gasping back to life, light pouring down"),
-             ("Speak with the Dying", "Ask a dying or dead creature 3 questions. It answers in a language you understand.",
-              "a priestess kneeling beside a huge dying giant in a cave, ghostly light"),
+             ("Kind Heart", "One NPC nearby warms to you: until the talk ends it treats the party as trusted friends, and every ally gets +5 to persuade it.",
+              "a kind battle priestess gently holding the hands of a frightened ragged villager, warm golden light, the villager smiling"),
          ]),
     dict(key="wizard", name="Aldric the Wizard", color="Purple", fig="rpg_MAGE", hp=16, defense=11,
          stats=dict(Might=0, Agility=1, Wits=3),
          attacks=[("Staff", 2, "1d6", "melee"), ("Arcane bolt", 5, "1d10", "range 10")],
-         blurb="Royal court wizard. Fragile, clever, and loud.",
+         blurb="Royal court wizard. Fragile, clever, and stubborn.",
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
                  "Old friends: he taught Princess Isolde her first sorcery. She trusts his voice."],
-         background="Royal court wizard. Fragile, clever and loud. Tutor to the princess, and not about to lose her.",
+         background="Royal court wizard. Fragile, clever and stubborn. Tutor to the princess, and not about to lose her.",
          gear="Crooked staff, spellbook, star-embroidered robe, a pipe he is not allowed to light indoors.",
          portrait="an old bearded wizard with a crooked staff and star-embroidered robe, arcane glow",
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
               "a huge fireball exploding in a ruined street, wicker burning"),
-             ("Tongues", "For this scene the whole party understands and speaks every language, including Giantish.",
-              "an old bearded human wizard speaking, ribbons of swirling golden light flowing from his mouth, calm wise face"),
+             ("Shrink", "One giant nearby shrinks to human size until the end of its next turn: half damage, and it can be grappled and shoved.",
+              "a tiny bewildered giant the size of a man standing among towering wizard's purple sparkles, an old wizard pointing his staff at it"),
              ("Levitate", "Lift yourself or one ally up to 10 squares straight up, and set them down gently.",
               "an old wizard levitating in mid-air inside a tall dark cave shaft, feet high above the ground, robes billowing, glowing aura"),
              ("Mirror Image", "Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.",
               "three identical wizards shimmering side by side"),
              ("Frost Nova", "Enemies adjacent to you take 1d6 and can't move on their next turn.",
               "a ring of ice exploding outwards from a wizard, frozen ground"),
-             ("Detect Magic", "The GM points out every magic item and magical trap in this scene.",
+             ("Detect Magic", "The GM points out every magic item and magical trap nearby.",
               "a wizard's eye glowing, hidden objects shining through walls"),
          ]),
 ]
@@ -175,7 +175,7 @@ NPCS = {
     ], notes="Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
-    ], notes="Speaks only Dravic. Works for the Bandit Baron."),
+    ], notes="Works for the Bandit Baron."),
     "refugee": dict(name="Refugee", bundles=[COMMONERS[i] for i in (0, 4, 1, 8, 5, 2, 9, 6, 7)], hp=6, defense=10,
                     attacks=[], notes="Hungry and scared."),
     "merchant": dict(notable=True, name="Old Pell (merchant)", bundles=[COMMONERS[3]], hp=8, defense=10, attacks=[],
@@ -207,7 +207,7 @@ NPCS = {
     "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, notable=True,
                         hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
-    ], notes="Speaks only Giantish (Tongues / Speak with the Dying / Street Dravic badly). See scene notes."),
+    ], notes="Speaks only Giant (Giant-Talk, or Brannoc's few words). See scene notes."),
     "dead_human": dict(name="Fallen guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
                        dead=True),
     "princess": dict(notable=True, name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
@@ -295,7 +295,7 @@ Read aloud:
   land of Dravmark. She went as royal envoy to renew the Mountain Pact with the giants.
   Word is the giants have come down from the mountains and are raiding the towns. Find her.
   Bring her home."
-Nobody speaks Dravic except the Fighter (a little). Give them 10 gold and 3 rations each.
+Give them 10 gold and 3 rations each.
 Background (GM only): the giants' sacred Hearthstone was stolen from their mountain shrine and
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else."""),
 
@@ -321,7 +321,7 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
          notes="""Read aloud: "Holst's gate hangs open. Doors are smashed in, from above. Footprints the size
 of a cart sink into the mud. Nothing moves - except three thin children watching you."
 Clues: roofs torn off; a door ripped out whole; granaries empty; a broken wicker shield bigger than a door.
-STREET KIDS (Dravic only): hands out, "Pénz? Pénz?" (money). Fighter can make out "coin" and "hungry".
+STREET KIDS: hands out, "Coin? Spare a coin? We're hungry."
   - Give them ANY gold or food -> note it. Later the Bandit Baron's crew vouches for the party (scene 3:
     Vasko starts friendly, first Baron's Bones round is won automatically) and the kids give the party the
     WARREN WHISTLE (magic: blow it, 1d4 street kids appear to help or distract, once).
@@ -361,7 +361,7 @@ Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favou
   - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
     Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
-ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
+ASKING ABOUT THE PRINCESS:
   "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."
 Anyone who asks around gets pointed to the Bandit Baron's den (east). If they paid the kids, a kid appears and leads them.
 REST here is allowed (press REST): full HP, all cards back to hand."""),
@@ -389,14 +389,14 @@ RAT'S BONES (dice game) - best of 3 rounds:
   1. Each side rolls 3d6 (players use table dice; Vasko: his button).
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
-  One hero plays, others may "help" (cards: Loaded Die rerolls one die; Blessing adds +1d4 to the total).
+  One hero plays, others may "help" (cards: Luck rerolls one die; Blessing adds +1d4 to the total).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
     for "fairness" (no more ring rerolls) - and now it's on the table.
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
-  VASKO'S LUCKY RING (magic): once per scene, reroll any die you can see.
+  VASKO'S LUCKY RING (magic): once per fight, reroll any die you can see.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -429,7 +429,7 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
-     TRUE SIGHT (magic: once, see through illusions/invisibility for a scene) - hint: the princess will be hard
+     TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
      to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
@@ -480,8 +480,8 @@ After: tracks and blood lead to a cave in the hillside."""),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
-HROTHGA (dying giantess): speaks Giantish only. Tongues / Speak with the Dying lets them talk; Street Dravic
-gets a few words. She is not hostile, just dying. What she knows:
+HROTHGA (dying giantess): speaks Giant only. Brannoc's Giant-Talk lets them talk; without it
+he gets a few words (Wits DC 12 for anything more). Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
@@ -508,9 +508,9 @@ ITEMS = [
      "a small round glass flask of glowing red potion with a cork stopper on a wooden table", 2),
     ("Smoke Egg", "Throw it: works like Smoke Bomb, a 3x3 area is hidden until they act. One use.",
      "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
-    ("Vasko's Lucky Ring", "Once per scene: reroll any die you can see.",
+    ("Vasko's Lucky Ring", "Once per fight: reroll any die you can see.",
      "a heavy gold signet ring with a rat crest and a faintly glowing green gem on red velvet", 1),
-    ("Lantern of True Sight", "Once: for one scene, see through illusions and invisibility.",
+    ("Lantern of True Sight", "Once: for an hour, see through illusions and invisibility.",
      "an old engraved brass lantern glowing with pale blue magical light in a dark stone tunnel", 1),
     ("Giant's Tooth Amulet", "Once: one Might check automatically succeeds.",
      "a huge yellowed giant's tooth carved with swirling spiral patterns hanging from a thick braided rope on dark stone", 1),

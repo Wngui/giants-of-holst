@@ -6,7 +6,7 @@ from content import HEROES, SCENES, STYLE, MAP_STYLE, ITEMS, SKIES, SKY_STYLE, S
 
 COMFY = "http://127.0.0.1:8188"
 RAW = Path(__file__).parent / "art" / "raw"
-REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1, "ground_outskirts": 1, "ground_den": 2, "ground_cart": 1, "item_6": 1, "screen_art": 1}  # bump to get a new seed
+REROLL = {"card_back": 1, "card_thief_0": 1, "card_thief_1": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1, "ground_outskirts": 1, "ground_den": 2, "ground_cart": 1, "item_6": 1, "screen_art": 1}  # bump to get a new seed
 
 
 def jobs():
