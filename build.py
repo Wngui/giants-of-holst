@@ -460,10 +460,10 @@ def xml_ui(base):
 <Button {on}toggleSelected" {btn}>Toggle visibility (selected)</Button>
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 </VerticalLayout></Panel>"""
-    picks = "".join(f"""<VerticalLayout spacing="4"><Image image="portrait_{h['key']}" preserveAspect="true"/>
+    picks = "".join(f"""<VerticalLayout spacing="4"><Image id="pickimg_{h['color']}" image="portrait_{h['key']}" {on}pick" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
-    picks += f"""<VerticalLayout spacing="4"><Image image="portrait_gm" preserveAspect="true"/>
+    picks += f"""<VerticalLayout spacing="4"><Image id="pickimg_Black" image="portrait_gm" {on}pick" preserveAspect="true"/>
 <Button id="pick_Black" {on}pick" {btn}>Game Master</Button></VerticalLayout>"""
     pick = f"""<Panel id="pick" visibility="White|Brown|Orange|Yellow|Teal|Pink|Grey" rectAlignment="UpperCenter"
  offsetXY="0 -60" width="940" height="260" color="#1b1410ee" padding="10 10 10 10">

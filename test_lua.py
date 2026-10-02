@@ -349,7 +349,7 @@ gm = g.mkplayer("gm", "White")
 c.pick(gm, None, "pick_Black")                       # the Game Master option
 assert gm.color == "Black" and g.UIattr["pick_Black.interactable"] == "false"
 bob = g.mkplayer("bob", "White")
-c.pick(bob, None, "pick_Red")
+c.pick(bob, None, "pickimg_Red")                     # clicking the portrait works too
 assert bob.color == "Red" and g.UIattr["pick_Red.interactable"] == "false"
 hand = lambda col: len(list(g.Player[col].getHandObjects().values()))
 assert hand("Red") == 6

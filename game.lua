@@ -436,7 +436,7 @@ function musicStop() MusicPlayer.pause() end
 
 -- ---------------------------------------------------------------- class pick
 function pick(player, _, id)
-    local color = id:sub(6)   -- a hero's seat colour, or Black for the Game Master
+    local color = id:match("_(%a+)$")   -- pick_<colour> button or pickimg_<colour> portrait; Black = Game Master
     if Player[color].seated then
         broadcastToColor("That adventurer is taken, pick another.", player.color, { 1, 0.6, 0.2 })
         return
