@@ -1014,6 +1014,36 @@ def gm_board():
     return a.objs
 
 
+def peasant(seed=1, cloak="wool_brown", merchant=False):
+    """Hooded townsfolk figure ~1.15 squares tall on a dark base (gold rim for notable ones), facing +y like the
+    RPG figures: robe, cloak over the shoulders, hood round a face, a bundle on the back; the merchant gets a fat
+    pack, a wide hat and a coin purse."""
+    a = Asset(seed)
+    rnd = a.rnd
+    a.cyl(0.3, 0.05, (0, 0, 0), "charcoal", segs=20)
+    if merchant:
+        a.cyl(0.305, 0.02, (0, 0, 0.035), "gold", segs=20)
+    under = "wool_grey" if cloak != "wool_grey" else "wool_brown"
+    stoop = rnd.uniform(0.0, 0.12) if not merchant else 0.0   # tired refugees hunch a little
+    a.lathe([(0.23, 0.04), (0.21, 0.35), (0.18, 0.62), (0.17, 0.78), (0.1, 0.86)], (0, -stoop * 0.3, 0), cloak,
+            segs=14, rot=(stoop, 0, 0), smooth=True)
+    a.cyl(0.21, 0.05, (0, -stoop * 0.35, 0.44), under, segs=14, rot=(stoop, 0, 0))   # rope belt
+    for s in (-1, 1):   # arms folded in the cloak
+        a.blob(0.065, (s * 0.15, 0.06 - stoop * 0.4, 0.6), cloak, scale=(1, 1.3, 2.0), jitter=0.05, subdiv=2, smooth=True)
+    hy = 0.04 - stoop * 0.6
+    a.blob(0.09, (0, hy + 0.02, 0.92), "skin", scale=(0.9, 1, 1.1), jitter=0.04, subdiv=2, smooth=True)   # face
+    a.blob(0.12, (0, hy - 0.03, 0.95), cloak, scale=(1, 1.05, 1.1), jitter=0.06, subdiv=2, smooth=True)  # hood behind it
+    if merchant:
+        a.cyl(0.22, 0.02, (0, hy, 1.04), "wool_brown", segs=16)                       # wide hat brim
+        a.cyl(0.1, 0.12, (0, hy, 1.05), "wool_brown", segs=12, r2=0.08)
+        a.box((0.32, 0.18, 0.4), (0, -0.24, 0.58), "canvas")                         # big trader's pack
+        a.cyl(0.05, 0.36, (0, -0.24, 0.8), "timber", segs=6, rot=(0, math.pi / 2, 0))
+        a.blob(0.06, (0.17, 0.12, 0.45), "cloth_red", scale=(1, 1, 1.3), jitter=0.05, subdiv=1)   # coin purse
+    else:
+        a.blob(0.12, (0.02, -0.2, 0.62), "canvas", scale=(1.2, 0.8, 1), jitter=0.12, subdiv=2)       # bundle of belongings
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -1037,6 +1067,9 @@ ASSETS = {
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
     "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_board": gm_board, "hp_plaque": hp_plaque, "gm_screen": gm_screen, "dice_tray": dice_tray,
+    "refugee_a": lambda: peasant(41, "wool_brown"), "refugee_b": lambda: peasant(42, "wool_grey"),
+    "refugee_c": lambda: peasant(43, "wool_green"), "refugee_d": lambda: peasant(44, "wool_blue"),
+    "merchant": lambda: peasant(45, "cloth_red", merchant=True),
 }
 
 if __name__ == "__main__":

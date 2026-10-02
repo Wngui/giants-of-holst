@@ -89,6 +89,7 @@ Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do 
           addNotebookTab = function(t) tabs[#tabs + 1] = t end }
 MusicPlayer = { setCurrentAudioclip = function(t) MusicPlayer.url = t.url end, pause = function() end,
                 play = function() end, player_status = "Ready" }
+Grid = {}
 Wait = { time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
 WebRequest = { get = function(url, cb)
   requested = url
@@ -249,17 +250,22 @@ for i, s in enumerate(scenes, 1):
             assert min(t.scaleX, t.scaleY, t.scaleZ) > 0, (s["title"], o.data.Name, "zero scale")
     assert g.MusicPlayer.url == s["music"]["url"]
     assert g.UIattr["sceneTitle.text"] == s["title"]
+assert g.Grid.show_lines is False
+c.musicBattle(); assert g.Grid.show_lines is True and abs(g.Grid.sizeX - SQ) < 1e-9   # Battle shows the grid
+c.musicScene(); assert g.Grid.show_lines is False
 fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
     json.dump({"W": W, "D": D, "TOP": TOP, "SQ": SQ, "scenes": dump}, open(os.environ["DUMP"], "w"))
-# fog of war is off: Holst City's NPCs start visible; the GM selects some and toggles them hidden and back
+# fog of war is off: Holst City's giants start visible, its stealthy street kids hidden (and see-through for the GM);
+# the GM selects some and toggles them hidden and back
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
 gm_bar = 'visibility="Black" percentage'
-assert giants and kids and not any(o.invisible for o in giants + kids)
+assert giants and kids and not any(o.invisible for o in giants)
+assert all(o.invisible and o.tint.a < 1 and o.lit and gm_bar in o.xml for o in kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
 g.selected = lua.table_from(giants)
 c.toggleSelected(g.Player.Black)
@@ -275,7 +281,7 @@ c.hotkeys["Toggle visibility (GM)"]("Red", giants[1])     # players can't
 assert giants[1].invisible
 g.selected = lua.table_from(giants[1:])
 c.toggleSelected(g.Player.Black)
-assert count("hidden") == 0
+assert count("hidden") == len(kids)
 # GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
 desk = list(g.getObjectsWithTag("gm").values())
 screen = list(g.getObjectsWithTag("gmscreen").values())

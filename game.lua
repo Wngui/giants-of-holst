@@ -41,6 +41,9 @@ function install(sceneIndex)
         local g = d.grid
         spawnObjectData({ data = placed(d), callback_function = function(o)
             if g.role == "hp" then hpShield(o, g.color, g.max) end
+            -- the RPG thief spawns in its crouched sneak pose, which reads as stuck sitting: switch to its other mode
+            -- ponytail: guess at what the mode toggle does; remove if the thief still (or now) sits
+            if d.Name == "rpg_THIEF" and o.RPGFigurine then pcall(function() o.RPGFigurine.changeMode() end) end
         end })
     end
     -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
@@ -143,7 +146,10 @@ function setScene(i)
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if o.hasTag("hidden") then hide(o) end
+            if o.hasTag("hidden") then
+                o.setInvisibleTo(PLAYERS)
+                Wait.frames(function() hide(o) end, 5)   -- tint/outline/bar once the figure and its script have loaded
+            end
         end })
     end
     for n, color in ipairs(DATA.colors) do
@@ -159,6 +165,7 @@ function setScene(i)
     highlightScene()
     UI.setAttribute("sceneTitle", "text", s.title)
     play(s.music)
+    showGrid(false)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
 end
 
@@ -413,8 +420,18 @@ function play(track)
     Wait.condition(function() MusicPlayer.play() end, function() return MusicPlayer.player_status == "Ready" end, 20)
 end
 
-function musicScene() play(DATA.scenes[scene].music) end
-function musicBattle() play(DATA.battle) end
+function musicScene() play(DATA.scenes[scene].music); showGrid(false) end
+function musicBattle() play(DATA.battle); showGrid(true) end
+
+-- battle grid over the map: one cell per map square, integer map coordinates at cell centres
+function showGrid(on)
+    local set = { type = 1, sizeX = SQ, sizeY = SQ, offsetX = T.cx + SQ / 2, offsetY = 1, offsetZ = T.cz + SQ / 2,
+                  thick_lines = false, opacity = 0.5, snapping = 0, show_lines = on }
+    for _, k in ipairs({ "type", "sizeX", "sizeY", "offsetX", "offsetY", "offsetZ", "thick_lines", "opacity",
+                         "snapping", "show_lines" }) do
+        pcall(function() Grid[k] = set[k] end)   -- one unknown field must not stop the rest
+    end
+end
 function musicStop() MusicPlayer.pause() end
 
 -- ---------------------------------------------------------------- class pick

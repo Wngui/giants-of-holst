@@ -29,7 +29,7 @@ HEROES = [
     dict(key="thief", name="Wren the Thief", color="Red", fig="rpg_THIEF", hp=18, defense=13,
          stats=dict(Might=0, Agility=3, Wits=2),
          attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing knife", 5, "1d4+3", "range 6")],
-         blurb="Has never paid for anything twice. Rarely once.",
+         blurb="Quick hands, quicker feet. Gets into anything with a lock.",
          traits=["Sneaky: advantage on sneaking and lockpicking (roll 2 d20, keep the best).",
                  "Street smart: knows how thieves' guilds think, talk and hide things."],
          background="Grew up in the alleys of Aldmere's capital and talked his way into the King's service "
@@ -53,7 +53,7 @@ HEROES = [
     dict(key="fighter", name="Brannoc the Fighter", color="Blue", fig="rpg_KNIGHT", hp=30, defense=15,
          stats=dict(Might=3, Agility=1, Wits=0),
          attacks=[("Longsword", 5, "1d8+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
-         blurb="Has been hit by more things than most people have seen.",
+         blurb="Veteran of the goblin wars. First in, last out.",
          traits=["Speaks a little Dravic: understands simple words and can say a few. Anything harder: Wits DC 12.",
                  "Hard to shift: advantage on checks to hold a door, a line or a giant's leash."],
          background="Veteran of the goblin wars. Picked up his Dravic in border taverns, mostly the rude words.",
@@ -76,7 +76,7 @@ HEROES = [
     dict(key="healer", name="Sister Maelis the Healer", color="Green", fig="rpg_WARRIOR", hp=22, defense=13,
          stats=dict(Might=1, Agility=0, Wits=3),
          attacks=[("Mace", 3, "1d6+1", "melee"), ("Sacred flame", 5, "1d8+1", "range 8, ignores shields")],
-         blurb="Will heal you. Will also tell you it was your own fault.",
+         blurb="Battle priest of the Dawn. Keeps everyone breathing.",
          traits=["Healer: stabilising a downed ally is automatic for her (no roll), and still just one action.",
                  "Dawn lore: knows the dying, the undead and what holy symbols mean."],
          background="Battle priest of the Dawn. Keeps everyone breathing, whether they like it or not.",
@@ -99,7 +99,7 @@ HEROES = [
     dict(key="wizard", name="Aldric the Wizard", color="Purple", fig="rpg_MAGE", hp=16, defense=11,
          stats=dict(Might=0, Agility=1, Wits=3),
          attacks=[("Staff", 2, "1d6", "melee"), ("Arcane bolt", 5, "1d10", "range 10")],
-         blurb="Knows four hundred spells. Six of them are useful.",
+         blurb="Royal court wizard. Fragile, clever, and loud.",
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
                  "Old friends: he taught Princess Isolde her first sorcery. She trusts his voice."],
          background="Royal court wizard. Fragile, clever and loud. Tutor to the princess, and not about to lose her.",
@@ -153,7 +153,11 @@ NPCS = {
     "street_kid": dict(name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Speaks only Dravic. Works for the Bandit Baron."),
-    "refugee": dict(name="Refugee", fig="rpg_MAGE", hp=6, defense=10, attacks=[], notes="Hungry and scared."),
+    "refugee": dict(name="Refugee", models=["refugee_a", "refugee_b", "refugee_c", "refugee_d"], hp=6, defense=10,
+                    attacks=[], notes="Hungry and scared."),
+    "merchant": dict(notable=True, name="Old Pell (merchant)", models=["merchant"], hp=8, defense=10, attacks=[],
+                     notes="Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. "
+                           "Out of food. Knows the Bandit Baron's men buy his best wine every night."),
     "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
     "hunter": dict(name="Hunter", fig="rpg_RANGER", hp=14, defense=13, attacks=[
@@ -319,13 +323,17 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
                ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 6.6, -2.0), ("carcass", 7.1, -1.2),
                # the crowd round the hunters, Lady Oriska shouldering her way to the front
                ("noble", 6.0, -1.0), ("refugee", 5.9, 0.2), ("refugee", 6.8, 0.6), ("refugee", 8.9, 0.5),
-               ("refugee", 9.1, -1.7), ("refugee", 8.6, -3.4), ("refugee", 7.0, -3.6), ("refugee", 5.9, -2.9)],
+               ("refugee", 9.1, -1.7), ("refugee", 8.6, -3.4), ("refugee", 7.0, -3.6), ("refugee", 5.9, -2.9),
+               ("merchant", 7.0, 3.9)],
+         face={"refugee": (7.7, -1.55), "noble": (7.7, -1.55), "merchant": (0, 0)},   # everyone watches the hunters
          notes="""Read aloud: "You drop into stink and darkness. Then - firelight. Hundreds of people live down here
 in rags and smoke. Holst didn't empty. It went underground."
 FOOD SCENE: two rough hunters come in from outside the walls, dragging carcasses from the woods. A noblewoman (Lady Oriska) pays 5 gold EACH, loudly.
 Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favour.
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
+  - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
+    Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
   "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."

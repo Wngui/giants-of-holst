@@ -67,6 +67,7 @@ Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits 
 - **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on a chain. Cutting the leash (Agility DC 12) and the thrall runs off.
 - **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Speaks only Dravic. Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
+- **Old Pell (merchant)** HP 8, Def 10. . Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. Out of food. Knows the Bandit Baron's men buy his best wine every night.
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
 - **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
 - **Giant rat carcass** HP 1, Def 1. . Food.
@@ -121,6 +122,8 @@ FOOD SCENE: two rough hunters come in from outside the walls, dragging carcasses
 Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favour.
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
+  - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
+    Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS (language! Fighter DC 12 Wits, Tongues, or charades):
   "A lady in blue with glowing hands? The Bandit Baron's boys brought her through a week ago."
