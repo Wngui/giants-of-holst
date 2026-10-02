@@ -264,20 +264,20 @@ objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
 gm_bar = 'visibility="Black" percentage'
-assert giants and kids and all(o.invisible and o.tint.a < 1 and o.lit and gm_bar in o.xml for o in giants + kids)
+assert giants and kids and all(o.invisible and o.tint.a < 1 and not o.lit and gm_bar in o.xml for o in giants + kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
 g.selected = lua.table_from(giants)
 c.toggleSelected(g.Player.Black)
-assert not any(o.invisible or o.lit for o in giants)   # the GM shows them...
+assert not any(o.invisible for o in giants)   # the GM shows them...
 c.toggleSelected(g.Player.Black)                       # ...and hides them again
-assert all(o.invisible and o.hasTag("hidden") and o.lit and o.tint.a < 1 and gm_bar in o.xml for o in giants)
+assert all(o.invisible and o.hasTag("hidden") and o.tint.a < 1 and gm_bar in o.xml for o in giants)
 gp = giants[0].getPosition()
 hero.pos = lua.table_from([gp.x + 1, gp.y, gp.z])
 c.onObjectDrop("Red", hero)
 assert giants[0].invisible                           # walking up no longer reveals anything
 g.selected = lua.table_from([])
 c.hotkeys["Toggle visibility (GM)"]("Black", giants[0])   # hotkey on the hovered giant
-assert not giants[0].invisible and not giants[0].lit and giants[0].tint.a == 1 and gm_bar not in giants[0].xml
+assert not giants[0].invisible and giants[0].tint.a == 1 and gm_bar not in giants[0].xml
 c.hotkeys["Toggle visibility (GM)"]("Red", giants[1])     # players can't
 assert giants[1].invisible
 g.selected = lua.table_from(giants[1:])

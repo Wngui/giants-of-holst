@@ -175,7 +175,7 @@ end
 -- ---------------------------------------------------------------- hidden enemies (instead of TTS's fog box)
 PLAYERS = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey" }
 
--- Hidden from players; for the GM it turns see-through and gets an outline so it reads as hidden at a glance.
+-- Hidden from players; for the GM it turns see-through so it reads as hidden at a glance (no outline).
 local tints = {}
 function hide(o)
     o.setInvisibleTo(PLAYERS)
@@ -183,7 +183,6 @@ function hide(o)
     local t = o.getColorTint()
     tints[o.getGUID()] = tints[o.getGUID()] or t
     o.setColorTint({ r = t.r, g = t.g, b = t.b, a = 0.35 })
-    o.highlightOn({ 0.6, 0.8, 1 })
     if o.getLuaScript() ~= "" then o.call("setHidden", { hidden = true }) end   -- NPCs: bar GM-only too
 end
 
@@ -191,7 +190,6 @@ function reveal(o)
     o.setInvisibleTo({})
     o.removeTag("hidden")
     if tints[o.getGUID()] then o.setColorTint(tints[o.getGUID()]) end
-    o.highlightOff()
     if o.getLuaScript() ~= "" then o.call("setHidden", { hidden = false }) end
 end
 
