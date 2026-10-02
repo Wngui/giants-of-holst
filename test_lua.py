@@ -179,9 +179,12 @@ for o in g.getObjectsWithTag("kit").values():
 for i, a in enumerate(boxes):
     for b in boxes[i + 1:]:
         assert abs(a[1] - b[1]) >= a[3] + b[3] or abs(a[2] - b[2]) >= a[4] + b[4], ("kit overlap", a, b)
-assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple"}
+assert set(to_py(g.hands).keys()) == {"Red", "Blue", "Green", "Purple", "Black"}
 for col, t in to_py(g.hands).items():
-    assert abs(t["position"][2]) > D / 2, (col, "hand zone should sit past the table edge")
+    if col == "Black":   # the GM's hand lies past the GM table at the east end
+        assert t["position"][0] > W / 2 + 10 * SQ, t
+    else:
+        assert abs(t["position"][2]) > D / 2, (col, "hand zone should sit past the table edge")
 
 scenes = to_py(c.DATA.scenes)
 for i, s in enumerate(scenes, 1):
@@ -226,11 +229,13 @@ assert count("hidden") == 0 and not any(o.invisible for o in giants)
 # GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
 desk = list(g.getObjectsWithTag("gm").values())
 screen = list(g.getObjectsWithTag("gmscreen").values())
-assert len(desk) == len(c.DATA.gm) - 3 and all(o.invisible for o in desk), [o.data.Nickname for o in desk if not o.invisible]
+gmtable = list(g.getObjectsWithTag("gmtable").values())
+assert len(gmtable) == 1 and not gmtable[0].invisible and gmtable[0].data.Transform.posY == TOP   # top level with the table
+assert len(desk) == len(c.DATA.gm) - 4 and all(o.invisible for o in desk), [o.data.Nickname for o in desk if not o.invisible]
 assert all(o.data.Transform.posX > W / 2 for o in desk), [(o.data.Nickname, o.data.Transform.posX) for o in desk]
 assert len(screen) == 3 and not any(o.invisible for o in screen)
 assert all(W / 2 - 3 * SQ < o.data.Transform.posX < W / 2 + SQ and o.data.Transform.posY > TOP for o in screen)
-pouch = next(o for o in desk if o.data.Name == "Bag")
+pouch = next(o for o in desk if o.data.Name == "Infinite_Bag")
 assert pouch.data.ContainedObjects[1].Transform.scaleX == SQ          # coins inside sized to the grid
 card = next(o for o in desk if o.data.Name == "Card")
 card.pos = lua.table_from([0, TOP, 0])

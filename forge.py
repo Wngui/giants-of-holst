@@ -931,6 +931,19 @@ def ration():
     return a.objs
 
 
+def gm_table():
+    """The GM's own table beside the main one: plank top (its surface is the model origin, so it sits level with the
+    main table), an apron and four long legs."""
+    a = Asset(27)
+    w, d, t = 10.4, 20.8, 0.35
+    a.box((w, d, t), (0, 0, -t / 2), "planks")
+    a.box((w - 0.8, d - 0.8, 0.6), (0, 0, -t - 0.3), "timber")
+    for x in (-1, 1):
+        for y in (-1, 1):
+            a.box((0.7, 0.7, 9), (x * (w / 2 - 0.7), y * (d / 2 - 0.7), -t - 4.5), "timber")
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -953,7 +966,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce, "coin": coin, "ration": ration,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table,
 }
 
 if __name__ == "__main__":
@@ -967,6 +980,6 @@ if __name__ == "__main__":
         _mats.clear()
         for old in OUT.glob(f"{name}.*"):
             old.unlink()
-        big = name.startswith(("house", "tavern", "ruin"))   # buildings: 2k atlas keeps their texel density near the props'
+        big = name.startswith(("house", "tavern", "ruin", "gm_table"))   # buildings: 2k atlas keeps their texel density near the props'
         textures[name] = bake_objects(name, ASSETS[name](), OUT, size=2048 if big else 1024)
         tex_list.write_text("".join(f"{n} {t}\n" for n, t in sorted(textures.items())))

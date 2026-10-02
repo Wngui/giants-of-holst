@@ -455,8 +455,6 @@ ITEMS = [
     ("Moonstaff Shard", "Once: cast Fireball (3x3 area, 3d6 fire, Agility DC 14 for half).",
      "a broken shard of a silver staff with a glowing crescent moon crystal, sparks of light", 1),
 ]
-# pre-filled pouches: (label, gold coins, rations)
-POUCHES = [("Starting purse", 10, 3)] * 4 + [("Guard post chest (passage A)", 15, 0), ("Rats' nest purse (passage C)", 8, 0)]
 # per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
 SKY_STYLE = ("An equirectangular 360 degree panorama, seen from eye level. A painterly dark fantasy illustration "
              "in muted earthy colours with soft atmospheric light.")

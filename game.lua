@@ -38,7 +38,7 @@ function install(sceneIndex)
     for _, o in ipairs(getObjectsWithTag("kit")) do o.destruct() end
     for _, d in ipairs(DATA.kits) do spawnObjectData({ data = placed(d) }) end
     -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
-    for _, tag in ipairs({ "gm", "gmscreen" }) do
+    for _, tag in ipairs({ "gm", "gmscreen", "gmtable" }) do
         for _, o in ipairs(getObjectsWithTag(tag)) do o.destruct() end
     end
     for _, d in ipairs(DATA.gm) do
@@ -51,6 +51,11 @@ function install(sceneIndex)
         Player[color].setHandTransform({ position = { c.x, T.top + 4, T.cz + c.sz * (T.d / 2 + 4) },
                                          rotation = { 0, c.ry, 0 }, scale = { 12, 5, 4 } })
     end
+    -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
+    pcall(function()
+        Player.Black.setHandTransform({ position = { T.cx + T.w / 2 + DATA.layout.gm_hand * SQ, T.top + 4, T.cz },
+                                        rotation = { 0, 270, 0 }, scale = { 12, 5, 4 } })
+    end)
     local tabs = Notes.getNotebookTabs()
     for i = #tabs, 1, -1 do Notes.removeNotebookTab(tabs[i].index) end
     for _, t in ipairs(DATA.notebook) do Notes.addNotebookTab(t) end

@@ -16,6 +16,7 @@ crates crates.jpg
 door_smashed door_smashed.jpg
 fence fence.jpg
 giant_club giant_club.jpg
+gm_table gm_table.jpg
 goods goods.jpg
 grate grate.jpg
 hoard hoard.jpg

@@ -3,7 +3,7 @@ e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/ou
 import hashlib, json, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, POUCHES, SKIES
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -13,7 +13,8 @@ TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
 ART_FRAC = 0.64             # share of the table width the scene art covers; the wooden border holds the player kits
 # measured-at-load layout knobs, passed to game.lua (fractions of the table's measured width/depth)
 LAYOUT = {"cols": COLS, "rows": ROWS, "art_w": ART_FRAC, "surface": 1.0,
-          "kit_x": 0.41, "reveal": 7, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0}
+          "kit_x": 0.41, "reveal": 7, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0,
+          "gm_hand": 12.5}   # GM hand zone, squares past the table's east edge (beyond the GM table)
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSerif{}.ttf"
 RGB = {"Red": (150, 35, 35), "Blue": (35, 70, 150), "Green": (35, 115, 55), "Purple": (100, 45, 135)}
 
@@ -167,12 +168,7 @@ def build_images():
     pw = art.width // 3
     for i, (title, body, fs) in enumerate(screen_panels()):
         art.crop((i * pw, 0, (i + 1) * pw, art.height)).resize((1000, 1500), Image.LANCZOS).save(OUT / f"screen_front_{i}.jpg", quality=88)
-        text_panel(title, body, fs=fs).save(OUT / f"screen_back_{i}.jpg", quality=90)
-    desk = Image.open(RAW / "table_wood.png").convert("RGB")
-    desk.crop((0, 0, desk.width, int(desk.width / 2.04))).resize((2040, 1000)).save(OUT / "gm_desk.jpg", quality=85)
-    console = Image.new("RGB", (1200, 800), (40, 28, 20))
-    ImageDraw.Draw(console).rectangle((0, 0, 1199, 799), outline=GOLD, width=16)
-    console.save(OUT / "gm_console.jpg", quality=90)
+        text_panel(title, body, fs=fs).rotate(180).save(OUT / f"screen_back_{i}.jpg", quality=90)   # tile backs render upside down
     for key in SKIES:
         sky(key).save(OUT / f"sky_{key}.jpg", quality=85)
     wood = Image.open(RAW / "table_wood.png").convert("RGB").resize(TABLE_PX)
@@ -305,18 +301,23 @@ def hero_objects(h, n, base):
 # GM desk: beyond the table's east edge (grid x past the table half-width), GM-only (tag "gm"); the screen
 # stands on the table's east border and everyone sees it. GM sits east looking west: cards ry 270, tiles ry 90.
 EDGE = COLS / ART_FRAC / 2          # table half-width in grid squares
-DESK_X = EDGE + 5.2                 # desk centre; it is 10 squares deep and 20.4 wide
+DESK_X = EDGE + 5.4                 # GM table centre; it is 10.4 squares deep and 20.8 wide
+
+
+TEXTURES = dict(l.split() for l in (ROOT / "props" / "textures.txt").read_text().splitlines()) if (ROOT / "props" / "textures.txt").exists() else {}
 
 
 def gm_objects(base):
     gm = dict(Tags=["gm"])
-    def model(name, **kw):
-        return obj("Custom_Model", tf(), Nickname=name.title(), CustomMesh={
-            "MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{name}.jpg", "NormalURL": "",
-            "ColliderURL": "", "Convex": True, "MaterialIndex": 2 if name == "coin" else 1, "TypeIndex": 0,
-            "CastShadows": True}, **kw)
-    out = [tile(f"{base}art/out/gm_desk.jpg", tf(ry=90.0), GUID=guid("gm", "desk"), Nickname="GM desk", Locked=True, **gm,
-                grid={"x": DESK_X, "z": 0, "k": "tile", "s": [20.4, 1, 20.4], "lift": -0.1})]
+    coin = obj("Custom_Model", tf(), Nickname="Gold coin", Hands=True, CustomMesh={
+        "MeshURL": f"{base}props/coin.obj", "DiffuseURL": f"{base}props/coin.jpg", "NormalURL": "", "ColliderURL": "",
+        "Convex": True, "MaterialIndex": 2, "TypeIndex": 0, "CastShadows": True})
+    # the GM's table: a real table everyone sees (only what lies on it is GM-only)
+    out = [obj("Custom_Model", tf(), GUID=guid("gm", "table"), Nickname="GM table", Locked=True, Tags=["gmtable"],
+               CustomMesh={"MeshURL": f"{base}props/gm_table.obj", "DiffuseURL": f"{base}props/{TEXTURES['gm_table']}",
+                           "NormalURL": "", "ColliderURL": "", "Convex": True, "MaterialIndex": 1, "TypeIndex": 0,
+                           "CastShadows": True},
+               grid={"x": DESK_X, "z": 0, "k": "model", "lift": 0})]
     # screen: three standing panels, art outside (players), quick reference inside (GM)
     for i, (z, x, ry) in enumerate(((-2.8, 0.75, 60.0), (0.0, 0.0, 90.0), (2.8, 0.75, 120.0))):
         t = tf(ry=ry)
@@ -325,42 +326,20 @@ def gm_objects(base):
                  Locked=True, Tags=["gmscreen"], grid={"x": EDGE - 0.8 + x, "z": z, "k": "tile", "s": [4.5, 1, 4.5], "ly": 2.3})
         p["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/screen_back_{i}.jpg"
         out.append(p)
-    out.append(tile(f"{base}art/out/gm_console.jpg", tf(ry=90.0), GUID=guid("gm", "console"), Nickname="GM controls",
-                    Locked=True, XmlUI=console_xml(), **gm, grid={"x": DESK_X + 3.4, "z": 0, "k": "tile", "s": [4, 1, 4]}))
     out.append(obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
                    CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
-                   grid={"x": DESK_X + 3.4, "z": -6, "k": "tile", "s": [3, 1, 3]}))
+                   grid={"x": DESK_X + 2.6, "z": -5.5, "k": "tile", "s": [3, 1, 3]}))
     deck = {"FaceURL": f"{base}art/out/items.jpg", "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 4,
             "NumHeight": 2, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
-    spots = [(x, z) for x in (DESK_X - 3.4, DESK_X - 1.1) for z in (-8, -4, 0, 4, 8)]
+    spots = [(x, z) for x in (DESK_X - 3.2, DESK_X - 0.9) for z in (-8, -4, 0, 4, 8)]
     cards = [(i, name, text) for i, (name, text, _, k) in enumerate(ITEMS) for _ in range(k)]
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
-        out.append(obj("Card", tf(ry=270.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
-                       GUID=guid("gm", "item", n), **gm, grid={"x": x, "z": z, "k": "tile", "s": [1.4, 1, 1.4]}))
-    coin, ration = model("coin"), model("ration")
-    for n, (label, gold, food) in enumerate(POUCHES):
-        what = ", ".join(w for w in (f"{gold} gold" if gold else "", f"{food} rations" if food else "") if w)
-        out.append(obj("Bag", tf(), GUID=guid("gm", "pouch", n), Nickname=label, Description=what, **gm,
-                       ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18}, ContainedObjects=[coin] * gold + [ration] * food,
-                       grid={"x": DESK_X + 1.2, "z": -8.5 + 3.4 * n, "k": "tile", "s": [1.6, 1.6, 1.6], "inner": 1.0}))
-    for n, (label, thing, z) in enumerate((("Gold coins (endless)", coin, 4.5), ("Rations (endless)", ration, 8.0))):
-        out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "supply", n), Nickname=label, **gm,
-                       ContainedObjects=[thing], grid={"x": DESK_X + 3.4, "z": z, "k": "tile", "s": [1.6, 1.6, 1.6], "inner": 1.0}))
+        out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
+                       GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1.4, 1, 1.4]}))
+    out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
+                   Description="Endless gold. Hover and press a number: that many coins go to your hand.", **gm,
+                   ContainedObjects=[coin], grid={"x": DESK_X + 2.6, "z": 3, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
     return out
-
-
-def console_xml():
-    """The GM panel again, as buttons lying on the desk (object UI; also GM-only by visibility)."""
-    btn = 'fontSize="34" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0"'
-    on = f'onClick="{CONTROLLER}/'
-    scenes = "".join(f'<Button id="scene_{i + 1}" {on}onSceneButton" {btn}>{s["title"]}</Button>' for i, s in enumerate(SCENES))
-    tools = "".join(f'<Button {on}{f}" {btn}>{t}</Button>' for f, t in (("musicScene", "Scene music"), ("musicBattle", "Battle music"),
-                    ("musicStop", "Stop music"), ("revealAll", "Reveal all enemies"), ("rest", "REST")))
-    # ponytail: object-UI size/rotation are TTS conventions I can't test here; tweak position/scale if it sits oddly
-    return (f'<Panel visibility="Black|Host" position="0 0 -12" rotation="0 0 180" width="1150" height="760" '
-            f'scale="0.17 0.17 0.17"><HorizontalLayout spacing="20" padding="20 20 20 20">'
-            f'<VerticalLayout spacing="8">{scenes}</VerticalLayout><VerticalLayout spacing="8">{tools}</VerticalLayout>'
-            f'</HorizontalLayout></Panel>')
 
 
 def xml_ui(base):
