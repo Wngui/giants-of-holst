@@ -1,7 +1,10 @@
 -- NPC: healthbar everyone sees; HP, damage box and attack buttons only the GM (Black seat / host) sees.
 -- Damage box: "12" or "+12" deals damage, "-5" heals. Attack buttons roll and whisper the result to the GM.
--- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_POS (z negative = higher).
-UI_POS, UI_ROT, UI_SCALE = "0 0 -420", "0 0 180", "0.4 0.4 0.4"
+-- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_POS (z negative = higher) or uiRot.
+UI_POS, UI_SCALE = "0 0 -420", "0.4 0.4 0.4"
+-- the bar stands upright facing the south seats whatever way the figure turns: Euler (yaw - 90, -90, 90) in the
+-- object-UI frame (x = object x, z = object down). The old "0 0 180" lay flat and turned with the figure.
+function uiRot() return string.format("%d -90 90", math.floor(self.getRotation().y + 0.5) - 90) end
 local GM = "Black|Host"
 local S
 
@@ -15,7 +18,7 @@ function onSave() return JSON.encode(S) end
 function draw()
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="%d"><VerticalLayout spacing="4" childForceExpandHeight="false">',
-        UI_POS, UI_ROT, UI_SCALE, 60 + 44 * #S.attacks) }
+        UI_POS, uiRot(), UI_SCALE, 60 + 44 * #S.attacks) }
     x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22"' .. (S.hidden and ' visibility="' .. GM .. '"' or '') ..
         ' percentage="' .. pct() ..
         '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>'

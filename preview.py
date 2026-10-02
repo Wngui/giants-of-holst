@@ -107,8 +107,10 @@ for sc in data["scenes"]:
                 h, r = 0.25 * SQ, 0.15 * SQ
             bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=h, location=(t["posX"], t["posZ"], TOP + h / 2))
             bpy.context.object.data.materials.append(material("fig" + str(colour), colour=colour))
-    for name, loc, rot, ortho in [("persp", (0, -D * 0.95, D * 0.85), (math.radians(47), 0, 0), False),
-                                  ("top", (0, 0, 60), (0, 0, 0), True)]:
+    views = [("persp", (0, -D * 0.95, D * 0.85), (math.radians(47), 0, 0), False), ("top", (0, 0, 60), (0, 0, 0), True)]
+    if any(o["nick"] == "GM table" for o in sc["objects"]):   # the GM's seat, east, looking west over the GM table
+        views.append(("gm", (W / 2 + 17 * SQ, 0, TOP + 11 * SQ), (math.radians(52), 0, math.radians(90)), False))
+    for name, loc, rot, ortho in views:
         cam = bpy.data.objects.new(name, bpy.data.cameras.new(name))
         s.collection.objects.link(cam)
         cam.location, cam.rotation_euler = loc, rot

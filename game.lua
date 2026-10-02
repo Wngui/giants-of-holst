@@ -44,6 +44,7 @@ function install(sceneIndex)
     for _, d in ipairs(DATA.gm) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
             if o.hasTag("gm") then gmHide(o) end
+            if o.hasTag("gmconsole") then console(o) end
         end })
     end
     for _, color in ipairs(DATA.colors) do
@@ -213,6 +214,27 @@ function gmHide(o) o.setInvisibleTo(PLAYERS) end
 function gmShow(o)
     o.setInvisibleTo({})
     o.removeTag("gm")
+end
+
+-- GM controls on the GM table: the floating panel's buttons as object buttons, two rows of six. Clicks from
+-- anyone but Black are ignored (the board is hidden from players anyway).
+-- ponytail: BTN = button units per local unit of the board is a guess at TTS's scale; tweak if buttons are off
+BTN = 1000
+function console(o)
+    local n = #DATA.gm_buttons
+    local cols = math.ceil(n / 2)
+    for i, b in ipairs(DATA.gm_buttons) do
+        local fn = "gmButton" .. i
+        _G[fn] = function(_, color)
+            if color ~= "Black" then return end
+            if b.scene then setScene(b.scene) else _G[b.fn]() end
+        end
+        local col, row = (i - 1) % cols, math.floor((i - 1) / cols)
+        o.createButton({ click_function = fn, function_owner = self, label = b.label,
+                         position = { -1 + (col + 0.5) * 2 / cols, 0.15, (row == 0 and -1 or 1) * 0.15 },
+                         width = 0.3 * BTN, height = 0.12 * BTN, font_size = 0.035 * BTN,
+                         color = { 0.23, 0.16, 0.1 }, font_color = { 0.94, 0.85, 0.63 } })
+    end
 end
 
 -- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out

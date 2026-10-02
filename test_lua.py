@@ -88,6 +88,8 @@ function makeObj(d)
   function o.hasTag(t) return o.tags[t] == true end
   function o.removeTag(t) o.tags[t] = nil end
   function o.addTag(t) o.tags[t] = true end
+  function o.getRotation() return {x = 0, y = d.Transform and d.Transform.rotY or 0, z = 0} end
+  function o.createButton(b) o.buttons = o.buttons or {}; o.buttons[#o.buttons + 1] = b end
   function o.setInvisibleTo(t) o.invisible = #t > 0 end
   function o.getPosition()
     local p = o.pos or {d.Transform.posX, d.Transform.posY, d.Transform.posZ}
@@ -195,7 +197,8 @@ for i, s in enumerate(scenes, 1):
         dump.append({"title": s["title"], "key": s["table"].rsplit("_", 1)[1][:-4], "objects": [
             {"name": o.data.Name, "nick": o.data.Nickname, "mesh": (to_py(o.data.CustomMesh) or {}).get("MeshURL", ""),
              "tex": (to_py(o.data.CustomMesh) or {}).get("DiffuseURL", ""), "t": to_py(o.data.Transform),
-             "dead": bool(o.data.RPGdead)} for o in g.getObjectsWithTag("scene").values()] + [
+             "dead": bool(o.data.RPGdead)} for tag in ("scene", "gm", "gmscreen", "gmtable")
+            for o in g.getObjectsWithTag(tag).values()] + [
             {"name": "hero", "nick": col, "t": {"posX": h.pos[1], "posY": h.pos[2], "posZ": h.pos[3]}}
             for col in ("Red", "Blue", "Green", "Purple") for h in g.getObjectsWithTag("fig_" + col).values()]})
     for o in g.getObjectsWithTag("scene").values():
@@ -230,11 +233,18 @@ assert count("hidden") == 0 and not any(o.invisible for o in giants)
 desk = list(g.getObjectsWithTag("gm").values())
 screen = list(g.getObjectsWithTag("gmscreen").values())
 gmtable = list(g.getObjectsWithTag("gmtable").values())
-assert len(gmtable) == 1 and not gmtable[0].invisible and gmtable[0].data.Transform.posY == TOP   # top level with the table
-assert len(desk) == len(c.DATA.gm) - 4 and all(o.invisible for o in desk), [o.data.Nickname for o in desk if not o.invisible]
+assert len(gmtable) == 1 and not gmtable[0].invisible and abs(gmtable[0].data.Transform.posY - TOP) < 0.05   # level with the table
+assert len(desk) == len(c.DATA.gm) - 2 and all(o.invisible for o in desk), [o.data.Nickname for o in desk if not o.invisible]
 assert all(o.data.Transform.posX > W / 2 for o in desk), [(o.data.Nickname, o.data.Transform.posX) for o in desk]
-assert len(screen) == 3 and not any(o.invisible for o in screen)
-assert all(W / 2 - 3 * SQ < o.data.Transform.posX < W / 2 + SQ and o.data.Transform.posY > TOP for o in screen)
+assert len(screen) == 1 and not screen[0].invisible and screen[0].data.Transform.posX > W / 2   # on the GM table
+board = list(g.getObjectsWithTag("gmconsole").values())[0]
+assert len(board.buttons) == len(c.DATA.gm_buttons)
+fn = board.buttons[1].click_function
+g.UIattr["sceneTitle.text"] = ""
+c[fn](board, "Red")                                  # players can't press GM buttons
+assert g.UIattr["sceneTitle.text"] == ""
+c[fn](board, "Black")
+assert g.UIattr["sceneTitle.text"] == scenes[0]["title"]
 pouch = next(o for o in desk if o.data.Name == "Infinite_Bag")
 assert pouch.data.ContainedObjects[1].Transform.scaleX == SQ          # coins inside sized to the grid
 card = next(o for o in desk if o.data.Name == "Card")
@@ -297,6 +307,7 @@ ng.JSON.decode = lambda s: npc.table_from({k: (npc.table_from([npc.table_from(a)
 npc.execute("""
 log, attrs, died, swung = {}, {}, 0, 0
 self = { UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
+         getRotation = function() return { x = 0, y = 270, z = 0 } end,
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
 function broadcastToAll(m) log[#log+1] = m end
 function broadcastToColor(m, c) log[#log+1] = c .. ": " .. m end
@@ -310,6 +321,7 @@ end
 npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
 assert "ProgressBar" in ng.xml and ng.xml.count("<Button") == 3
+assert 'rotation="180 -90 90"' in ng.xml           # upright bar, turned back by the figure's yaw (270 - 90)
 ng.applyDamage(None, "+12")
 assert ng.attrs["bar.percentage"] == "80" and ng.attrs["hp.text"].startswith("48/60")
 ng.applyDamage(None, "100")

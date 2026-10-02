@@ -26,6 +26,8 @@ def jobs():
     for key, (prompt, _, _) in SKIES.items():
         yield f"sky_{key}", f"{prompt} {SKY_STYLE}", 1536, 768
     yield "screen_art", f"{SCREEN_ART}, {STYLE}", 1536, 768
+    yield "gm_top", ("A top-down view of an old dark oak tabletop with a large worn crimson leather desk mat in the middle, "
+                     f"its edges tooled with a thin gold border pattern, seen from directly above, filling the frame, {STYLE}"), 768, 1536
 
 
 def workflow(prompt, w, h, seed):

@@ -932,15 +932,55 @@ def ration():
 
 
 def gm_table():
-    """The GM's own table beside the main one: plank top (its surface is the model origin, so it sits level with the
+    """The GM's own table beside the main one: painted top (its surface is the model origin, so it sits level with the
     main table), an apron and four long legs."""
+    import shutil
+    shutil.copy(ROOT / "art" / "raw" / "gm_top.png", TEX / "gm_top.png")
     a = Asset(27)
     w, d, t = 10.4, 20.8, 0.35
-    a.box((w, d, t), (0, 0, -t / 2), "planks")
+    a.box((w, d, 0.02), (0, 0, -0.01), "gm_top", decal=True)
+    a.box((w, d, t - 0.02), (0, 0, -0.02 - (t - 0.02) / 2), "planks")
     a.box((w - 0.8, d - 0.8, 0.6), (0, 0, -t - 0.3), "timber")
     for x in (-1, 1):
         for y in (-1, 1):
             a.box((0.7, 0.7, 9), (x * (w / 2 - 0.7), y * (d / 2 - 0.7), -t - 4.5), "timber")
+    return a.objs
+
+
+def gm_screen():
+    """Three-panel GM screen as one piece, so the panels meet at hinges instead of cutting into each other.
+    Painted art faces +x (players, once placed facing west), the quick reference faces -x (the GM); wings fold
+    toward the GM. Panel images are build.py's art/out/screen_front_i / screen_back_i."""
+    import shutil
+    for i in range(3):
+        for side, src in (("out", "front"), ("in", "back")):
+            shutil.copy(ROOT / "art" / "out" / f"screen_{src}_{i}.jpg", TEX / f"screen_{side}_{i}.png")
+    a = Asset(28)
+    pw, ph, t, ang = 2.2, 3.2, 0.03, math.radians(35)
+    # panel centres along y (players' left to right = -y to +y seen from +x), wings swung back toward -x
+    panels = [(-pw / 2 - pw / 2 * math.cos(ang), -pw / 2 * math.sin(ang), -ang),
+              (0.0, 0.0, 0.0),
+              (pw / 2 + pw / 2 * math.cos(ang), -pw / 2 * math.sin(ang), ang)]
+    for i, (y, x, rz) in enumerate(panels):
+        rot = (0, 0, rz)
+        dx, dy = math.cos(rz), math.sin(rz)   # panel normal (+x side) after the swing
+        for side, off in (("out", t / 2), ("in", -t / 2)):
+            k = i if side == "out" else 2 - i   # the GM sees the panels in the opposite order
+            a.box((t, pw, ph), (x + dx * off, y + dy * off, 0.15 + ph / 2), f"screen_{side}_{k}", rot=rot, decal=True)
+        for zz in (0.15, 0.15 + ph):   # frame: top and bottom rails
+            a.box((0.1, pw + 0.06, 0.08), (x, y, zz), "timber", rot=rot)
+    for s in (-1, 1):   # hinge posts where the panels meet, and outer posts
+        a.cyl(0.06, ph + 0.2, (0, s * pw / 2, 0), "iron", segs=8)
+        a.cyl(0.06, ph + 0.2, (-pw * math.sin(ang), s * (pw / 2 + pw * math.cos(ang)), 0), "timber", segs=8)
+    return a.objs
+
+
+def dice_tray():
+    """Octagonal wooden dice tray with a red felt floor (locked, non-convex collider: dice land inside)."""
+    a = Asset(29)
+    a.lathe([(1.7, 0), (1.7, 0.32), (1.55, 0.32), (1.55, 0.06), (0.0, 0.06)], (0, 0, 0), "timber", segs=8, cap_bottom=True,
+            cap_top=False, rot=(0, 0, math.pi / 8))
+    a.cyl(1.56, 0.03, (0, 0, 0.06), "cloth_red", segs=8, rot=(0, 0, math.pi / 8))
     return a.objs
 
 
@@ -966,7 +1006,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_screen": gm_screen, "dice_tray": dice_tray,
 }
 
 if __name__ == "__main__":
@@ -980,6 +1020,6 @@ if __name__ == "__main__":
         _mats.clear()
         for old in OUT.glob(f"{name}.*"):
             old.unlink()
-        big = name.startswith(("house", "tavern", "ruin", "gm_table"))   # buildings: 2k atlas keeps their texel density near the props'
+        big = name.startswith(("house", "tavern", "ruin", "gm_"))   # buildings: 2k atlas keeps their texel density near the props'
         textures[name] = bake_objects(name, ASSETS[name](), OUT, size=2048 if big else 1024)
         tex_list.write_text("".join(f"{n} {t}\n" for n, t in sorted(textures.items())))

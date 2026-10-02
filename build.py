@@ -168,7 +168,10 @@ def build_images():
     pw = art.width // 3
     for i, (title, body, fs) in enumerate(screen_panels()):
         art.crop((i * pw, 0, (i + 1) * pw, art.height)).resize((1000, 1500), Image.LANCZOS).save(OUT / f"screen_front_{i}.jpg", quality=88)
-        text_panel(title, body, fs=fs).rotate(180).save(OUT / f"screen_back_{i}.jpg", quality=90)   # tile backs render upside down
+        text_panel(title, body, fs=fs).save(OUT / f"screen_back_{i}.jpg", quality=90)
+    console = Image.new("RGB", (1800, 600), (40, 28, 20))
+    ImageDraw.Draw(console).rectangle((0, 0, 1799, 599), outline=GOLD, width=18)
+    console.save(OUT / "gm_console.jpg", quality=90)
     for key in SKIES:
         sky(key).save(OUT / f"sky_{key}.jpg", quality=85)
     wood = Image.open(RAW / "table_wood.png").convert("RGB").resize(TABLE_PX)
@@ -298,47 +301,53 @@ def hero_objects(h, n, base):
     ]
 
 
-# GM desk: beyond the table's east edge (grid x past the table half-width), GM-only (tag "gm"); the screen
-# stands on the table's east border and everyone sees it. GM sits east looking west: cards ry 270, tiles ry 90.
-EDGE = COLS / ART_FRAC / 2          # table half-width in grid squares
-DESK_X = EDGE + 5.4                 # GM table centre; it is 10.4 squares deep and 20.8 wide
-
-
-TEXTURES = dict(l.split() for l in (ROOT / "props" / "textures.txt").read_text().splitlines()) if (ROOT / "props" / "textures.txt").exists() else {}
+# GM table: past the main table's east edge, the GM sits east looking west (top = west, right = north).
+# Everything on it is GM-only (tag "gm") except the table itself and the screen. Cards ry 90 read upright for the GM.
+TEXTURES = dict(l.split() for l in (ROOT / "props" / "textures.txt").read_text().splitlines())   # prop -> baked image
+EDGE = COLS / ART_FRAC / 2          # main table half-width in grid squares
+GM_GAP = -0.4                       # GM table's inner edge vs the main table edge (negative: tucked under its rim)
+X0 = EDGE + GM_GAP                  # GM table inner edge; it is 10.4 squares deep (x) and 20.8 wide (z)
+DIE_COLOURS = {"Die_4": (0.55, 0.06, 0.08), "Die_6": (0.55, 0.06, 0.08), "Die_8": (0.55, 0.06, 0.08),
+               "Die_10": (0.55, 0.06, 0.08), "Die_12": (0.55, 0.06, 0.08), "Die_20": (0.85, 0.62, 0.12)}
+GM_BUTTONS = [dict(label=s["title"], scene=i + 1) for i, s in enumerate(SCENES)] + [
+    dict(label=t, fn=f) for f, t in (("musicScene", "Scene music"), ("musicBattle", "Battle music"),
+                                     ("musicStop", "Stop music"), ("revealAll", "Reveal enemies"), ("rest", "REST"))]
 
 
 def gm_objects(base):
     gm = dict(Tags=["gm"])
-    coin = obj("Custom_Model", tf(), Nickname="Gold coin", Hands=True, CustomMesh={
-        "MeshURL": f"{base}props/coin.obj", "DiffuseURL": f"{base}props/coin.jpg", "NormalURL": "", "ColliderURL": "",
-        "Convex": True, "MaterialIndex": 2, "TypeIndex": 0, "CastShadows": True})
-    # the GM's table: a real table everyone sees (only what lies on it is GM-only)
-    out = [obj("Custom_Model", tf(), GUID=guid("gm", "table"), Nickname="GM table", Locked=True, Tags=["gmtable"],
-               CustomMesh={"MeshURL": f"{base}props/gm_table.obj", "DiffuseURL": f"{base}props/{TEXTURES['gm_table']}",
-                           "NormalURL": "", "ColliderURL": "", "Convex": True, "MaterialIndex": 1, "TypeIndex": 0,
-                           "CastShadows": True},
-               grid={"x": DESK_X, "z": 0, "k": "model", "lift": 0})]
-    # screen: three standing panels, art outside (players), quick reference inside (GM)
-    for i, (z, x, ry) in enumerate(((-2.8, 0.75, 60.0), (0.0, 0.0, 90.0), (2.8, 0.75, 120.0))):
-        t = tf(ry=ry)
-        t["rotX"] = 270.0
-        p = tile(f"{base}art/out/screen_front_{2 - i}.jpg", t, GUID=guid("gm", "screen", i), Nickname="GM screen",
-                 Locked=True, Tags=["gmscreen"], grid={"x": EDGE - 0.8 + x, "z": z, "k": "tile", "s": [4.5, 1, 4.5], "ly": 2.3})
-        p["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/screen_back_{i}.jpg"
-        out.append(p)
-    out.append(obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
-                   CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
-                   grid={"x": DESK_X + 2.6, "z": -5.5, "k": "tile", "s": [3, 1, 3]}))
+    def model(name, **kw):
+        kw.setdefault("Nickname", name.replace("_", " ").title())
+        return obj("Custom_Model", tf(), CustomMesh={
+            "MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{TEXTURES[name]}", "NormalURL": "",
+            "ColliderURL": "", "Convex": kw.pop("convex", True), "MaterialIndex": 2 if name == "coin" else 1,
+            "TypeIndex": 0, "CastShadows": True}, **kw)
+    out = [model("gm_table", GUID=guid("gm", "table"), Nickname="GM table", Locked=True, Tags=["gmtable"],
+                 grid={"x": X0 + 5.2, "z": 0, "k": "model", "lift": -0.02}),            # a hair low: no flicker at the seam
+           model("gm_screen", GUID=guid("gm", "screen"), Nickname="GM screen", Locked=True, Tags=["gmscreen"],
+                 grid={"x": X0 + 1.0, "z": 0, "k": "model", "lift": 0}),
+           model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False, **gm,
+                 grid={"x": X0 + 7.2, "z": -6.2, "k": "model", "lift": 0}),
+           tile(f"{base}art/out/gm_console.jpg", tf(ry=90.0), GUID=guid("gm", "console"), Nickname="GM controls", Locked=True,
+                Tags=["gm", "gmconsole"], grid={"x": X0 + 9.0, "z": 0, "k": "tile", "s": [6, 1, 6]}),
+           obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
+               CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
+               grid={"x": X0 + 2.6, "z": -6.9, "k": "tile", "s": [1.8, 1, 1.8]})]
+    for n, (die, rgb) in enumerate(DIE_COLOURS.items()):
+        out.append(obj(die, tf(), GUID=guid("gm", "die", n), Nickname="GM " + die.replace("Die_", "d"), **gm,
+                       ColorDiffuse=dict(zip("rgb", rgb)),
+                       grid={"x": X0 + 6.6 + 0.6 * (n % 3), "z": -6.8 + 0.9 * (n // 3), "k": "tile", "s": [1, 1, 1], "lift": 1.5}))
     deck = {"FaceURL": f"{base}art/out/items.jpg", "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 4,
             "NumHeight": 2, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
-    spots = [(x, z) for x in (DESK_X - 3.2, DESK_X - 0.9) for z in (-8, -4, 0, 4, 8)]
+    spots = [(X0 + x, z) for x in (1.3, 3.4, 5.5) for z in (3.9, 5.4, 6.9, 8.4)]   # tight block, top right
     cards = [(i, name, text) for i, (name, text, _, k) in enumerate(ITEMS) for _ in range(k)]
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
         out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
-                       GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1.4, 1, 1.4]}))
+                       GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
+    coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.", **gm,
-                   ContainedObjects=[coin], grid={"x": DESK_X + 2.6, "z": 3, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
+                   ContainedObjects=[coin], grid={"x": X0 + 7.8, "z": 6.9, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
     return out
 
 
@@ -428,7 +437,7 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base),
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS,
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
