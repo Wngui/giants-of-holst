@@ -282,7 +282,7 @@ fenced in Holst by the thieves' guild. The giants came to take it back - and eve
                 ("cart", -5.6, -3.4, 70, 0.9), ("crate", -6.4, -2.4, 20), ("barrel", -6.8, -1.9), ("barrel", -6.3, -1.6),
                 ("sack", 1.6, 3.2, 20), ("sack", 2.1, 2.8, 70), ("lumber", 5.6, 2.9, 20),
                 ("rubble", -3, 3.3, 10), ("rubble", 6.2, -3, 60), ("rubble", 3.3, -3.3, 20, 0.8), ("crates", 5.4, -4, 30),
-                ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115, 0.6), ("wicker_shield", 2.6, -3.6, 20),
+                ("door_smashed", -2.0, 3.3, 35), ("giant_club", 5.2, -1.9, 115, 0.6), ("wicker_shield", 2.6, -3.6, 20, 0.75),
                 ("goods", -2.6, -4.3, 10), ("goods", -4.9, -4.2, 200)],
          npcs=[("street_kid", -4, 3), ("street_kid", -3, 4), ("street_kid", -5, 4),
                ("giant_club", 4.5, 2.5), ("giant_eye", 6, 0), ("giant_troll", 6, -3), ("giant_club", 3, 1),
@@ -433,7 +433,7 @@ After: tracks and blood lead to a cave in the hillside."""),
                + [("stalagmite", x, z, (x * 31) % 360) for x, z in [(-5.5, 3.8), (4.8, 4.2), (-6, -2.8), (5.6, 1.5), (-3, 5)]]
                + [("rubble", -1.6, 5.6, 0, 0.8), ("rubble", 1.8, 5.6, 180, 0.8), ("rock_b", 2.8, -2.4, 30, 1.4),
                   ("rock_d", 2.8, -0.4, 80, 1.1), ("campfire_cold", -1.3, 0.8), ("rubble", 4, 2.5, 0, 0.6), ("torch", -3.5, -1),
-                  ("wicker_shield", 4.4, -3.2, 130, 0.9), ("giant_club", 7.6, -3.0, 75, 0.55)],
+                  ("wicker_shield", 4.4, -3.2, 130, 0.7), ("giant_club", 7.6, -3.0, 75, 0.55)],
          npcs=[("dead_human", -3, 2), ("dead_human", -2, -2), ("dead_human", 0.5, -0.5), ("dying_giant", 1.4, -2.6),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
