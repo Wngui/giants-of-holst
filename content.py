@@ -29,7 +29,7 @@ HEROES = [
     dict(key="thief", name="Wren the Thief", color="Red", fig="rpg_THIEF", hp=18, defense=13,
          stats=dict(Might=0, Agility=3, Wits=2),
          attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing knife", 5, "1d4+3", "range 6")],
-         blurb="Quick hands, quicker feet. Gets into anything with a lock.",
+         blurb="Quick feet, quicker hands. Nothing stays locked for long.",
          traits=["Sneaky: advantage on sneaking and lockpicking (roll 2 d20, keep the best).",
                  "Street smart: knows how thieves' guilds think, talk and hide things."],
          background="Grew up in the alleys of Aldmere's capital and talked his way into the King's service "
