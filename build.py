@@ -2,8 +2,8 @@
 e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/out/*, Holst.json, GM_GUIDE.md"""
 import hashlib, json, subprocess, sys, textwrap
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC
+from PIL import Image, ImageChops, ImageDraw, ImageFont
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, POUCHES, SKIES
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -70,6 +70,85 @@ def make_sheet(hero):
     return im
 
 
+GOLD = (120, 88, 36)
+
+
+def make_item_card(i):
+    title, text, _, _ = ITEMS[i]
+    im = Image.new("RGB", (500, 700), GOLD)
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle((12, 12, 488, 688), 18, fill=(236, 222, 190))
+    d.text((250, 48), title, font=font(30 if len(title) > 18 else 34, True), fill=GOLD, anchor="mm")
+    im.paste(Image.open(RAW / f"item_{i}.png").convert("RGB").resize((460, 383)), (20, 82))
+    d.rectangle((20, 82, 480, 465), outline=GOLD, width=3)
+    wrap(d, (32, 482), text, 24, 34)
+    d.text((250, 668), "magic item", font=font(18), fill=(110, 90, 60), anchor="mm")
+    return im
+
+
+def text_panel(title, body, size=(1000, 1500), fs=30):
+    """Parchment panel with a heading and wrapped text (GM screen inside)."""
+    im = Image.new("RGB", size, (236, 222, 190))
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, size[0] - 1, size[1] - 1), outline=GOLD, width=14)
+    d.text((size[0] // 2, 70), title, font=font(52, True), fill=GOLD, anchor="mm")
+    wrap(d, (50, 130), body, fs, int((size[0] - 100) / (fs * 0.55)), spacing=10)
+    return im
+
+
+def screen_panels():
+    rules = RULES.split("\n", 1)[1]
+    foes = "\n".join(f"{t['name']}: HP {t['hp']}, Def {t['defense']}. " +
+                     "; ".join(f"{a} {'+%d' % b if b is not None else ''} {c or ''}".replace("  ", " ") for a, b, c, _ in t["attacks"])
+                     for t in NPCS.values() if t["attacks"])
+    items = "\n".join(f"{n}{' (x%d)' % k if k > 1 else ''}: {x}" for n, x, _, k in ITEMS)
+    return [("How to play", rules, 36), ("Foes", foes, 33), ("Magic items", items, 36)]
+
+
+def sky(key):
+    """Scene backdrop as a 360 panorama: left/right edges made to wrap, top and bottom faded so the poles don't pinch."""
+    im = Image.open(upscaled(f"sky_{key}")).convert("RGB")
+    w, h = im.size
+    shifted = ImageChops.offset(im, w // 2, 0)
+    mask = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(mask)
+    edge = int(w * 0.12)
+    for x in range(edge):
+        v = int(255 * (1 - x / edge) ** 1.5)
+        d.line((x, 0, x, h), fill=v)
+        d.line((w - 1 - x, 0, w - 1 - x, h), fill=v)
+    im = Image.composite(shifted, im, mask)
+    for band, rows in (("top", range(int(h * 0.14))), ("bottom", range(h - 1, h - 1 - int(h * 0.16), -1))):
+        y0 = rows[0]
+        ref = im.crop((0, y0, w, y0 + 1) if band == "top" else (0, y0 - 1, w, y0)).resize((1, 1)).getpixel((0, 0))
+        for i, y in enumerate(rows):
+            k = 1 - i / len(rows)
+            row = im.crop((0, y, w, y + 1))
+            im.paste(Image.blend(row, Image.new("RGB", (w, 1), ref), k ** 1.4), (0, y))
+    return im
+
+
+def gm_pdf(text, out):
+    """GM guide as a book: plain text pages (headings bold), for TTS's in-game PDF reader."""
+    W, H, M = 1240, 1754, 90
+    pages, y, page = [], H, None
+    for raw in text.splitlines():
+        if raw.startswith("```"):
+            continue
+        head = raw.startswith("#")
+        line = raw.lstrip("#").strip().replace("**", "").replace("*", "").replace("`", "")
+        fs = 38 if raw.startswith("# ") else 32 if head else 24
+        for part in textwrap.wrap(line, int((W - 2 * M) / (fs * 0.52)), subsequent_indent="   ") or [""]:
+            if y + fs * 1.5 > H - M:
+                page = Image.new("RGB", (W, H), (244, 236, 214))
+                pages.append(page)
+                y = M
+            ImageDraw.Draw(page).text((M, y), part, font=font(fs, head), fill=(40, 28, 16))
+            y += int(fs * (1.9 if head else 1.45))
+    pages[0].save(out, save_all=True, append_images=pages[1:], resolution=150)
+    return len(pages)
+
+
 def build_images():
     OUT.mkdir(parents=True, exist_ok=True)
     for h in HEROES:
@@ -80,6 +159,22 @@ def build_images():
         make_sheet(h).save(OUT / f"sheet_{h['key']}.jpg", quality=90)
         Image.open(RAW / f"portrait_{h['key']}.png").convert("RGB").resize((256, 256)).save(OUT / f"portrait_{h['key']}.jpg")
     Image.open(RAW / "card_back.png").convert("RGB").resize((500, 700)).save(OUT / "card_back.jpg", quality=90)
+    items = Image.new("RGB", (2000, 1400))
+    for i in range(len(ITEMS)):
+        items.paste(make_item_card(i), ((i % 4) * 500, (i // 4) * 700))
+    items.save(OUT / "items.jpg", quality=90)
+    art = Image.open(upscaled("screen_art")).convert("RGB")
+    pw = art.width // 3
+    for i, (title, body, fs) in enumerate(screen_panels()):
+        art.crop((i * pw, 0, (i + 1) * pw, art.height)).resize((1000, 1500), Image.LANCZOS).save(OUT / f"screen_front_{i}.jpg", quality=88)
+        text_panel(title, body, fs=fs).save(OUT / f"screen_back_{i}.jpg", quality=90)
+    desk = Image.open(RAW / "table_wood.png").convert("RGB")
+    desk.crop((0, 0, desk.width, int(desk.width / 2.04))).resize((2040, 1000)).save(OUT / "gm_desk.jpg", quality=85)
+    console = Image.new("RGB", (1200, 800), (40, 28, 20))
+    ImageDraw.Draw(console).rectangle((0, 0, 1199, 799), outline=GOLD, width=16)
+    console.save(OUT / "gm_console.jpg", quality=90)
+    for key in SKIES:
+        sky(key).save(OUT / f"sky_{key}.jpg", quality=85)
     wood = Image.open(RAW / "table_wood.png").convert("RGB").resize(TABLE_PX)
     aw = int(TABLE_PX[0] * ART_FRAC)
     ah = int(aw / 1.5)
@@ -176,7 +271,9 @@ def scene_data(s, base, textures):
     if s["key"] == "den":   # Baron's Bones dice on the gambling table
         spawns += [obj("Die_6", tf(), GUID=guid("den", "die", i), Tags=["scene"], grid={"x": -0.4 + 0.4 * i, "z": 0, "k": "fig", "lift": 4})
                    for i in range(3)]
+    _, rgb, bright = SKIES[s["key"]]
     return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
+                sky=f"{base}art/out/sky_{s['key']}.jpg", light=[*rgb, bright],
                 table=f"{base}art/out/table_{s['key']}.jpg", music=dict(url=f"{base}music/{s['music']}", title=s["title"]))
 
 
@@ -203,6 +300,67 @@ def hero_objects(h, n, base):
             CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
             grid={"role": "deck", "color": c}),
     ]
+
+
+# GM desk: beyond the table's east edge (grid x past the table half-width), GM-only (tag "gm"); the screen
+# stands on the table's east border and everyone sees it. GM sits east looking west: cards ry 270, tiles ry 90.
+EDGE = COLS / ART_FRAC / 2          # table half-width in grid squares
+DESK_X = EDGE + 5.2                 # desk centre; it is 10 squares deep and 20.4 wide
+
+
+def gm_objects(base):
+    gm = dict(Tags=["gm"])
+    def model(name, **kw):
+        return obj("Custom_Model", tf(), Nickname=name.title(), CustomMesh={
+            "MeshURL": f"{base}props/{name}.obj", "DiffuseURL": f"{base}props/{name}.jpg", "NormalURL": "",
+            "ColliderURL": "", "Convex": True, "MaterialIndex": 2 if name == "coin" else 1, "TypeIndex": 0,
+            "CastShadows": True}, **kw)
+    out = [tile(f"{base}art/out/gm_desk.jpg", tf(ry=90.0), GUID=guid("gm", "desk"), Nickname="GM desk", Locked=True, **gm,
+                grid={"x": DESK_X, "z": 0, "k": "tile", "s": [20.4, 1, 20.4], "lift": -0.1})]
+    # screen: three standing panels, art outside (players), quick reference inside (GM)
+    for i, (z, x, ry) in enumerate(((-2.8, 0.75, 60.0), (0.0, 0.0, 90.0), (2.8, 0.75, 120.0))):
+        t = tf(ry=ry)
+        t["rotX"] = 270.0
+        p = tile(f"{base}art/out/screen_front_{2 - i}.jpg", t, GUID=guid("gm", "screen", i), Nickname="GM screen",
+                 Locked=True, Tags=["gmscreen"], grid={"x": EDGE - 0.8 + x, "z": z, "k": "tile", "s": [4.5, 1, 4.5], "ly": 2.3})
+        p["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/screen_back_{i}.jpg"
+        out.append(p)
+    out.append(tile(f"{base}art/out/gm_console.jpg", tf(ry=90.0), GUID=guid("gm", "console"), Nickname="GM controls",
+                    Locked=True, XmlUI=console_xml(), **gm, grid={"x": DESK_X + 3.4, "z": 0, "k": "tile", "s": [4, 1, 4]}))
+    out.append(obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
+                   CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
+                   grid={"x": DESK_X + 3.4, "z": -6, "k": "tile", "s": [3, 1, 3]}))
+    deck = {"FaceURL": f"{base}art/out/items.jpg", "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 4,
+            "NumHeight": 2, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
+    spots = [(x, z) for x in (DESK_X - 3.4, DESK_X - 1.1) for z in (-8, -4, 0, 4, 8)]
+    cards = [(i, name, text) for i, (name, text, _, k) in enumerate(ITEMS) for _ in range(k)]
+    for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
+        out.append(obj("Card", tf(ry=270.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
+                       GUID=guid("gm", "item", n), **gm, grid={"x": x, "z": z, "k": "tile", "s": [1.4, 1, 1.4]}))
+    coin, ration = model("coin"), model("ration")
+    for n, (label, gold, food) in enumerate(POUCHES):
+        what = ", ".join(w for w in (f"{gold} gold" if gold else "", f"{food} rations" if food else "") if w)
+        out.append(obj("Bag", tf(), GUID=guid("gm", "pouch", n), Nickname=label, Description=what, **gm,
+                       ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18}, ContainedObjects=[coin] * gold + [ration] * food,
+                       grid={"x": DESK_X + 1.2, "z": -8.5 + 3.4 * n, "k": "tile", "s": [1.6, 1.6, 1.6], "inner": 1.0}))
+    for n, (label, thing, z) in enumerate((("Gold coins (endless)", coin, 4.5), ("Rations (endless)", ration, 8.0))):
+        out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "supply", n), Nickname=label, **gm,
+                       ContainedObjects=[thing], grid={"x": DESK_X + 3.4, "z": z, "k": "tile", "s": [1.6, 1.6, 1.6], "inner": 1.0}))
+    return out
+
+
+def console_xml():
+    """The GM panel again, as buttons lying on the desk (object UI; also GM-only by visibility)."""
+    btn = 'fontSize="34" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0"'
+    on = f'onClick="{CONTROLLER}/'
+    scenes = "".join(f'<Button id="scene_{i + 1}" {on}onSceneButton" {btn}>{s["title"]}</Button>' for i, s in enumerate(SCENES))
+    tools = "".join(f'<Button {on}{f}" {btn}>{t}</Button>' for f, t in (("musicScene", "Scene music"), ("musicBattle", "Battle music"),
+                    ("musicStop", "Stop music"), ("revealAll", "Reveal all enemies"), ("rest", "REST")))
+    # ponytail: object-UI size/rotation are TTS conventions I can't test here; tweak position/scale if it sits oddly
+    return (f'<Panel visibility="Black|Host" position="0 0 -12" rotation="0 0 180" width="1150" height="760" '
+            f'scale="0.17 0.17 0.17"><HorizontalLayout spacing="20" padding="20 20 20 20">'
+            f'<VerticalLayout spacing="8">{scenes}</VerticalLayout><VerticalLayout spacing="8">{tools}</VerticalLayout>'
+            f'</HorizontalLayout></Panel>')
 
 
 def xml_ui(base):
@@ -291,12 +449,14 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
+                gm=gm_objects(base),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
     data["version"] = hashlib.md5((json.dumps(data, sort_keys=True) + (ROOT / "game.lua").read_text()).encode()).hexdigest()[:8]
     # DATA goes in as a Lua table literal: TTS's JSON.decode takes minutes on a payload this size
     lua = (ROOT / "game.lua").read_text().replace("DATA = {} --@DATA@", "DATA = " + lua_lit(data))
+    print("GM guide book:", gm_pdf(gm_guide(), OUT / "gm_guide.pdf"), "pages")
     xml, assets = xml_ui(base)
     (ROOT / "controller.lua").write_text(lua)
     (ROOT / "game.json").write_text(json.dumps(dict(version=data["version"], xml=xml, assets=assets)))

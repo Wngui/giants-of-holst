@@ -9,6 +9,7 @@ cart cart.jpg
 chair chair.jpg
 chest chest.jpg
 chest_gold chest_gold.jpg
+coin coin.jpg
 coins coins.jpg
 crate crate.jpg
 crates crates.jpg
@@ -35,6 +36,7 @@ pillar pillar.jpg
 pine pine.jpg
 pine_b pine_b.jpg
 pines pines.jpg
+ration ration.jpg
 rock_a rock_a.jpg
 rock_b rock_b.jpg
 rock_c rock_c.jpg

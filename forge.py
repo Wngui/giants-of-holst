@@ -914,6 +914,23 @@ def wall_sconce():
     return a.objs
 
 
+def coin():
+    """One gold coin, a bit oversized so it is easy to pick up (GM desk: coin bag and pouches)."""
+    a = Asset(25)
+    a.cyl(0.16, 0.04, (0, 0, 0), "gold", segs=16)
+    a.cyl(0.1, 0.008, (0, 0, 0.04), "gold", segs=10)
+    return a.objs
+
+
+def ration():
+    """A day's food: a cloth bundle tied with string and a loaf of bread."""
+    a = Asset(26)
+    a.blob(0.2, (0, 0, 0), "canvas", scale=(1.3, 1, 0.7), jitter=0.08, subdiv=2, flat_bottom=0, smooth=True)
+    a.box((0.03, 0.42, 0.03), (0, 0, 0.14), "timber")
+    a.blob(0.12, (0.12, 0.06, 0.12), "dirt_road", scale=(1.6, 1, 0.8), jitter=0.06, subdiv=2, smooth=True)
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -936,7 +953,7 @@ ASSETS = {
     "kerb": kerb, "house_e": lambda: house(13, 2.2, 2.6, 3, "timber", front=True, roof="shingle", plaster="plaster_rose"),
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
-    "wall_sconce": wall_sconce,
+    "wall_sconce": wall_sconce, "coin": coin, "ration": ration,
 }
 
 if __name__ == "__main__":

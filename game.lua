@@ -37,6 +37,15 @@ end
 function install(sceneIndex)
     for _, o in ipairs(getObjectsWithTag("kit")) do o.destruct() end
     for _, d in ipairs(DATA.kits) do spawnObjectData({ data = placed(d) }) end
+    -- GM desk: whatever still lies on it (tag "gm") and the screen are replaced; things handed out stay
+    for _, tag in ipairs({ "gm", "gmscreen" }) do
+        for _, o in ipairs(getObjectsWithTag(tag)) do o.destruct() end
+    end
+    for _, d in ipairs(DATA.gm) do
+        spawnObjectData({ data = placed(d), callback_function = function(o)
+            if o.hasTag("gm") then gmHide(o) end
+        end })
+    end
     for _, color in ipairs(DATA.colors) do
         local c = corner(color)
         Player[color].setHandTransform({ position = { c.x, T.top + 4, T.cz + c.sz * (T.d / 2 + 4) },
@@ -104,7 +113,10 @@ function placed(d)
         end
     else
         -- props drop a little and get pinned; figures are scaled to the grid (RPG kit figures fit a 2-unit square)
-        p = world(g.x, g.z, g.lift or (g.k == "fig" and 1 or 0.3))
+        p = world(g.x, g.z, g.ly and g.ly * SQ or g.lift or (g.k == "fig" and 1 or 0.3))
+        for _, c in ipairs(g.inner and d.ContainedObjects or {}) do   -- coins etc. in bags: grid-sized too
+            c.Transform.scaleX, c.Transform.scaleY, c.Transform.scaleZ = g.inner * SQ, g.inner * SQ, g.inner * SQ
+        end
         local unit = (g.k == "model") and SQ or SQ / 2
         local s = g.s or { 1, 1, 1 }
         t.scaleX, t.scaleY, t.scaleZ = s[1] * unit, s[2] * unit, s[3] * unit
@@ -139,6 +151,7 @@ function setScene(i)
             fig.setRotationSmooth({ 0, 90, 0 })   -- face east, into the scene
         end
     end
+    backdrop(s)
     UI.setAttribute("sceneTitle", "text", s.title)
     play(s.music)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
@@ -170,13 +183,52 @@ function revealNear(p)
     end
 end
 
-function onObjectDrop(_, o)
+function onObjectDrop(player, o)
     for _, color in ipairs(DATA.colors) do
         if o.hasTag("fig_" .. color) then
             local q = o.getPosition()
             revealNear({ q.x, q.y, q.z })
         end
     end
+    -- GM desk: what the GM puts down on it disappears for players; what the GM puts anywhere else appears
+    if player == "Black" then
+        if onDesk(o.getPosition()) then
+            if not o.hasTag("gm") then o.addTag("gm"); gmHide(o) end
+        elseif o.hasTag("gm") then
+            gmShow(o)
+        end
+    end
+end
+
+-- ---------------------------------------------------------------- GM desk
+function onDesk(q) return q.x > T.cx + T.w / 2 end
+
+function gmHide(o) o.setInvisibleTo(PLAYERS) end
+
+function gmShow(o)
+    o.setInvisibleTo({})
+    o.removeTag("gm")
+end
+
+-- coins out of a desk pouch, a card off a desk deck: hidden like their container until the GM hands them out
+function onObjectLeaveContainer(container, o)
+    if container.hasTag("gm") then
+        o.addTag("gm")
+        gmHide(o)
+    end
+end
+
+-- ---------------------------------------------------------------- mood: 360 backdrop + light colour per scene
+-- pcall: these TTS calls can't be tested here; a failure must never stop the scene switch
+local light0
+function backdrop(s)
+    pcall(function() Backgrounds.setCustomURL(s.sky) end)
+    pcall(function()
+        light0 = light0 or Lighting.light_intensity
+        Lighting.light_intensity = light0 * s.light[4]
+        Lighting.setLightColor(Color(s.light[1], s.light[2], s.light[3]))
+        Lighting.apply()
+    end)
 end
 
 -- ---------------------------------------------------------------- music

@@ -434,3 +434,48 @@ THE END. (Optional epilogue: she promises to return the Hearthstone and renew th
 ]
 
 BATTLE_MUSIC = "battle.mp3"
+
+# ---------------------------------------------------------------- GM desk (GM-only, beside the table)
+# magic items as cards the GM hands out: (name, rules text, card art prompt, copies)
+ITEMS = [
+    ("Warren Whistle", "Blow it once: 1d4 street kids turn up to help or cause a distraction.",
+     "a small carved bone whistle on a leather cord lying on worn cobblestones, warm candlelight", 1),
+    ("Wolf-tooth Charm", "Once: reroll a failed Agility or Might check.",
+     "a necklace of wolf teeth and leather strips with a carved bone bead on rough dark wood", 1),
+    ("Healing Draught", "Drink (an action): heal 2d8+2 HP. One use.",
+     "a small round glass flask of glowing red potion with a cork stopper on a wooden table", 2),
+    ("Smoke Egg", "Throw it: works like Smoke Bomb, a 3x3 area is hidden until they act. One use.",
+     "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
+    ("Vasko's Lucky Ring", "Once per scene: reroll any die you can see.",
+     "a heavy gold signet ring with a rat crest and a faintly glowing green gem on red velvet", 1),
+    ("Lantern of True Sight", "Once: for one scene, see through illusions and invisibility.",
+     "an old engraved brass lantern glowing with pale blue magical light in a dark stone tunnel", 1),
+    ("Giant's Tooth Amulet", "Once: one Might check automatically succeeds.",
+     "a huge yellowed giant's tooth carved with swirling spiral patterns hanging from a thick braided rope on dark stone", 1),
+    ("Moonstaff Shard", "Once: cast Fireball (3x3 area, 3d6 fire, Agility DC 14 for half).",
+     "a broken shard of a silver staff with a glowing crescent moon crystal, sparks of light", 1),
+]
+# pre-filled pouches: (label, gold coins, rations)
+POUCHES = [("Starting purse", 10, 3)] * 4 + [("Guard post chest (passage A)", 15, 0), ("Rats' nest purse (passage C)", 8, 0)]
+# per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
+SKY_STYLE = ("An equirectangular 360 degree panorama, seen from eye level. A painterly dark fantasy illustration "
+             "in muted earthy colours with soft atmospheric light.")
+SKIES = {
+    "title": ("A cosy medieval tavern hall at night with a roaring stone hearth, heavy wooden beams, candles and "
+              "shelves of bottles.", (1.0, 0.85, 0.65), 1.0),
+    "outskirts": ("A walled medieval city burning at dusk, columns of smoke rising over timber-framed rooftops, a red "
+                  "sky and the hazy silhouettes of giants between the towers.", (1.0, 0.78, 0.6), 0.9),
+    "sewer": ("A vast underground brick sewer with tall vaulted arches, dark water channels and the warm glow of "
+              "refugee campfires in the gloom.", (0.75, 0.9, 0.8), 0.65),
+    "den": ("A candlelit underground stone cistern hall with thick columns, stolen chandeliers, red drapes and heaps "
+            "of glittering loot.", (1.0, 0.75, 0.5), 0.75),
+    "passage": ("A long dark stone tunnel lit by a few flickering wall torches, damp walls, cobwebs and deep "
+                "shadows.", (0.8, 0.8, 0.95), 0.55),
+    "cart": ("A misty pine forest at dusk along a muddy country road, tall dark trees and fog drifting between the "
+             "trunks.", (0.85, 0.9, 1.0), 0.85),
+    "cave": ("Inside a huge dark natural cave, jagged rock walls and a shaft of pale light falling from a crack high in "
+             "the ceiling.", (0.7, 0.75, 0.9), 0.55),
+}
+SCREEN_ART = ("Three huge cyclops giants, muscular grey-skinned brutes each with a single large eye in the middle of "
+              "the forehead, carrying round wicker shields and tree-trunk clubs, smashing a burning medieval town at dusk "
+              "while tiny townsfolk flee below them")

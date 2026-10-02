@@ -2,11 +2,11 @@
 so delete one to re-roll it. Usage: python gen_art.py  (ComfyUI must be on 127.0.0.1:8188)"""
 import json, time, urllib.request, urllib.parse
 from pathlib import Path
-from content import HEROES, SCENES, STYLE, MAP_STYLE, GROUNDS, GROUND_STYLE
+from content import HEROES, SCENES, STYLE, MAP_STYLE, ITEMS, SKIES, SKY_STYLE, SCREEN_ART, GROUNDS, GROUND_STYLE
 
 COMFY = "http://127.0.0.1:8188"
 RAW = Path(__file__).parent / "art" / "raw"
-REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1, "ground_outskirts": 1, "ground_den": 2, "ground_cart": 1}  # bump to get a new seed
+REROLL = {"card_back": 1, "card_thief_4": 1, "card_wizard_1": 1, "card_wizard_2": 1, "portrait_healer": 1, "map_passage": 1, "ground_outskirts": 1, "ground_den": 2, "ground_cart": 1, "item_6": 1, "screen_art": 1}  # bump to get a new seed
 
 
 def jobs():
@@ -20,6 +20,12 @@ def jobs():
             yield f"card_{h['key']}_{i}", f"{prompt}, {STYLE}", 768, 640
     yield "table_wood", f"top-down view of a dark old oak tavern tabletop, long wooden planks, worn, scratches, candle wax, no objects, {STYLE}", 1536, 1024
     yield "card_back", f"ornate symmetrical celtic knotwork pattern, gold filigree on deep crimson leather, no symbols, {STYLE}", 640, 896
+    # GM desk art, appended so earlier jobs keep their seeds
+    for i, (_, _, prompt, _) in enumerate(ITEMS):
+        yield f"item_{i}", f"{prompt}, {STYLE}", 768, 640
+    for key, (prompt, _, _) in SKIES.items():
+        yield f"sky_{key}", f"{prompt} {SKY_STYLE}", 1536, 768
+    yield "screen_art", f"{SCREEN_ART}, {STYLE}", 1536, 768
 
 
 def workflow(prompt, w, h, seed):

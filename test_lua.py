@@ -87,6 +87,7 @@ function makeObj(d)
   function o.getGUID() return d.GUID end
   function o.hasTag(t) return o.tags[t] == true end
   function o.removeTag(t) o.tags[t] = nil end
+  function o.addTag(t) o.tags[t] = true end
   function o.setInvisibleTo(t) o.invisible = #t > 0 end
   function o.getPosition()
     local p = o.pos or {d.Transform.posX, d.Transform.posY, d.Transform.posZ}
@@ -222,6 +223,29 @@ c.onObjectDrop("Red", hero)
 assert not giants[0].invisible and gm_bar not in giants[0].xml    # visible again, bar for everyone
 c.revealAll()
 assert count("hidden") == 0 and not any(o.invisible for o in giants)
+# GM desk: off the table's east edge and hidden from players; the screen on the table's east border, seen by all
+desk = list(g.getObjectsWithTag("gm").values())
+screen = list(g.getObjectsWithTag("gmscreen").values())
+assert len(desk) == len(c.DATA.gm) - 3 and all(o.invisible for o in desk), [o.data.Nickname for o in desk if not o.invisible]
+assert all(o.data.Transform.posX > W / 2 for o in desk), [(o.data.Nickname, o.data.Transform.posX) for o in desk]
+assert len(screen) == 3 and not any(o.invisible for o in screen)
+assert all(W / 2 - 3 * SQ < o.data.Transform.posX < W / 2 + SQ and o.data.Transform.posY > TOP for o in screen)
+pouch = next(o for o in desk if o.data.Name == "Bag")
+assert pouch.data.ContainedObjects[1].Transform.scaleX == SQ          # coins inside sized to the grid
+card = next(o for o in desk if o.data.Name == "Card")
+card.pos = lua.table_from([0, TOP, 0])
+c.onObjectDrop("Red", card)                          # a player can't hand things out
+assert card.invisible
+c.onObjectDrop("Black", card)                        # GM puts it on the table -> everyone sees it
+assert not card.invisible and not card.hasTag("gm")
+card.pos = lua.table_from([W / 2 + 5 * SQ, TOP, 0])
+c.onObjectDrop("Black", card)                        # and back on the desk -> GM-only again
+assert card.invisible and card.hasTag("gm")
+coin = g.makeObj(to_lua({"Name": "Custom_Model", "GUID": "c01n00", "Transform": {"posX": W / 2 + 5, "posY": 2, "posZ": 0}}))
+c.onObjectLeaveContainer(pouch, coin)
+assert coin.invisible and coin.hasTag("gm")
+assert all(s["sky"].endswith(".jpg") and len(s["light"]) == 4 for s in scenes)
+
 sheet = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Custom_Tile" and "Wren" in o.data.Nickname][0]
 assert sheet.data.Transform.rotY == 180, "Red's sheet faces the player (tile images are flipped vs hands)"
 
