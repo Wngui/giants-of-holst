@@ -158,6 +158,11 @@ function setScene(i)
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
+            if o.hasTag("trapgas") then                             -- the poison gas trap: the GM sets it off by hand
+                o.addContextMenuItem("Release the gas", function(color)
+                    if color == "Black" then fxAt("gas_cloud", o.getPosition()) end
+                end)
+            end
             if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
             if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
             if o.hasTag("fxclear") then clearCube(o) end

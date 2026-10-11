@@ -175,7 +175,9 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   1. DART PLATE (column -6): darts from the walls, 2d4 to whoever steps on it.
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
-  3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
+  3. POISON GAS VENT (column +4): green gas floods the tunnel. Everyone within 2 squares: Might DC 12.
+     Fail: 2d6 poison damage and POISONED (-2 to all rolls until a rest). Success: half damage. Rune-marked.
+     Right-click the vent marker > "Release the gas" for the green cloud.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF

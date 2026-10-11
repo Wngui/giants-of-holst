@@ -438,8 +438,9 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
                    "Agility DC 13 to disarm. Triggered: darts from the walls, 2d4 to whoever steps on it."}),
                   ("trap_pit", -1, 0, 0, 1, {"name": "Trap 2: collapsing floor", "hidden": True, "gm": "Wits DC 13 to spot. "
                    "Triggered: Agility DC 13 or fall 3m, 1d6, Might DC 12 to climb out (allies can help)."}),
-                  ("trap_vent", 4, 0, 0, 1, {"name": "Trap 3: sleep gas vent", "hidden": True, "gm": "Wits DC 13 to spot "
-                   "(Detect Magic shows the runes). Triggered: Might DC 12 or fall asleep."}),
+                  ("trap_vent", 4, 0, 0, 1, {"name": "Trap 3: poison gas vent", "hidden": True, "gas": True,
+                   "gm": "Wits DC 13 to spot (Detect Magic shows the runes). Triggered: everyone within 2 squares, "
+                   "Might DC 12. Fail: 2d6 poison and -2 to all rolls until a rest. Success: half. Right-click: Release the gas."}),
                   ("trap_wire", 8, 0, 0, 1, {"name": "Trap 4: bell tripwire", "hidden": True, "gm": "Wits DC 13 to spot, "
                    "Agility DC 13 to disarm. Rings: the giant rats in their nest wake and attack."})],
          npcs=[("giant_rat", 5.6, 3.6), ("giant_rat", 6.4, 3.2)],
@@ -451,7 +452,9 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   1. DART PLATE (column -6): darts from the walls, 2d4 to whoever steps on it.
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
-  3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
+  3. POISON GAS VENT (column +4): green gas floods the tunnel. Everyone within 2 squares: Might DC 12.
+     Fail: 2d6 poison damage and POISONED (-2 to all rolls until a rest). Success: half damage. Rune-marked.
+     Right-click the vent marker > "Release the gas" for the green cloud.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF

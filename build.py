@@ -332,11 +332,12 @@ LOOSE = ("barrel", "keg", "crate", "crates", "sack", "chest", "chest_gold", "coi
 
 def prop(spec, n, scene, base, textures):
     name, x, z, *rest = spec
-    extra = rest.pop() if rest and isinstance(rest[-1], dict) else {}   # {"name", "gm": GM-only note, "hidden": trap}
+    extra = rest.pop() if rest and isinstance(rest[-1], dict) else {}   # {"name", "gm": GM-only note, "hidden": trap, "gas": trap 3}
     rot, scale = (list(rest) + [0, 1][len(rest):])[:2]      # optional rot, scale
     s = list(scale) if isinstance(scale, (list, tuple)) else [scale] * 3
     loose = name in LOOSE
-    common = dict(GUID=guid(scene, "prop", n), Tags=["scene"] + (["hidden", "manual"] if extra.get("hidden") else []),
+    common = dict(GUID=guid(scene, "prop", n), Tags=["scene"] + (["hidden", "manual"] if extra.get("hidden") else []) +
+                  (["trapgas"] if extra.get("gas") else []),
                   Tooltip="gm" in extra, Locked=not loose, GMNotes=extra.get("gm", ""))
     if name.startswith("Tileset_"):                       # built-in TTS tileset piece
         return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
@@ -370,7 +371,8 @@ FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240D
       "fireball": (_FX + "2270444915139318768/3259CD2646D7C3C9EC7F1103F80567181AAB20E5/", 0, 0, 1.0, 0.5, 4),
       "blood": (_FX + "2270444915139318553/A261B79D93615AF0B0057D2A84A299AB5D59D20C/", 0, 0, 0.85, 1.5, 2),
       "puff": (_SMOKE, 0, 3, 0.6, 0.5, 4), "poison": (_SMOKE, 0, 4, 0.6, 0.5, 4),
-      "smoke_cloud": (_SMOKE, 5, None, 1.0, 0.5, None),            # Smoke Bomb / Smoke Egg: stays until the GM deletes it
+      "smoke_cloud": (_SMOKE, 5, None, 1.0, 0.5, None),
+      "gas_cloud": (_SMOKE, 6, None, 1.3, 0.3, 12),                # trap 3: green poison gas            # Smoke Bomb / Smoke Egg: stays until the GM deletes it
       "smoke_column": (_SMOKE, 3, None, 0.8, 1.5, None),           # black smoke over the burning ruins
       # ToMo's fire (as in the braziers), effect 4: sound, no light (its flickering light over 3 ruins was too much). The pack's own "Fire - small" ships custom shaders
       # that fail to load in TTS ("Shader didn't load correctly")

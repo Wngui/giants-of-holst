@@ -146,7 +146,7 @@ function makeObj(d)
   end
   o.Counter = { setValue = function(v) o.counter = v end }
   o.UI = { setXml = function(x) o.xml = x end, setAttribute = function() end }
-  function o.addContextMenuItem() end
+  function o.addContextMenuItem(label, fn) o.menu = fn end
   o.RPGFigurine = { die = function() end, attack = function() end }
   objects[d.GUID] = o
   if d.LuaScript and d.LuaScript ~= "" then
@@ -423,6 +423,9 @@ objs = list(g.getObjectsWithTag("scene").values())
 traps = [o for o in objs if (o.data.Nickname or "").startswith("Trap ")]
 assert len(traps) == 4 and all(o.invisible and o.tint.a < 1 and "DC" in o.data.GMNotes for o in traps)
 assert any("LANTERN OF TRUE SIGHT" in (o.data.GMNotes or "") for o in objs)
+vent = next(o for o in traps if "poison gas" in o.data.Nickname)
+g.spawned = None; vent.menu("Red"); assert g.spawned is None                    # players can't set it off
+vent.menu("Black"); assert g.spawned.CustomAssetbundle.LoopingEffectIndex == 6  # green smoke
 for s in scenes:
     names = [o["Name"] for o in s["spawns"]]
     assert names.count("Custom_Assetbundle") >= sum("props/torch.obj" in (o.get("CustomMesh") or {}).get("MeshURL", "") for o in s["spawns"])
