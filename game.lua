@@ -297,12 +297,25 @@ end
 
 ALL = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey", "Black" }
 
--- storm scenes: every 20 s, half the time, a roll of thunder somewhere over the map
+-- storm scenes: every 20 s, half the time, lightning: the table light flashes twice, the thunder follows
 function storm()
     local s = DATA.scenes[scene]
     if s and s.storm and T and math.random() < 0.5 then
-        fxAt("thunder", { x = T.cx + (math.random() - 0.5) * 16 * SQ, z = T.cz + (math.random() - 0.5) * 10 * SQ })
+        flash()
+        local p = { x = T.cx + (math.random() - 0.5) * 16 * SQ, z = T.cz + (math.random() - 0.5) * 10 * SQ }
+        Wait.time(function() fxAt("thunder", p) end, 0.4 + math.random() * 1.2)
     end
+end
+
+function flash()
+    pcall(function()
+        local base = Lighting.light_intensity
+        local function set(v) Lighting.light_intensity = v; Lighting.apply() end
+        set(base * 3)
+        Wait.time(function() set(base) end, 0.08)
+        Wait.time(function() set(base * 2.2) end, 0.2)
+        Wait.time(function() set(base) end, 0.3)
+    end)
 end
 
 -- The effect pack's carrier cube shows while the bundle loads and until tint alpha 0 takes (the pack's advice; set too

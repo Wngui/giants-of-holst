@@ -379,9 +379,12 @@ _DESTRUCT = _FX + "2404446659869056693/485A9C7B229AE1DF40DA8ACF323F52A1B61905DA/
 _RAIN = _FX + "2404446659869065433/3DDE001D9060BAF87A50DFFF1EE21D491508A9DE/"
 FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            "thud": (_FX + "2404446659869068680/7A803D820B95FBF2DBC75FFCE32F45761A4496DC/", 0, 1, 0.1, 0, 4),
-           "boom": (_DESTRUCT, 0, 4, 0.1, 0, 8), "crash": (_DESTRUCT, 0, 10, 0.1, 0, 6),
+           # Fireball: a distant-sounding explosion, its source sunk under the table to soften it (no volume control)
+           "boom": (_FX + "2404446659868465020/DDEC7C0DC8D32C2C0B1F9AE643FC6D8CBC8FCE71/", 0, 15, 0.1, -4, 8),
+           "crash": (_DESTRUCT, 0, 10, 0.1, 0, 6),
            # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
-           "rain": (_RAIN, 16, None, 0.1, 0, None), "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
+           "rain": (_RAIN, 4, None, 0.1, -8, None),   # light rain loop, source well under the table: quieter
+           "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
 SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
@@ -394,7 +397,7 @@ for i, c in enumerate(COLOURS):
     FX["burst_" + c.lower()] = (_MAGIC, 0, i, 0.7, 0.3, 3)
 FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, clear=u.startswith(_FX), snd=WITH_SOUND.get(k) or
               ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
-FX["steam"]["loop"] = 1   # its "w/ Sound" looping effect
+FX["fire_quiet"] = dict(FX["fire"], loop=1)   # ToMo "Fire On (No Light)": silent; only one ruin fire crackles
 for f in FX.values():
     # the pack's one-shots play their looping mode (looping index = trigger index + 2, after "Off" and "Transparent")
     # for their lifetime instead of the trigger: with game.lua's clearCube (hidden until loaded) no cube ever shows

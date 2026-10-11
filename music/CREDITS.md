@@ -9,7 +9,7 @@ All tracks by Kevin MacLeod (incompetech.com), licensed under Creative Commons: 
 | outskirts.mp3 | "Dark Times" |
 | battle.mp3 | "Five Armies" |
 | sewer.mp3 | "Ossuary 5 - Rest" |
-| den.mp3 | "Hidden Agenda" |
+| den.mp3 | "Pippin the Hunchback" |
 | passage.mp3 | "The Descent" |
 | cart.mp3 | "Moorland" |
 | cave.mp3 | "Ossuary 1 - A Beginning" |

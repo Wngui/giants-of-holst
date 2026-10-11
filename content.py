@@ -300,7 +300,8 @@ Background (GM only): the giants' sacred Hearthstone was stolen from their mount
 fenced in Holst by the thieves' guild. The giants came to take it back - and everything else."""),
 
     dict(key="outskirts", title="1. Holst City", fog=True, music="outskirts.mp3", battle=True, hidden=True,
-         fx=[(e, x, z) for x, z in ((-2.8, 5.6), (7.9, -5.6), (3.8, -6)) for e in ("fire", "smoke_column")],   # the ruins burn
+         fx=[("fire", -2.8, 5.6), ("fire_quiet", 7.9, -5.6), ("fire_quiet", 3.8, -6)]   # the ruins burn (one crackles)
+            + [("smoke_column", x, z) for x, z in ((-2.8, 5.6), (7.9, -5.6), (3.8, -6))],
          stealth=["street_kid"],   # hidden until the GM presses their Reveal button (not by walking past)
          map_prompt="ruined medieval town street with broken houses, smashed carts, huge footprints in mud, scattered debris, a round sewer grate in the cobbles",
          heroes=[(-7, -1), (-7, 0), (-6, -1), (-6, 0)],
