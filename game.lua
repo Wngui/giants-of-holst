@@ -150,6 +150,7 @@ function setScene(i)
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
+            if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
             if o.hasTag("hidden") then
                 o.setInvisibleTo(PLAYERS)
                 Wait.frames(function() hide(o) end, 5)   -- tint/outline/bar once the figure and its script have loaded
@@ -275,7 +276,8 @@ function fxAt(name, p)
         callback_function = function(o)
             if f.hide then o.setInvisibleTo(ALL) end   -- sound-only bundle: its carrier cube stays out of sight
             if f.trig then
-                Wait.condition(function() pcall(function() o.AssetBundle.playTriggerEffect(f.trig) end) end,
+                local trig = type(f.trig) == "table" and f.trig[math.random(#f.trig)] or f.trig   -- a list: pick one
+                Wait.condition(function() pcall(function() o.AssetBundle.playTriggerEffect(trig) end) end,
                                function() return o.isDestroyed() or not o.loading_custom end, 20)
             end
             if f.life then Wait.time(function() if not o.isDestroyed() then o.destruct() end end, f.life) end
@@ -284,11 +286,11 @@ end
 
 ALL = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey", "Black" }
 
--- storm scenes: every 20 s, half the time, a lightning strike with thunder somewhere on the map
+-- storm scenes: every 20 s, half the time, a roll of thunder somewhere over the map
 function storm()
     local s = DATA.scenes[scene]
     if s and s.storm and T and math.random() < 0.5 then
-        fxAt("lightning", { x = T.cx + (math.random() - 0.5) * 16 * SQ, z = T.cz + (math.random() - 0.5) * 10 * SQ })
+        fxAt("thunder", { x = T.cx + (math.random() - 0.5) * 16 * SQ, z = T.cz + (math.random() - 0.5) * 10 * SQ })
     end
 end
 

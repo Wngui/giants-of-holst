@@ -366,23 +366,22 @@ FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240D
       "puff": (_SMOKE, 0, 3, 0.6, 0.5, 6), "poison": (_SMOKE, 0, 4, 0.6, 0.5, 6),
       "smoke_cloud": (_SMOKE, 5, None, 1.0, 0.5, None),            # Smoke Bomb / Smoke Egg: stays until the GM deletes it
       "smoke_column": (_SMOKE, 3, None, 0.8, 1.5, None),           # black smoke over the burning ruins
-      # ToMo's fire (as in the braziers), effect 3: light and sound. The pack's own "Fire - small" ships custom shaders
+      # ToMo's fire (as in the braziers), effect 4: sound, no light (its flickering light over 3 ruins was too much). The pack's own "Fire - small" ships custom shaders
       # that fail to load in TTS ("Shader didn't load correctly")
-      "fire": ("https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1", 3, None, 1.0, 0.3, None),
-      "candle": (_FX + "2270444915139312193/B2D57713BFFD619F77490690B49B2A9A990CDF9C/", 2, None, 0.25, 0, None),
+      "fire": ("https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1", 4, None, 1.0, 0.3, None),   # sound, no light
       "steam": (_FX + "2270444915139309239/936CFA9C80F455F7CD5560613ED189A82476DF17/", 0, None, 0.5, -0.2, None),   # cube under the floor
-      "fog": (_FX + "2270444915139311769/6D468EB548E760E2F3EB53135522400851C4D4B0/", 0, None, 2.0, 0.3, None),
-      "rain": (_FX + "2270444915139315184/F5B126B9A2C1CB523D2EA43765EC06BE86C71FC9/", 0, None, 3.0, 6, None),
       "thunder": (_FX + "1697279045394202566/3C3ADA0562A7796BAC79D849E43C75A722272235/", 2, None, 2.0, 7, None)}
 # sounds: trigger effects on sound-only bundles (their carrier cube is hidden from everyone). "Sound Effects" (Workshop
 # 2113057305) and "Soundscape Assets" (Workshop 3323409166, Left 4 Dead 2 rips: private play only, never redistributed)
 _SE = _FX + "778484758094767424/7B9E3F5416E3E303ED217CF7FDC40DA4C4A94533/"
 _DESTRUCT = _FX + "2404446659869056693/485A9C7B229AE1DF40DA8ACF323F52A1B61905DA/"
+_RAIN = _FX + "2404446659869065433/3DDE001D9060BAF87A50DFFF1EE21D491508A9DE/"
 FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            "thud": (_FX + "2404446659869068680/7A803D820B95FBF2DBC75FFCE32F45761A4496DC/", 0, 1, 0.1, 0, 4),
            "boom": (_DESTRUCT, 0, 4, 0.1, 0, 8), "crash": (_DESTRUCT, 0, 10, 0.1, 0, 6),
-           "lightning": (_FX + "2270444915139317007/BA1E4E1D6AA31B010500869A98A6D0818975B960/", 0, 0, 0.5, 0, 5)})
-SOUND = {"swipe", "pop", "thud", "boom", "crash"}
+           # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
+           "rain": (_RAIN, 16, None, 0.1, 0, None), "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
+SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
 # visual -> sound played with it
 WITH_SOUND = {"crit": "thud", "fireball": "boom", "puff": "swipe", "poison": "swipe", "smoke_cloud": "swipe", "blood": "swipe"}
 for i, c in enumerate(COLOURS):
@@ -390,8 +389,13 @@ for i, c in enumerate(COLOURS):
     FX["burst_" + c.lower()] = (_MAGIC, 0, i, 1.0, 0.3, 5)
 FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, snd=WITH_SOUND.get(k) or
               ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
-for k in ("rain", "steam"):
-    FX[k]["loop"] = 1   # their "w/ Sound" looping effect
+FX["steam"]["loop"] = 1   # its "w/ Sound" looping effect
+for f in FX.values():   # the pack's one-shots: "Off" (0) shows the carrier cube, "Transparent" (1) hides it
+    if f["trig"] is not None and not f["hide"] and f["url"] in (_SWIRL, _MAGIC, _SMOKE) + tuple(
+            _FX + u for u in ("2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240DEE/",
+                              "2270444915139318768/3259CD2646D7C3C9EC7F1103F80567181AAB20E5/",
+                              "2270444915139318553/A261B79D93615AF0B0057D2A84A299AB5D59D20C/")):
+        f["loop"] = 1
 # cards and items dropped face up on the map: the effect plays where the card lands. Anything unlisted: "swirl_white"
 CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud", "Luck": "swirl_yellow",
            "Poisoned Blade": "poison", "Cleave": "blood", "Shield Wall": "swirl_blue", "Taunt": "burst_red",
@@ -401,30 +405,13 @@ CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud
            "Mirror Image": "swirl_purple", "Frost Nova": "burst_blue", "Detect Magic": "swirl_blue",
            "Healing Draught": "swirl_green", "Smoke Egg": "smoke_cloud", "Vasko's Lucky Ring": "swirl_yellow",
            "Lantern of True Sight": "swirl_blue", "Moonstaff Shard": "burst_white"}
-WARM = {"r": 1.0, "g": 0.62, "b": 0.3}   # tint for the candle flames' light (if TTS tints bundle lights at all)
-
-
 def fx_obj(name, x, z, n, scene, lift=0.0):
     f = FX[name]
-    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n), Tags=["scene"], Tooltip=False, Locked=True,
-               ColorDiffuse=WARM if name == "candle" else {"r": 1.0, "g": 1.0, "b": 1.0},
+    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n), Tags=["scene"] + (["fxhide"] if f["hide"] else []),
+               Tooltip=False, Locked=True,
                grid={"x": x, "z": z, "k": "fx", "s": [f["s"]] * 3, "ly": f["lift"] + lift},
                CustomAssetbundle={"AssetbundleURL": f["url"], "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": f["loop"]})
-
-
-def lights(s):
-    """Small flames on the den's sconces (inner face, towards the middle) and candelabras, and the tavern's lanterns."""
-    out = []
-    for name, x, z, *rest in s.get("props", []):
-        if name == "wall_sconce":
-            r = math.hypot(x, z)
-            out.append(("candle", x - 0.4 * x / r, z - 0.4 * z / r, 1.3))
-        elif name == "candelabra":
-            out.append(("candle", x, z, 1.7))
-        elif name == "tavern":   # rotated 180: the door and its lanterns face south
-            out += [("candle", x - 0.6, z - 1.65, 1.3), ("candle", x + 0.6, z - 1.65, 1.3)]
-    return out
 
 
 FOG = False   # hidden enemies revealed by walking near: off for now, the GM toggles visibility by hand
@@ -436,7 +423,7 @@ def scene_data(s, base, textures):
         spawns.append(prop(spec, n, s["key"], base, textures))
         if spec[0] == "torch":
             spawns.append(flame(spec[1], spec[2], n, s["key"]))
-    for n, (name, x, z, *lift) in enumerate(s.get("fx", []) + lights(s)):   # ambient effects and small flames
+    for n, (name, x, z, *lift) in enumerate(s.get("fx", [])):   # ambient effects
         spawns.append(fx_obj(name, x, z, n, s["key"], *lift))
     for n, spec in enumerate(s["npcs"]):
         o = npc(*spec[:3], n, s["key"], *spec[3:], face=s.get("face", {}).get(spec[0]))
