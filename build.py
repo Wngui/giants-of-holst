@@ -346,7 +346,7 @@ FLAME_URL = "https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.un
 
 def flame(x, z, n, scene):
     return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "flame", n), Tags=["scene", "fx"], Tooltip=False, Locked=True,
-               grid={"x": x, "z": z, "k": "model", "s": [0.25] * 3, "ly": 0.74},
+               grid={"x": x, "z": z, "k": "model", "s": [0.25] * 3, "ly": 0.7},   # its little cube under the coals
                CustomAssetbundle={"AssetbundleURL": FLAME_URL, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": 0})
 
@@ -368,7 +368,8 @@ FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240D
       "smoke_column": (_SMOKE, 3, None, 0.8, 1.5, None),           # black smoke over the burning ruins
       # ToMo's fire (as in the braziers), effect 4: sound, no light (its flickering light over 3 ruins was too much). The pack's own "Fire - small" ships custom shaders
       # that fail to load in TTS ("Shader didn't load correctly")
-      "fire": ("https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1", 4, None, 1.0, 0.3, None),   # sound, no light
+      "fire": ("https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1", 4, None, 1.0, -0.1, None),   # sound, no light;
+      # lowered so its small cube (TTS re-enables the renderer the bundle has off) sits under the rubble
       "steam": (_FX + "2270444915139309239/936CFA9C80F455F7CD5560613ED189A82476DF17/", 0, None, 0.5, -0.2, None),   # cube under the floor
       "thunder": (_FX + "1697279045394202566/3C3ADA0562A7796BAC79D849E43C75A722272235/", 2, None, 2.0, 7, None)}
 # sounds: trigger effects on sound-only bundles (their carrier cube is hidden from everyone). "Sound Effects" (Workshop
@@ -384,7 +385,8 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
 SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
-FX["candle"] = ("props/candle_light.unity3d", 0, None, 1.0, 0, None)
+# scale 0.01: TTS turns the bundle's (disabled) cube back on; a light's range doesn't scale, so only the cube shrinks
+FX["candle"] = ("props/candle_light.unity3d", 0, None, 0.01, 0, None)
 # visual -> sound played with it
 WITH_SOUND = {"crit": "thud", "fireball": "boom", "puff": "swipe", "poison": "swipe", "smoke_cloud": "swipe", "blood": "swipe"}
 for i, c in enumerate(COLOURS):
