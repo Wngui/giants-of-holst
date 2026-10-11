@@ -402,6 +402,11 @@ assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (coun
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 
+# cave: the princess starts hidden, and "reveal all" leaves her hidden
+c.setScene(7)
+isl = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Princess Isolde"]
+assert len(isl) == 1 and isl[0].invisible and isl[0].hasTag("manual")
+c.revealAll(); assert isl[0].invisible
 # sewer: the loaded gold die lies hidden on Old Pell's barrel
 c.setScene(3)
 gold = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Loaded gold die"]

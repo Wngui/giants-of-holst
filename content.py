@@ -496,6 +496,7 @@ If the party arrives badly hurt from the traps, let them REST at the passage exi
 After: tracks and blood lead to a cave in the hillside."""),
 
     dict(key="cave", title="6. The Last Stand Cave", fog=True, music="cave.mp3",
+         stealth=["princess"],   # hidden up the shaft until the GM reveals her (her Reveal button or the hotkey)
          map_prompt="inside a large dark natural cave, rocky floor, a tall shaft in the far wall rising into darkness, fallen weapons, a broken wicker shield, faint light from a crack above",
          heroes=[(0, -6), (1, -6), (0, -5), (1, -5)],
          props=rocks(-10, 6.8, -1.6, 6.8, 4) + rocks(1.6, 6.8, 10, 6.8, 5) + rocks(-10, -6.8, -2, -6.8, 6)
