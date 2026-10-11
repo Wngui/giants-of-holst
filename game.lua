@@ -28,7 +28,8 @@ function start(s)
     end
     Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
     Wait.time(applyHands, 2, 15)
-    Wait.time(storm, 20, -1)   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
+    Wait.time(storm, 20, -1)
+    preload()   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
 end
 
 function onSave()
@@ -313,6 +314,26 @@ function clearCube(o)
         Wait.time(clear, 0.5)
         Wait.time(clear, 2)
     end, function() return o.isDestroyed() or not o.loading_custom end, 30)
+end
+
+-- One idle copy of every effect bundle under the table, invisible and silent, so later spawns come out of the cache
+-- loaded at once (and their carrier cube can be cleared right away). The candle light is left out: it would shine.
+-- Rebuilt on each load.
+local IDLE = { [DATA.fx.fire.url] = 2, [DATA.fx.steam.url] = 2 }   -- "Fire Off" / "Steam Off"; the rest: 0, off/silent
+function preload()
+    for _, o in ipairs(getObjectsWithTag("fxcache")) do o.destruct() end
+    local seen = { [DATA.fx.candle.url] = true }
+    for _, f in pairs(DATA.fx) do
+        if not seen[f.url] and f.url:match("^https?://") then
+            seen[f.url] = true
+            spawnObjectData({ data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { "fxcache" },
+                Transform = { posX = T.cx, posY = T.top - 30, posZ = T.cz, rotX = 0, rotY = 0, rotZ = 0,
+                              scaleX = 0.1, scaleY = 0.1, scaleZ = 0.1 },
+                CustomAssetbundle = { AssetbundleURL = f.url, AssetbundleSecondaryURL = "", MaterialIndex = 0, TypeIndex = 0,
+                                      LoopingEffectIndex = IDLE[f.url] or 0 } },
+                callback_function = function(o) o.setInvisibleTo(ALL); o.interactable = false end })
+        end
+    end
 end
 
 -- for npc.lua: fx { name =, guid = }

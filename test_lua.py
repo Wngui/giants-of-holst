@@ -437,6 +437,12 @@ for s in scenes:   # ambient effects and flames are scene spawns with a known ef
         if o["Name"] == "Custom_Assetbundle" and "flame" not in o["GUID"]:
             assert o["CustomAssetbundle"]["AssetbundleURL"].startswith("https://"), o
 
+# every effect bundle preloaded once, out of sight
+urls = {f["url"] for f in to_py(c.DATA.fx).values() if f["url"].startswith("http")}
+cache = list(g.getObjectsWithTag("fxcache").values())
+assert len(cache) == len(urls) and all(o.invisible for o in cache)
+c.preload(); assert len(list(g.getObjectsWithTag("fxcache").values())) == len(urls)   # rebuilt, not doubled
+
 # hero cards are the same size as the GM's item cards
 item = next(o for o in g.getObjectsWithTag("gm").values() if o.data.Name == "Card")
 decks = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Deck"]
