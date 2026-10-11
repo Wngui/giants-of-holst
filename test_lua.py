@@ -437,19 +437,13 @@ for s in scenes:   # ambient effects and flames are scene spawns with a known ef
         if o["Name"] == "Custom_Assetbundle" and "flame" not in o["GUID"]:
             assert o["CustomAssetbundle"]["AssetbundleURL"].startswith("https://"), o
 
+# the pack's one-shots use looping modes (no trigger), so clearCube can hide the cube until they're loaded
+assert all(f.get("trig") is None for k, f in data_fx.items() if f["clear"] and not f["hide"])
 # every effect bundle preloaded once, out of sight
 urls = {f["url"] for f in to_py(c.DATA.fx).values() if f["url"].startswith("http")}
 cache = list(g.getObjectsWithTag("fxcache").values())
 assert len(cache) == len(urls) and all(o.invisible for o in cache)
 c.preload(); assert len(list(g.getObjectsWithTag("fxcache").values())) == len(urls)   # rebuilt, not doubled
-
-# FX test cards: the GM drops one on the map, it plays every time
-tests = [o for o in g.getObjectsWithTag("fxtest").values()]
-assert len(tests) == 7
-for o in tests:
-    o.pos = lua.table_from([2, TOP, 0]); o.is_face_down = False
-    g.spawned = None; c.onObjectDrop("Black", o); assert fx() == data_fx["blood"]["url"], o.data.Nickname
-    g.spawned = None; c.onObjectDrop("Black", o); assert fx() == data_fx["blood"]["url"]
 
 # hero cards are the same size as the GM's item cards
 item = next(o for o in g.getObjectsWithTag("gm").values() if o.data.Name == "Card")

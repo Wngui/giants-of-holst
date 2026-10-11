@@ -360,10 +360,10 @@ _SWIRL = _FX + "2270444915139313553/27816EA79BCAB051C15C56BA2AFF1AF65ECAB5B2/"
 _MAGIC = _FX + "2270444915139320764/088D4D90C54EE8B5092844387761C67D266835BA/"
 _SMOKE = _FX + "2270444915139311435/BF2382A7612CDD7EF897804FC92558458FB7956B/"
 COLOURS = ["White", "Blue", "Red", "Yellow", "Green", "Purple"]      # trigger order in the magic bundles
-FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240DEE/", 0, 0, 1.0, 1, 4),
-      "fireball": (_FX + "2270444915139318768/3259CD2646D7C3C9EC7F1103F80567181AAB20E5/", 0, 0, 1.0, 0.5, 6),
-      "blood": (_FX + "2270444915139318553/A261B79D93615AF0B0057D2A84A299AB5D59D20C/", 0, 0, 0.85, 1.5, 3),
-      "puff": (_SMOKE, 0, 3, 0.6, 0.5, 6), "poison": (_SMOKE, 0, 4, 0.6, 0.5, 6),
+FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240DEE/", 0, 0, 1.0, 1, 3),
+      "fireball": (_FX + "2270444915139318768/3259CD2646D7C3C9EC7F1103F80567181AAB20E5/", 0, 0, 1.0, 0.5, 4),
+      "blood": (_FX + "2270444915139318553/A261B79D93615AF0B0057D2A84A299AB5D59D20C/", 0, 0, 0.85, 1.5, 2),
+      "puff": (_SMOKE, 0, 3, 0.6, 0.5, 4), "poison": (_SMOKE, 0, 4, 0.6, 0.5, 4),
       "smoke_cloud": (_SMOKE, 5, None, 1.0, 0.5, None),            # Smoke Bomb / Smoke Egg: stays until the GM deletes it
       "smoke_column": (_SMOKE, 3, None, 0.8, 1.5, None),           # black smoke over the burning ruins
       # ToMo's fire (as in the braziers), effect 4: sound, no light (its flickering light over 3 ruins was too much). The pack's own "Fire - small" ships custom shaders
@@ -382,13 +382,6 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
            "rain": (_RAIN, 16, None, 0.1, 0, None), "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
 SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
-FX_TESTS = [("A", "Current: Transparent mode, alpha 0 once loaded (+0.5 s, +2 s)"),
-            ("B", "Alpha 0 in the spawn data, Transparent mode, trigger once loaded"),
-            ("C", "Looping 'Blood spray' mode instead of the trigger (cube not part of it), no tint"),
-            ("D", "Looping 'Blood spray' mode, alpha 0 in the spawn data"),
-            ("E", "Invisible to all until loaded + 0.3 s, then shown, alpha 0, trigger"),
-            ("F", "Trigger once loaded; alpha 0 forced every 0.1 s for its whole life"),
-            ("G", "Invisible until loaded + 0.3 s, then shown in looping 'Blood spray' mode, alpha 0")]
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
 FX["candle"] = ("props/candle_light.unity3d", 0, None, 1.0, 0, None)
@@ -400,12 +393,11 @@ for i, c in enumerate(COLOURS):
 FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, clear=u.startswith(_FX), snd=WITH_SOUND.get(k) or
               ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
 FX["steam"]["loop"] = 1   # its "w/ Sound" looping effect
-for f in FX.values():   # the pack's one-shots: "Off" (0) shows the carrier cube, "Transparent" (1) hides it
-    if f["trig"] is not None and not f["hide"] and f["url"] in (_SWIRL, _MAGIC, _SMOKE) + tuple(
-            _FX + u for u in ("2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240DEE/",
-                              "2270444915139318768/3259CD2646D7C3C9EC7F1103F80567181AAB20E5/",
-                              "2270444915139318553/A261B79D93615AF0B0057D2A84A299AB5D59D20C/")):
-        f["loop"] = 1
+for f in FX.values():
+    # the pack's one-shots play their looping mode (looping index = trigger index + 2, after "Off" and "Transparent")
+    # for their lifetime instead of the trigger: with game.lua's clearCube (hidden until loaded) no cube ever shows
+    if f["clear"] and f["trig"] is not None and not f["hide"]:
+        f["loop"], f["trig"] = f["trig"] + 2, None
 # cards and items dropped face up on the map: the effect plays where the card lands. Anything unlisted: "swirl_white"
 CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud", "Luck": "swirl_yellow",
            "Poisoned Blade": "poison", "Cleave": "blood", "Shield Wall": "swirl_blue", "Taunt": "burst_red",
@@ -560,11 +552,6 @@ def gm_objects(base):
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
         out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
                        GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
-    # ponytail: temporary FX test cards (Cleave's blood spray, 7 ways to hide the effect pack's carrier cube); drop on the map
-    for n, (k, how) in enumerate(FX_TESTS):
-        out.append(obj("Card", tf(ry=90.0), CardID=900 + 7, Nickname=f"FX test {k}", Description=how, CustomDeck={"9": deck},
-                       GUID=guid("gm", "fxtest", n), Hands=True, Tags=["gm", "fxtest"],
-                       grid={"x": X0 + 9.6, "z": -0.6 + 1.2 * n, "k": "tile", "s": [1, 1, 1]}))
     coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.",
