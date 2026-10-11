@@ -336,7 +336,7 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
   Anyone who jumps in: next scene."""),
 
     dict(key="sewer", title="2. The Sewer Warren", fog=True, music="sewer.mp3", rest=True,
-         fx=[("steam", 0.6, 2.4), ("steam", 1.2, -3.6), ("fog", -4, 0), ("fog", 5, 0)],   # ambient particle effects (build.py FX)
+         fx=[("steam", 0.6, 2.4), ("steam", 1.2, -3.6)],   # steam off the channel
          map_prompt="underground stone sewer cavern with a refugee camp, tents made of rags, small fires, a central channel of dark water, crates",
          heroes=[(-5, 1), (-5, 2), (-4, 1), (-4, 2)],
          props=wall_line("wall", -9.9, 6.3, 9.9, 6.3, spacing=1.8) + wall_line("wall", -10.4, -6, -10.4, 4.8, spacing=1.8)
@@ -487,7 +487,6 @@ If the party arrives badly hurt from the traps, let them REST at the passage exi
 After: tracks and blood lead to a cave in the hillside."""),
 
     dict(key="cave", title="6. The Last Stand Cave", fog=True, music="cave.mp3",
-         fx=[("fog", -4, 1), ("fog", 4, -1)],   # ambient particle effects (build.py FX)
          map_prompt="inside a large dark natural cave, rocky floor, a tall shaft in the far wall rising into darkness, fallen weapons, a broken wicker shield, faint light from a crack above",
          heroes=[(0, -6), (1, -6), (0, -5), (1, -5)],
          props=rocks(-10, 6.8, -1.6, 6.8, 4) + rocks(1.6, 6.8, 10, 6.8, 5) + rocks(-10, -6.8, -2, -6.8, 6)

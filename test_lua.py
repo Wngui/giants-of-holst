@@ -250,7 +250,7 @@ for i, s in enumerate(scenes, 1):
         assert "grid" not in dict(o.data), "grid must be stripped before spawnObjectData"
         if o.data.Name != "FogOfWar":
             assert abs(t.posX) <= ART[0] + 1e-6 and abs(t.posZ) <= ART[1] + 1e-6, (s["title"], o.data.Name, t.posX, t.posZ)
-            assert t.posY >= TOP, (s["title"], o.data.Name)
+            assert t.posY >= TOP or o.data.Name == "Custom_Assetbundle", (s["title"], o.data.Name)   # effects may sink their carrier
             assert min(t.scaleX, t.scaleY, t.scaleZ) > 0, (s["title"], o.data.Name, "zero scale")
     assert g.MusicPlayer.url == s["music"]["url"]
     assert g.UIattr["sceneTitle.text"] == s["title"]

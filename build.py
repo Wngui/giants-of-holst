@@ -366,9 +366,11 @@ FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240D
       "puff": (_SMOKE, 0, 3, 0.6, 0.5, 6), "poison": (_SMOKE, 0, 4, 0.6, 0.5, 6),
       "smoke_cloud": (_SMOKE, 5, None, 1.0, 0.5, None),            # Smoke Bomb / Smoke Egg: stays until the GM deletes it
       "smoke_column": (_SMOKE, 3, None, 0.8, 1.5, None),           # black smoke over the burning ruins
-      "fire": (_FX + "2270444915139314616/1AFAC3C97DEC099489D2CCCF87244371D9DBE0A0/", 0, None, 1.0, 0.6, None),
+      # ToMo's fire (as in the braziers), effect 3: light and sound. The pack's own "Fire - small" ships custom shaders
+      # that fail to load in TTS ("Shader didn't load correctly")
+      "fire": ("https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1", 3, None, 1.0, 0.3, None),
       "candle": (_FX + "2270444915139312193/B2D57713BFFD619F77490690B49B2A9A990CDF9C/", 2, None, 0.25, 0, None),
-      "steam": (_FX + "2270444915139309239/936CFA9C80F455F7CD5560613ED189A82476DF17/", 0, None, 0.6, 0.2, None),
+      "steam": (_FX + "2270444915139309239/936CFA9C80F455F7CD5560613ED189A82476DF17/", 0, None, 0.5, -0.2, None),   # cube under the floor
       "fog": (_FX + "2270444915139311769/6D468EB548E760E2F3EB53135522400851C4D4B0/", 0, None, 2.0, 0.3, None),
       "rain": (_FX + "2270444915139315184/F5B126B9A2C1CB523D2EA43765EC06BE86C71FC9/", 0, None, 3.0, 6, None),
       "thunder": (_FX + "1697279045394202566/3C3ADA0562A7796BAC79D849E43C75A722272235/", 2, None, 2.0, 7, None)}
@@ -388,7 +390,7 @@ for i, c in enumerate(COLOURS):
     FX["burst_" + c.lower()] = (_MAGIC, 0, i, 1.0, 0.3, 5)
 FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, snd=WITH_SOUND.get(k) or
               ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
-for k in ("fire", "rain", "steam"):
+for k in ("rain", "steam"):
     FX[k]["loop"] = 1   # their "w/ Sound" looping effect
 # cards and items dropped face up on the map: the effect plays where the card lands. Anything unlisted: "swirl_white"
 CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud", "Luck": "swirl_yellow",
