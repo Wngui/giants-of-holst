@@ -336,6 +336,46 @@ function preload()
     end
 end
 
+-- ponytail: temporary. FX test cards: Frost Nova's blue burst, hiding the pack's carrier cube 7 different ways
+function fxTest(k, card)
+    local f, q = DATA.fx.burst_blue, card.getPosition()
+    local loopBlue = 3                       -- Magic Explosion looping effects: Off, Transparent, White, Blue, ...
+    local alpha0 = { r = 1, g = 1, b = 1, a = 0 }
+    local useLoop = k == "C" or k == "D" or k == "G"
+    local hidden = k == "E" or k == "G"
+    local data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { "fx" },
+        Transform = { posX = q.x, posY = T.top + f.lift * SQ, posZ = q.z, rotX = 0, rotY = 0, rotZ = 0,
+                      scaleX = f.s, scaleY = f.s, scaleZ = f.s },
+        CustomAssetbundle = { AssetbundleURL = f.url, AssetbundleSecondaryURL = "", MaterialIndex = 0, TypeIndex = 0,
+                              LoopingEffectIndex = useLoop and loopBlue or 1 } }
+    if k == "B" or k == "D" then data.ColorDiffuse = alpha0 end
+    broadcastToColor("FX test " .. k, "Black", { 0.6, 0.8, 1 })
+    spawnObjectData({ data = data, callback_function = function(o)
+        o.interactable = false
+        if hidden then o.setInvisibleTo(ALL) end
+        local function alive() return not o.isDestroyed() end
+        Wait.condition(function()
+            if not alive() then return end
+            if k == "A" then
+                o.setColorTint(alpha0); Wait.time(function() if alive() then o.setColorTint(alpha0) end end, 0.5)
+                Wait.time(function() if alive() then o.setColorTint(alpha0) end end, 2)
+            end
+            if k == "F" then Wait.time(function() if alive() then o.setColorTint(alpha0) end end, 0.1, 60) end
+            if hidden then
+                Wait.time(function()
+                    if not alive() then return end
+                    o.setColorTint(alpha0)
+                    o.setInvisibleTo({})
+                    if k == "E" then pcall(function() o.AssetBundle.playTriggerEffect(f.trig) end) end
+                end, 0.3)
+            elseif not useLoop then
+                pcall(function() o.AssetBundle.playTriggerEffect(f.trig) end)
+            end
+        end, function() return o.isDestroyed() or not o.loading_custom end, 20)
+        Wait.time(function() if alive() then o.destruct() end end, 6)
+    end })
+end
+
 -- for npc.lua: fx { name =, guid = }
 function fx(p)
     local o = getObjectFromGUID(p.guid)
@@ -345,9 +385,11 @@ end
 -- a hero card or item put face up on the map plays its effect there, once until REST picks it up again
 local played = {}
 function cardPlayed(o)
-    if o.type ~= "Card" or o.is_face_down or played[o.getGUID()] or o.hasTag("gm") then return end
+    if o.type ~= "Card" or o.is_face_down then return end
     local q, half = o.getPosition(), T.w * DATA.layout.art_w / 2
     if math.abs(q.x - T.cx) > half or math.abs(q.z - T.cz) > DATA.layout.rows * SQ / 2 then return end   -- hand/border
+    if o.hasTag("fxtest") then return fxTest(o.getName():sub(-1), o) end
+    if played[o.getGUID()] or o.hasTag("gm") then return end
     played[o.getGUID()] = true
     fxAt(DATA.card_fx[o.getName()] or "swirl_white", q)
 end

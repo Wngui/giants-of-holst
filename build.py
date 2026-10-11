@@ -382,6 +382,13 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
            "rain": (_RAIN, 16, None, 0.1, 0, None), "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
 SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
+FX_TESTS = [("A", "Current: Transparent mode, alpha 0 once loaded (+0.5 s, +2 s)"),
+            ("B", "Alpha 0 in the spawn data, Transparent mode, trigger once loaded"),
+            ("C", "Looping 'Blue' mode instead of the trigger (cube not part of it), no tint"),
+            ("D", "Looping 'Blue' mode, alpha 0 in the spawn data"),
+            ("E", "Invisible to all until loaded + 0.3 s, then shown, alpha 0, trigger"),
+            ("F", "Trigger once loaded; alpha 0 forced every 0.1 s for its whole life"),
+            ("G", "Invisible until loaded + 0.3 s, then shown in looping 'Blue' mode, alpha 0")]
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
 FX["candle"] = ("props/candle_light.unity3d", 0, None, 1.0, 0, None)
@@ -553,6 +560,11 @@ def gm_objects(base):
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
         out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
                        GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
+    # ponytail: temporary FX test cards (Frost Nova burst, 7 ways to hide the effect pack's carrier cube); drop on the map
+    for n, (k, how) in enumerate(FX_TESTS):
+        out.append(obj("Card", tf(ry=90.0), CardID=900 + 7, Nickname=f"FX test {k}", Description=how, CustomDeck={"9": deck},
+                       GUID=guid("gm", "fxtest", n), Hands=True, Tags=["gm", "fxtest"],
+                       grid={"x": X0 + 9.6, "z": -0.6 + 1.2 * n, "k": "tile", "s": [1, 1, 1]}))
     coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.",

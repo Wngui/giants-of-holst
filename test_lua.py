@@ -443,6 +443,14 @@ cache = list(g.getObjectsWithTag("fxcache").values())
 assert len(cache) == len(urls) and all(o.invisible for o in cache)
 c.preload(); assert len(list(g.getObjectsWithTag("fxcache").values())) == len(urls)   # rebuilt, not doubled
 
+# FX test cards: the GM drops one on the map, it plays every time
+tests = [o for o in g.getObjectsWithTag("fxtest").values()]
+assert len(tests) == 7
+for o in tests:
+    o.pos = lua.table_from([2, TOP, 0]); o.is_face_down = False
+    g.spawned = None; c.onObjectDrop("Black", o); assert fx() == data_fx["burst_blue"]["url"], o.data.Nickname
+    g.spawned = None; c.onObjectDrop("Black", o); assert fx() == data_fx["burst_blue"]["url"]
+
 # hero cards are the same size as the GM's item cards
 item = next(o for o in g.getObjectsWithTag("gm").values() if o.data.Name == "Card")
 decks = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Deck"]
