@@ -346,7 +346,8 @@ corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE 
                   ("bed", -6.2, 2.4, 90), ("bed", -7, -1.2, 0), ("bed", -5.4, -4.6, 60), ("bed", -9, 1.3, 20),
                   ("torch", -6, 0.6), ("torch", -6, -5.6), ("torch", 8.6, -3.4), ("torch", 4.4, 4.6),
                   ("bridge", 0.6, 4.2), ("bridge", -1.4, -0.2, 5), ("bridge", 2.6, -1.0, -5),
-                  ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6), ("barrel", 7.9, 4.1), ("sack", 4.6, 0.6, 30), ("sack", 5.0, -0.2),
+                  ("crates", 8.6, 3.8), ("barrel", 7.6, 4.6, 0, 1, {"name": "Barrel", "gm": "Searching it (Wits DC 12): a LOADED GOLD DIE on the bottom. "
+                   "Always lands on 6. Reveal the gold die on top of the barrel."}), ("barrel", 7.9, 4.1), ("sack", 4.6, 0.6, 30), ("sack", 5.0, -0.2),
                   ("crate", 5.6, 1.2, 15), ("keg", -9.2, -0.4, 90), ("rubble", 3.2, 5.2, 0, 0.7)],
          npcs=[("refugee", -6.3, 3.2), ("refugee", -6.6, -1.6), ("refugee", -5, -3.2), ("refugee", 7.5, -4.6),
                ("hunter", 8, -0.5), ("hunter", 7.4, -2.6), ("carcass", 6.6, -2.0), ("carcass", 7.1, -1.2),
@@ -362,6 +363,8 @@ Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favou
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
   - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
+  - LOADED GOLD DIE: hidden in the barrel nearest Pell (Wits DC 12 to search). Always lands on 6.
+    Reveal it with the visibility hotkey when found; it's worth a lot at Vasko's dice table.
     Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS:
@@ -394,6 +397,8 @@ RAT'S BONES (dice game) - best of 3 rounds:
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
   One hero plays, others may "help" (cards: Luck rerolls one die; Blessing adds +1d4 to the total).
+  THE LOADED GOLD DIE (if they found it in the sewer): always a 6. Swapping it in unseen: Agility DC 13;
+    Vasko notices a gold die on Wits DC 12 (he'd know - it's how he'd cheat too).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside

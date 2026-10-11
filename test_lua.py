@@ -402,6 +402,10 @@ assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (coun
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 
+# sewer: the loaded gold die lies hidden on Old Pell's barrel
+c.setScene(3)
+gold = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Loaded gold die"]
+assert len(gold) == 1 and gold[0].invisible and gold[0].hasTag("manual")
 # den: 5 street kids; the players' wonky dice start hidden. Passage: trap markers hidden, loot noted for the GM;
 # every brazier carries a flame
 c.setScene(4)

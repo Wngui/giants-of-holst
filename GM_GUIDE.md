@@ -125,6 +125,8 @@ Refugees stare. Food is worth more than gold here: 1 ration = 5 gold, or a favou
   - Hunters sell their WOLF-TOOTH CHARM for 2 rations (magic: once, reroll a failed Agility or Might check).
   - Lady Oriska trades a HEALING DRAUGHT (heal 2d8+2) for 1 ration. Or steal it (Agility DC 14).
   - OLD PELL the merchant (top right, by his barrels): rope, torches, lamp oil, chalk for 1 gold each. No food.
+  - LOADED GOLD DIE: hidden in the barrel nearest Pell (Wits DC 12 to search). Always lands on 6.
+    Reveal it with the visibility hotkey when found; it's worth a lot at Vasko's dice table.
     Buy something and he gossips: the Bandit Baron's men collect his best wine every night, east tunnel.
   - Sharing food with a refugee family: an old man tells them "the Bandit Baron knows everything in the drains".
 ASKING ABOUT THE PRINCESS:
@@ -145,6 +147,8 @@ RAT'S BONES (dice game) - best of 3 rounds:
   2. Each side may reroll ANY of their dice once (Vasko: reroll button per die).
   3. Rank: TRIPLE > STRAIGHT (e.g. 3-4-5) > PAIR (higher pair wins) > highest total.
   One hero plays, others may "help" (cards: Luck rerolls one die; Blessing adds +1d4 to the total).
+  THE LOADED GOLD DIE (if they found it in the sewer): always a 6. Swapping it in unseen: Agility DC 13;
+    Vasko notices a gold die on Wits DC 12 (he'd know - it's how he'd cheat too).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
   THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside

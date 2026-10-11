@@ -14,6 +14,12 @@ POUCH_LUA = f"""function onNumberTyped(color, n)
 end
 function setHidden() end
 """
+# the sewer's loaded gold die: whenever it's rolled it settles on 6; once a player picks it up it's theirs, no longer
+# scenery (scene changes clear and tidy away "scene" objects). setHidden: game.lua's hide() calls it
+LOADED_LUA = """function onRandomize() Wait.condition(function() self.setRotationValue(6) end, function() return self.resting end, 10) end
+function onPickUp(color) if color ~= "Black" then self.removeTag("scene") end end
+function setHidden() end
+"""
 RAW, OUT = ROOT / "art" / "raw", ROOT / "art" / "out"
 COLS, ROWS = 22, 22 / 1.5   # grid squares across/down the 3:2 scene art
 TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
@@ -377,7 +383,7 @@ FX = {"crit": (_FX + "2270444915139319129/1743CD5CF4C5925B97A1B71868D931C12C240D
 _SE = _FX + "778484758094767424/7B9E3F5416E3E303ED217CF7FDC40DA4C4A94533/"
 _DESTRUCT = _FX + "2404446659869056693/485A9C7B229AE1DF40DA8ACF323F52A1B61905DA/"
 _RAIN = _FX + "2404446659869065433/3DDE001D9060BAF87A50DFFF1EE21D491508A9DE/"
-FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
+FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "whoosh": (_SE, 0, 6, 0.1, 0, 3),   # whoosh: card swirls and bursts
            "thud": (_FX + "2404446659869068680/7A803D820B95FBF2DBC75FFCE32F45761A4496DC/", 0, 1, 0.1, 0, 4),
            # Fireball: a distant-sounding explosion, its source sunk under the table to soften it (no volume control)
            "boom": (_FX + "2404446659868465020/DDEC7C0DC8D32C2C0B1F9AE643FC6D8CBC8FCE71/", 0, 15, 0.1, -4, 8),
@@ -385,7 +391,7 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
            "rain": (_RAIN, 4, None, 0.1, -8, None),   # light rain loop, source well under the table: quieter
            "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
-SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
+SOUND = {"swipe", "whoosh", "thud", "boom", "crash", "rain", "thunder"}
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
 # scale 0.01: TTS turns the bundle's (disabled) cube back on; a light's range doesn't scale, so only the cube shrinks
@@ -396,7 +402,7 @@ for i, c in enumerate(COLOURS):
     FX["swirl_" + c.lower()] = (_SWIRL, 0, i, 0.5, 0.3, 2.5)   # small and quick: a card shouldn't fog the table
     FX["burst_" + c.lower()] = (_MAGIC, 0, i, 0.7, 0.3, 3)
 FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, clear=u.startswith(_FX), snd=WITH_SOUND.get(k) or
-              ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
+              ("whoosh" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
 FX["fire_quiet"] = dict(FX["fire"], loop=1)   # ToMo "Fire On (No Light)": silent; only one ruin fire crackles
 for f in FX.values():
     # the pack's one-shots play their looping mode (looping index = trigger index + 2, after "Off" and "Transparent")
@@ -461,12 +467,17 @@ def scene_data(s, base, textures):
                        ColorDiffuse={"r": 0.06, "g": 0.06, "b": 0.06},     # black, white pips: readable from across the table
                        grid={"x": -0.45 + 0.45 * i, "z": 0, "k": "fig", "s": [1.3, 1.3, 1.3], "lift": 4}) for i in range(3)]
         # the house's wonky dice for the players: lopsided and stained, hidden until the GM reveals them
-        wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((0.6, 0.45, 0.7), (0.7, 0.4, 0.3))]
+        wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((0.6, 0.6, 0.6), (0.7, 0.4, 0.3))]   # the third: just small, not squashed
         spawns += [obj("Die_6", tf(ry=50.0 * i), GUID=guid("den", "wonky", i), Tags=["scene", "hidden", "manual"],
                        Nickname="Wonky stained dice", Description="Lopsided, chipped and sticky. The house dice, for guests.",
                        ColorDiffuse=dict(zip("rgb", rgb)),
                        grid={"x": -1.6, "z": -0.6 + 0.6 * i, "k": "fig", "s": list(sc), "lift": 4})
                    for i, (sc, rgb) in enumerate(wonky)]
+    if s["key"] == "sewer":   # loot: the loaded gold die on Old Pell's barrel, hidden until the GM reveals it
+        spawns.append(obj("Die_6", tf(ry=15.0), GUID=guid("sewer", "loaded"), Tags=["scene", "hidden", "manual"],
+                          Nickname="Loaded gold die", Description="Heavy for its size. It always lands on 6.",
+                          ColorDiffuse={"r": 0.85, "g": 0.65, "b": 0.15}, LuaScript=LOADED_LUA,
+                          grid={"x": 7.6, "z": 4.6, "k": "fig", "s": [1.0, 1.0, 1.0], "lift": 2.5}))
     _, rgb, bright = SKIES[s["key"]]
     return dict(title=s["title"], spawns=spawns, storm=s.get("storm", False), heroes=[[x, z] for x, z in s["heroes"]],
                 sky=f"{base}art/out/sky_{s['key']}.jpg", light=[*rgb, bright],
