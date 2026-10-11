@@ -460,9 +460,10 @@ function hpShield(o, color, max)
         _G[fn] = function(_, who, alt)   -- only that hero's player (or the GM) changes their HP
             if who == color or who == "Black" then setHP(color, hp[color] + d * (alt and 5 or 1)) end
         end
-        -- the plaque is turned 180 to face its player, so local +x is their left: "-" goes there
+        -- the plaque is turned 180 to face its player, so local +x is their left: "-" goes there. Each button fills its
+        -- end of the plaque (0.48..1.3 from the middle) and a little past it: big targets
         o.createButton({ click_function = fn, function_owner = self, label = d < 0 and "-" or "+",
-                         position = { -d * 0.88, 0.12, 0 }, width = 0.7 * BTN, height = 0.66 * BTN, font_size = 0.55 * BTN,
+                         position = { -d * 0.9, 0.12, 0 }, width = 0.95 * BTN, height = 0.9 * BTN, font_size = 0.8 * BTN,
                          color = { 0.15, 0.1, 0.07 }, font_color = { 1, 0.95, 0.85 } })
     end
 end
