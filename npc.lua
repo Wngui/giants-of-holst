@@ -1,5 +1,5 @@
--- NPC: healthbar everyone sees; HP, damage box and attack buttons only the GM (Black seat / host) sees.
--- Damage box: "12" or "+12" deals damage, "-5" heals. Attack buttons roll and whisper the result to the GM.
+-- NPC: healthbar everyone sees (in battle only); HP and attack buttons only the GM (Black seat) sees.
+-- GM hovers the NPC and types a number: that much damage. Right-click > Heal 5. Attack buttons roll and whisper to the GM.
 -- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_HEIGHT in build.py or UI_ROT here.
 -- the bar stands upright and faces where the figure faces (its +z): Euler (90, -90, 90) in the object-UI frame
 -- (x = object x, z = object down). "0 0 180" lay flat; "(yaw - 90) -90 90" stood up facing south.
@@ -14,6 +14,12 @@ function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (60 
 function onLoad(saved)
     S = JSON.decode(saved)
     draw()
+    self.addContextMenuItem("Heal 5", function(color) if color == GM then hurt(-5) end end)
+end
+
+function onNumberTyped(color, n)
+    if color == GM then hurt(n) end
+    return true
 end
 
 function onSave() return JSON.encode(S) end
@@ -32,10 +38,10 @@ function draw()
             '" preferredHeight="' .. BTN_H .. '" fontSize="20" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0">' ..
             a.name .. '</Button>'
     end
-    x[#x + 1] = '<HorizontalLayout visibility="' .. GM .. '" preferredHeight="34" spacing="4">' ..
-        '<Text id="hp" fontSize="18" color="#ffffff" outline="#000000">' .. hpText() .. '</Text>' ..
-        '<InputField id="dmg" placeholder="dmg" onEndEdit="applyDamage" fontSize="18"/></HorizontalLayout>'
-    x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22"' .. (S.hidden and ' visibility="' .. GM .. '"' or '') ..
+    local off = S.battle and "" or ' active="false"'   -- bars only in battle (the GM's Battle button)
+    x[#x + 1] = '<Text id="hp" visibility="' .. GM .. '" preferredHeight="34" fontSize="18" color="#ffffff" outline="#000000"' ..
+        off .. '>' .. hpText() .. '</Text>'
+    x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22"' .. off .. (S.hidden and ' visibility="' .. GM .. '"' or '') ..
         ' percentage="' .. pct() ..
         '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>'
     x[#x + 1] = '</VerticalLayout></Panel>'
@@ -52,18 +58,20 @@ function setHidden(p)
     draw()
 end
 
+-- called by the controller when the GM switches battle mode on/off
+function setBattle(p)
+    S.battle = p.on
+    draw()
+end
+
 function pct() return math.floor(100 * S.hp / S.max) end
 function hpText() return S.hp .. "/" .. S.max .. "  Def " .. S.def end
 
-function applyDamage(player, value)
-    -- MoonSharp's tonumber(s, 10) throws on "-5"/"", so pattern-check first and call it without a base
-    local num = (value or ""):match("^%s*%+?(%-?%d+)%s*$")
-    local n = num and tonumber(num)
+function hurt(n)   -- negative heals
     if not n or n == 0 then return end
     S.hp = math.max(0, math.min(S.max, S.hp - n))
     self.UI.setAttribute("bar", "percentage", pct())
     self.UI.setAttribute("hp", "text", hpText())
-    self.UI.setAttribute("dmg", "text", "")
     -- die() toggles the lying pose; S.down tracks it so figures that start lying (the princess) stand when healed
     local down = S.hp == 0
     if down ~= (S.down or false) then

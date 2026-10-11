@@ -62,6 +62,10 @@ tent tent.jpg
 throne throne.jpg
 throne_dais throne_dais.jpg
 torch torch.jpg
+trap_pit trap_pit.jpg
+trap_plate trap_plate.jpg
+trap_vent trap_vent.jpg
+trap_wire trap_wire.jpg
 wall wall.jpg
 wall_broken wall_broken.jpg
 wall_door wall_door.jpg

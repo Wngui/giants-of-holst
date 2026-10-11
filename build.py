@@ -306,6 +306,7 @@ def npc(key, x, z, n, scene, hp=None, face=None):
         o["RPGdead"] = True
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
+        o["Tags"] = o["Tags"] + ["npc"]
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
                                           "ui": bundles[n % len(bundles)][2] if bundles else UI_HEIGHT.get(t["fig"], 330),
@@ -321,14 +322,28 @@ LOOSE = ("barrel", "keg", "crate", "crates", "sack", "chest", "chest_gold", "coi
 
 def prop(spec, n, scene, base, textures):
     name, x, z, *rest = spec
+    extra = rest.pop() if rest and isinstance(rest[-1], dict) else {}   # {"name", "gm": GM-only note, "hidden": trap}
     rot, scale = (list(rest) + [0, 1][len(rest):])[:2]      # optional rot, scale
     s = list(scale) if isinstance(scale, (list, tuple)) else [scale] * 3
     loose = name in LOOSE
-    common = dict(GUID=guid(scene, "prop", n), Tags=["scene"], Tooltip=False, Locked=not loose)
+    common = dict(GUID=guid(scene, "prop", n), Tags=["scene"] + (["hidden", "manual"] if extra.get("hidden") else []),
+                  Tooltip="gm" in extra, Locked=not loose, GMNotes=extra.get("gm", ""))
     if name.startswith("Tileset_"):                       # built-in TTS tileset piece
         return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
     return obj("Custom_Model", tf(ry=rot), grid={"x": x, "z": z, "k": "model", "s": s, "lift": 0.3 if loose else 0},
-               Nickname="", **common, CustomMesh=mesh(base, name, Convex=loose))   # non-convex mesh: locked only
+               Nickname=extra.get("name", ""), **common, CustomMesh=mesh(base, name, Convex=loose))   # non-convex mesh: locked only
+
+
+# a real flame with a dim point light on every brazier: Cobop's lit torch (Steam Workshop 2264051910), its handle
+# sunk into the bowl so only the burning head shows. ponytail: lift/scale eyeballed from the bundle's mesh bounds
+FLAME_URL = "https://www.dropbox.com/s/852mb5n44cefo1h/torch-on-silent.unity3d?dl=1"
+
+
+def flame(x, z, n, scene):
+    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "flame", n), Tags=["scene"], Tooltip=False, Locked=True,
+               grid={"x": x, "z": z, "k": "model", "s": [0.45] * 3, "ly": 0.53},
+               CustomAssetbundle={"AssetbundleURL": FLAME_URL, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
+                                  "TypeIndex": 0, "LoopingEffectIndex": 0})
 
 
 FOG = False   # hidden enemies revealed by walking near: off for now, the GM toggles visibility by hand
@@ -338,6 +353,8 @@ def scene_data(s, base, textures):
     spawns = []
     for n, spec in enumerate(s.get("props", [])):
         spawns.append(prop(spec, n, s["key"], base, textures))
+        if spec[0] == "torch":
+            spawns.append(flame(spec[1], spec[2], n, s["key"]))
     for n, spec in enumerate(s["npcs"]):
         o = npc(*spec[:3], n, s["key"], *spec[3:], face=s.get("face", {}).get(spec[0]))
         # living NPCs stay invisible to players until a hero comes near (fog) or the GM reveals them (hidden scenes)
@@ -350,6 +367,13 @@ def scene_data(s, base, textures):
         spawns += [obj("Die_6_Rounded", tf(ry=30.0 * i), GUID=guid("den", "die", i), Tags=["scene"], Nickname="Baron's Bones",
                        ColorDiffuse={"r": 0.06, "g": 0.06, "b": 0.06},     # black, white pips: readable from across the table
                        grid={"x": -0.45 + 0.45 * i, "z": 0, "k": "fig", "s": [1.3, 1.3, 1.3], "lift": 4}) for i in range(3)]
+        # the house's wonky dice for the players: lopsided and stained, hidden until the GM reveals them
+        wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((1.3, 0.8, 1.5), (0.7, 0.4, 0.3))]
+        spawns += [obj("Die_6", tf(ry=50.0 * i), GUID=guid("den", "wonky", i), Tags=["scene", "hidden", "manual"],
+                       Nickname="Wonky bone", Description="Lopsided, chipped and sticky. The house dice, for guests.",
+                       ColorDiffuse=dict(zip("rgb", rgb)),
+                       grid={"x": -1.6, "z": -0.6 + 0.6 * i, "k": "fig", "s": list(sc), "lift": 4})
+                   for i, (sc, rgb) in enumerate(wonky)]
     _, rgb, bright = SKIES[s["key"]]
     return dict(title=s["title"], spawns=spawns, heroes=[[x, z] for x, z in s["heroes"]],
                 sky=f"{base}art/out/sky_{s['key']}.jpg", light=[*rgb, bright],

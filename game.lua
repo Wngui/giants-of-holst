@@ -168,7 +168,7 @@ function setScene(i)
     highlightScene()
     UI.setAttribute("sceneTitle", "text", s.title)
     play(s.music)
-    showGrid(false)
+    showGrid(false)   -- new scene, out of battle (its NPCs spawn with their bars off)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
 end
 
@@ -428,8 +428,14 @@ function play(track)
     Wait.condition(function() MusicPlayer.play() end, function() return MusicPlayer.player_status == "Ready" end, 20)
 end
 
-function musicScene() play(DATA.scenes[scene].music); showGrid(false) end
-function musicBattle() play(DATA.battle); showGrid(true) end
+function musicScene() play(DATA.scenes[scene].music); battle(false) end
+function musicBattle() play(DATA.battle); battle(true) end
+
+-- battle mode: grid on the map and NPC health bars on
+function battle(on)
+    showGrid(on)
+    for _, o in ipairs(getObjectsWithTag("npc")) do o.call("setBattle", { on = on }) end
+end
 
 -- battle grid over the map: one cell per map square, integer map coordinates at cell centres
 function showGrid(on)

@@ -141,6 +141,7 @@ function makeObj(d)
   end
   o.Counter = { setValue = function(v) o.counter = v end }
   o.UI = { setXml = function(x) o.xml = x end, setAttribute = function() end }
+  function o.addContextMenuItem() end
   o.RPGFigurine = { die = function() end, attack = function() end }
   objects[d.GUID] = o
   if d.LuaScript and d.LuaScript ~= "" then
@@ -251,8 +252,10 @@ for i, s in enumerate(scenes, 1):
     assert g.MusicPlayer.url == s["music"]["url"]
     assert g.UIattr["sceneTitle.text"] == s["title"]
 assert g.Grid.show_lines is False
-c.musicBattle(); assert g.Grid.show_lines is True and abs(g.Grid.sizeX - SQ) < 1e-9   # Battle shows the grid
-c.musicScene(); assert g.Grid.show_lines is False
+npcs = list(g.getObjectsWithTag("npc").values())
+c.musicBattle(); assert g.Grid.show_lines is True and abs(g.Grid.sizeX - SQ) < 1e-9   # Battle shows the grid...
+assert npcs and all('active="false"' not in o.xml for o in npcs)                       # ...and the health bars
+c.musicScene(); assert g.Grid.show_lines is False and all('active="false"' in o.xml for o in npcs)
 fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
@@ -393,6 +396,23 @@ assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (coun
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 
+# den: 5 street kids; the players' wonky dice start hidden. Passage: trap markers hidden, loot noted for the GM;
+# every brazier carries a flame
+c.setScene(4)
+objs = list(g.getObjectsWithTag("scene").values())
+assert sum(o.data.Nickname == "Street kid" for o in objs) == 5
+wonky = [o for o in objs if o.data.Nickname == "Wonky bone"]
+assert len(wonky) == 3 and all(o.invisible and o.hasTag("manual") for o in wonky)
+c.revealAll(); assert all(o.invisible for o in wonky)        # only the GM's toggle shows them
+c.setScene(5)
+objs = list(g.getObjectsWithTag("scene").values())
+traps = [o for o in objs if (o.data.Nickname or "").startswith("Trap ")]
+assert len(traps) == 4 and all(o.invisible and o.tint.a < 1 and "DC" in o.data.GMNotes for o in traps)
+assert any("LANTERN OF TRUE SIGHT" in (o.data.GMNotes or "") for o in objs)
+for s in scenes:
+    names = [o["Name"] for o in s["spawns"]]
+    assert names.count("Custom_Assetbundle") >= sum("props/torch.obj" in (o.get("CustomMesh") or {}).get("MeshURL", "") for o in s["spawns"])
+
 # ---- npc.lua on a giant
 giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")
 npc = LuaRuntime(unpack_returned_tuples=True)
@@ -402,7 +422,7 @@ ng.JSON.decode = lambda s: npc.table_from({k: (npc.table_from([npc.table_from(a)
                                           for k, v in json.loads(s).items()})
 npc.execute("""
 log, attrs, died, swung = {}, {}, 0, 0
-self = { UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
+self = { addContextMenuItem = function(label, fn) menu = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
          getRotation = function() return { x = 0, y = 270, z = 0 } end,
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
 function broadcastToAll(m) log[#log+1] = m end
@@ -418,15 +438,16 @@ npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
 assert "ProgressBar" in ng.xml and ng.xml.count("<Button") == len(json.loads(giant["LuaScriptState"])["attacks"])
 assert 'rotation="90 -90 90"' in ng.xml            # upright bar facing the way the figure faces
-ng.applyDamage(None, "+12")
+assert 'active="false"' in ng.xml and "InputField" not in ng.xml   # bars hidden out of battle, no damage box
+ng.setBattle(npc.table_from({"on": True}))
+assert 'active="false"' not in ng.xml
+assert ng.onNumberTyped("Red", 12) is True and ng.attrs["hp.text"] is None   # players typing do nothing
+ng.onNumberTyped("Black", 12)                                          # GM hovers + types: damage
 assert ng.attrs["bar.percentage"] == "80" and ng.attrs["hp.text"].startswith("48/60")
-ng.applyDamage(None, "100")
+ng.onNumberTyped("Black", 100)
 assert ng.died == 1 and "falls" in ng.log[1]
-ng.applyDamage(None, "-10")
+ng.menu("Black"); ng.menu("Black"); ng.menu("Red")                   # right-click Heal 5, twice; players can't
 assert ng.died == 2 and ng.attrs["hp.text"].startswith("10/60")
-for junk in ("abc", "", " ", "--3", None):              # ignored, no error
-    ng.applyDamage(None, junk)
-assert ng.attrs["hp.text"].startswith("10/60")
 for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())
@@ -440,8 +461,8 @@ isolde = next(o for s in scenes for o in s["spawns"] if o.get("Nickname") == "Pr
 assert isolde["RPGdead"]
 npc.execute("died, log = 0, {}")
 ng.onLoad(isolde["LuaScriptState"])
-ng.applyDamage(None, "-8")
-assert ng.died == 1 and "gets back up" in ng.log[1] and ng.attrs["hp.text"].startswith("12/20")
-ng.applyDamage(None, "3")
+ng.menu("Black"); ng.menu("Black")
+assert ng.died == 1 and "gets back up" in ng.log[1] and ng.attrs["hp.text"].startswith("14/20")
+ng.onNumberTyped("Black", 3)
 assert ng.died == 1                                      # still standing, no toggle
 print("ok -", msgs[-1])

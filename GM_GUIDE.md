@@ -165,14 +165,15 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
 ```
 Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
-FOUR TRAPS, west to east. Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
+FOUR TRAPS, west to east (GM-only markers on the map; hover one for its DCs).
+Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
 Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   1. DART PLATE (column -6): darts from the walls, 2d4 to whoever steps on it.
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
-SIDE PASSAGES (optional, each off the main tunnel):
+SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
      TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
      to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.

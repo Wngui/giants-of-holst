@@ -380,7 +380,8 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
                   ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20), ("coins", 5.9, 4.6),
                   ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", -6.9, -2.6),
                   ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("chest", -3, -5.3, 10)],
-         npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2)],
+         npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2),
+               ("street_kid", 1.2, 4.2), ("street_kid", -1.5, -3.8), ("street_kid", 4.4, -4.2)],
          notes="""Read aloud: "Stolen chandeliers, three rugs on top of each other, a velvet throne with the stuffing
 out. On it: a thin man in a noble's coat three sizes too big, rolling bones in one hand. Vasko,
 the Bandit Baron. The street kids sit around him like cats."
@@ -410,24 +411,41 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
          props=passage_walls()
                + [("wall_door", -10.8, 0, 90), ("pillar", -10.8, 1.6), ("pillar", -10.8, -1.6),
                   ("rubble", -4, 1.4, 20, 0.7), ("rubble", 5, -1.4, 200, 0.7), ("torch", -6, 1.7),
-                  ("torch", -0.5, -1.7), ("torch", 8.5, 1.7), ("chest", -2.6, -1.5, 80),
+                  ("torch", -0.5, -1.7), ("torch", 8.5, 1.7),
+                  ("chest", -2.6, -1.5, 80, 1, {"name": "Old chest", "gm": "Empty: looted long ago."}),
                   # A: old guard post (north, x -3.5)
-                  ("chest", -3.5, 6.0, 0), ("torch", -4.3, 5.4), ("rubble", -2.9, 4.4, 60, 0.6),
+                  ("chest", -3.5, 6.0, 0, 1, {"name": "Guard post chest", "gm": "Locked (Agility DC 12): 15 gold, a rope. "
+                   "The skeleton beside it still holds the LANTERN OF TRUE SIGHT."}),
+                  ("torch", -4.3, 5.4), ("rubble", -2.9, 4.4, 60, 0.6),
                   # B: collapsed stash (south, x 1.5)
-                  ("rubble", 1.5, -5.6, 0, 1.1), ("barrel", 0.9, -4.6), ("sack", 2.0, -4.2, 40), ("crate", 1.9, -3.4, 15),
+                  ("rubble", 1.5, -5.6, 0, 1.1), ("barrel", 0.9, -4.6, 0, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
+                  ("sack", 2.0, -4.2, 40, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
+                  ("crate", 1.9, -3.4, 15, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
                   # C: rats' nest (north, x 6)
-                  ("bed", 5.6, 4.6, 20), ("bed", 6.4, 4.0, 110), ("sack", 6.6, 4.9, 70), ("rubble", 5.4, 3.4, 140, 0.5)],
+                  ("bed", 5.6, 4.6, 20), ("bed", 6.4, 4.0, 110),
+                  ("sack", 6.6, 4.9, 70, 1, {"name": "Rats' nest", "gm": "A gnawed purse in the bedding: 8 gold."}),
+                  ("rubble", 5.4, 3.4, 140, 0.5),
+                  # the four traps: GM-only markers (players never see them; the GM can reveal one once it's found)
+                  ("trap_plate", -6, 0, 0, 1, {"name": "Trap 1: dart plate", "hidden": True, "gm": "Wits DC 13 to spot, "
+                   "Agility DC 13 to disarm. Triggered: darts from the walls, 2d4 to whoever steps on it."}),
+                  ("trap_pit", -1, 0, 0, 1, {"name": "Trap 2: collapsing floor", "hidden": True, "gm": "Wits DC 13 to spot. "
+                   "Triggered: Agility DC 13 or fall 3m, 1d6, Might DC 12 to climb out (allies can help)."}),
+                  ("trap_vent", 4, 0, 0, 1, {"name": "Trap 3: sleep gas vent", "hidden": True, "gm": "Wits DC 13 to spot "
+                   "(Detect Magic shows the runes). Triggered: Might DC 12 or fall asleep."}),
+                  ("trap_wire", 8, 0, 0, 1, {"name": "Trap 4: bell tripwire", "hidden": True, "gm": "Wits DC 13 to spot, "
+                   "Agility DC 13 to disarm. Rings: the giant rats in their nest wake and attack."})],
          npcs=[("giant_rat", 5.6, 3.6), ("giant_rat", 6.4, 3.2)],
          notes="""Read aloud: "The door grinds shut behind you. The kid is gone. The tunnel runs west to east,
 narrow and old. Your torch shows scratches on the floor - and a skeleton still holding a torch."
-FOUR TRAPS, west to east. Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
+FOUR TRAPS, west to east (GM-only markers on the map; hover one for its DCs).
+Wits DC 13 to spot each (Detect Magic reveals the gas vent's rune).
 Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   1. DART PLATE (column -6): darts from the walls, 2d4 to whoever steps on it.
   2. COLLAPSING FLOOR (column -1): 2x2 drops into a 3m pit. Agility DC 13 or fall, 1d6 +
      Might DC 12 to climb out (allies can help).
   3. SLEEP GAS VENT (column +4): Might DC 12 or sleep 1d4 minutes (real time is funny). Rune-marked.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
-SIDE PASSAGES (optional, each off the main tunnel):
+SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
      TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
      to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.

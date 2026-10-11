@@ -1014,6 +1014,57 @@ def gm_board():
     return a.objs
 
 
+# ---------------------------------------------------------------- traps (Smugglers' Passage; GM-only markers)
+def trap_plate():
+    """Pressure plate: a raised stone slab in an iron frame with the trigger stone in the middle. 1.1 square."""
+    a = Asset(41)
+    a.box((1.1, 1.1, 0.06), (0, 0, 0.03), "stone")
+    for x, y, w, d in ((0, 0.55, 1.16, 0.06), (0, -0.55, 1.16, 0.06), (0.55, 0, 0.06, 1.1), (-0.55, 0, 0.06, 1.1)):
+        a.box((w, d, 0.08), (x, y, 0.04), "iron")
+    a.box((0.34, 0.34, 0.09), (0, 0, 0.045), "iron")
+    for i in range(8):   # dart holes round the edge
+        t = 2 * math.pi * i / 8
+        a.cyl(0.04, 0.02, (0.38 * math.cos(t), 0.38 * math.sin(t), 0.06), "charcoal", segs=6)
+    return a.objs
+
+
+def trap_pit():
+    """Collapsing floor, 2x2: four cracked slabs sagging into the dark, iron-tipped stakes showing through the gaps."""
+    a = Asset(42)
+    rnd = a.rnd
+    a.box((2.0, 2.0, 0.01), (0, 0, 0.005), "charcoal")
+    for x in (-0.5, 0.5):
+        for y in (-0.5, 0.5):
+            a.box((0.88, 0.88, 0.06), (x, y, 0.035), "stone", rot=(rnd.uniform(-0.06, 0.06), rnd.uniform(-0.06, 0.06), rnd.uniform(-0.1, 0.1)))
+    for _ in range(5):
+        a.cyl(0.03, 0.18, (rnd.uniform(-0.9, 0.9), rnd.choice((-1, 1)) * rnd.uniform(0, 0.05), 0), "iron", segs=5, r2=0.002)
+    return a.objs
+
+
+def trap_vent():
+    """Sleep-gas vent: a small iron grate over a dark hole, ringed with glowing gold runes."""
+    a = Asset(43)
+    a.cyl(0.36, 0.03, (0, 0, 0), "charcoal", segs=16)
+    for i in range(5):
+        p = -0.24 + 0.12 * i
+        a.box((0.04, 0.6, 0.04), (p, 0, 0.04), "iron")
+        a.box((0.6, 0.04, 0.035), (0, p, 0.035), "iron")
+    for i in range(10):
+        t = 2 * math.pi * i / 10
+        a.box((0.1, 0.04, 0.03), (0.5 * math.cos(t), 0.5 * math.sin(t), 0.015), "gold", rot=(0, 0, t + (0.6 if i % 2 else 0)))
+    return a.objs
+
+
+def trap_wire():
+    """Bell tripwire across the 4.8-wide tunnel: a taut cord at ankle height between two iron pegs, a bell at one end."""
+    a = Asset(44)
+    for y in (-2.3, 2.3):
+        a.cyl(0.04, 0.3, (0, y, 0), "iron", segs=6)
+    a.box((0.025, 4.6, 0.025), (0, 0, 0.18), "canvas")
+    a.lathe([(0.0, 0.42), (0.05, 0.4), (0.09, 0.3), (0.13, 0.22), (0.0, 0.22)], (0, 2.3, 0), "gold", segs=12)
+    return a.objs
+
+
 ASSETS = {
     "house_a": lambda: house(1, 3.0, 2.2, 2, "timber"),
     "house_b": lambda: house(2, 2.6, 2.0, 2, "mixed", roof="shingle", plaster="plaster_white", front=True),
@@ -1037,6 +1088,7 @@ ASSETS = {
     "house_f": lambda: house(14, 3.2, 2.2, 1, "stone", roof="thatch", annex=1, flowers=0.6),
     "throne_dais": throne_dais, "candelabra": candelabra, "hoard": hoard, "hoard_b": lambda: hoard(29),
     "wall_sconce": wall_sconce, "coin": coin, "ration": ration, "gm_table": gm_table, "gm_board": gm_board, "hp_plaque": hp_plaque, "gm_screen": gm_screen, "dice_tray": dice_tray,
+    "trap_plate": trap_plate, "trap_pit": trap_pit, "trap_vent": trap_vent, "trap_wire": trap_wire,
 }
 
 if __name__ == "__main__":
