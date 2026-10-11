@@ -465,7 +465,7 @@ SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
 
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True, hidden=True,
-         storm=True,   # lightning flashes and thunder now and then
+         fx=[("rain", 0, 0)], storm=True,   # quiet rain (sound only); lightning flashes and thunder now and then
          map_prompt="a muddy country road through a pine forest, a smashed wooden cart on its side, broken wheel, scattered crates and cloth, huge footprints, a tree trunk lying across the road",
          heroes=[(-1, -6), (0, -6), (1, -6), (0, -5)],
          props=[("broken_cart", 0.2, 0.6, 60, 1.2), ("log_large", 2.8, 2, 25),

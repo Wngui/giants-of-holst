@@ -12,4 +12,4 @@ All tracks by Kevin MacLeod (incompetech.com), licensed under Creative Commons: 
 | den.mp3 | "Pippin the Hunchback" |
 | passage.mp3 | "The Descent" |
 | cart.mp3 | "Moorland" |
-| cave.mp3 | "Ossuary 1 - A Beginning" |
+| cave.mp3 | "Lightless Dawn" |

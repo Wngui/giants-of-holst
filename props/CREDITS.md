@@ -16,3 +16,6 @@ Valve). All loaded by URL from Steam, not redistributed here. For private play.
 
 candle_light.unity3d: RobMayer's TTSLibrary point light (github.com/RobMayer/TTSLibrary, lights/point.unity3d), recoloured
 warm, dimmed, shadows and cube off.
+
+rain_quiet.unity3d: the "Rainscapes" bundle from "Soundscape Assets" (Workshop 3323409166) rebuilt by quietrain.py: one
+light-rain loop at a quarter of its volume, all other audio removed.

@@ -388,9 +388,11 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "whoosh": (_SE, 0, 6, 0.1, 0, 3),   
            # Fireball: a distant-sounding explosion, its source sunk under the table to soften it (no volume control)
            "boom": (_FX + "2404446659868465020/DDEC7C0DC8D32C2C0B1F9AE643FC6D8CBC8FCE71/", 0, 15, 0.1, -4, 8),
            "crash": (_DESTRUCT, 0, 10, 0.1, 0, 6),
-           # cart: thunder now and then (Soundscape "Rainscapes"; its rain loops were too loud, TTS has no volume)
+           # cart: thunder now and then (Soundscape "Rainscapes"), and its light rain loop made quiet: TTS has no volume
+           # control, so quietrain.py rebuilt the bundle with that one loop at 1/4 amplitude as PCM (props/rain_quiet)
+           "rain": ("props/rain_quiet.unity3d", 4, None, 0.1, 0, None),
            "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
-SOUND = {"swipe", "whoosh", "thud", "boom", "crash", "thunder"}
+SOUND = {"swipe", "whoosh", "thud", "boom", "crash", "thunder", "rain"}
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
 # scale 0.01: TTS turns the bundle's (disabled) cube back on; a light's range doesn't scale, so only the cube shrinks
