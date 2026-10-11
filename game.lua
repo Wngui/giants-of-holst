@@ -113,6 +113,12 @@ function placed(d)
         local s = spots[g.role]
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
+        if g.role == "deck" then                      -- same size as the GM's item cards (grid "tile" units: SQ / 2)
+            for _, c in ipairs(d.ContainedObjects or {}) do
+                c.Transform.scaleX, c.Transform.scaleY, c.Transform.scaleZ = SQ / 2, SQ / 2, SQ / 2
+            end
+            t.scaleX, t.scaleY, t.scaleZ = SQ / 2, SQ / 2, SQ / 2
+        end
         if g.role == "d20" then                       -- players' own die: big enough to grab and read
             t.scaleX, t.scaleY, t.scaleZ = 1.8, 1.8, 1.8
         end

@@ -437,6 +437,12 @@ for s in scenes:   # ambient effects and flames are scene spawns with a known ef
         if o["Name"] == "Custom_Assetbundle" and "flame" not in o["GUID"]:
             assert o["CustomAssetbundle"]["AssetbundleURL"].startswith("https://"), o
 
+# hero cards are the same size as the GM's item cards
+item = next(o for o in g.getObjectsWithTag("gm").values() if o.data.Name == "Card")
+decks = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Deck"]
+assert decks and all(abs(o.data.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks)
+assert all(abs(c.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks for c in o.data.ContainedObjects.values())
+
 # ---- npc.lua on a giant
 giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")
 npc = LuaRuntime(unpack_returned_tuples=True)
