@@ -151,6 +151,7 @@ function onSceneButton(player, _, id)
 end
 
 function setScene(i)
+    tidy()
     for _, o in ipairs(getObjectsWithTag("scene")) do o.destruct() end
     scene = i
     local s = DATA.scenes[i]
@@ -181,6 +182,26 @@ function setScene(i)
     play(s.music)
     showGrid(false)   -- new scene, out of battle (its NPCs spawn with their bars off)
     broadcastToAll(s.title, { 0.94, 0.85, 0.63 })
+end
+
+-- Before a scene change: whatever lies on the map that isn't the scene's own (played cards, coins, items, dice...) goes
+-- to a pile on the east border, between the two right-hand player kits. Hero figures stay (setScene moves them), and so
+-- do the players' own dice and sheets; played hero cards go to the pile (REST returns them to hands).
+local KEEP = { "scene", "fx", "fxcache", "gm", "gmtable", "gmscreen", "gmconsole" }
+function tidy()
+    local halfX, halfZ, n = T.w * DATA.layout.art_w / 2, DATA.layout.rows * SQ / 2, 0
+    for _, o in ipairs(getObjects()) do
+        local q = o.getPosition()
+        local keep = o == self or o.type == "Hand" or o.type == "Scripting" or o.type == "Fog" or
+                     math.abs(q.x - T.cx) > halfX or math.abs(q.z - T.cz) > halfZ
+        for _, tag in ipairs(KEEP) do keep = keep or o.hasTag(tag) end
+        for _, c in ipairs(DATA.colors) do keep = keep or o.hasTag("fig_" .. c) end
+        keep = keep or (o.hasTag("kit") and o.type ~= "Card" and o.type ~= "Deck")   -- a player's own d20/sheet stays
+        if not keep then
+            n = n + 1
+            o.setPositionSmooth({ T.cx + T.w * DATA.layout.kit_x, T.top + 1 + n * 0.4, T.cz + ((n % 3) - 1) * SQ }, false, true)
+        end
+    end
 end
 
 -- ---------------------------------------------------------------- hidden enemies (instead of TTS's fog box)
@@ -360,12 +381,15 @@ end
 -- a hero card or item put face up on the map plays its effect there, once until REST picks it up again
 local played = {}
 function cardPlayed(o)
-    if o.type ~= "Card" or o.is_face_down then return end
-    local q, half = o.getPosition(), T.w * DATA.layout.art_w / 2
-    if math.abs(q.x - T.cx) > half or math.abs(q.z - T.cz) > DATA.layout.rows * SQ / 2 then return end   -- hand/border
-    if played[o.getGUID()] or o.hasTag("gm") then return end
-    played[o.getGUID()] = true
-    fxAt(DATA.card_fx[o.getName()] or "swirl_white", q)
+    if o.type ~= "Card" or o.is_face_down or played[o.getGUID()] or o.hasTag("gm") then return end
+    Wait.frames(function()   -- once it has settled: a card dropped into a hand (rearranging it) plays nothing
+        if o.isDestroyed() or played[o.getGUID()] then return end
+        for _, z in ipairs(o.getZones() or {}) do
+            if z.type == "Hand" then return end
+        end
+        played[o.getGUID()] = true
+        fxAt(DATA.card_fx[o.getName()] or "swirl_white", o.getPosition())
+    end, 3)
 end
 
 -- ---------------------------------------------------------------- GM desk

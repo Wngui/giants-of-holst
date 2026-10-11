@@ -110,6 +110,7 @@ function makeObj(d)
   for _, t in ipairs(d.Tags or {}) do o.tags[t] = true end
   function o.getGUID() return d.GUID end
   function o.getName() return d.Nickname or "" end
+  function o.getZones() return o.zones or {} end
   function o.isDestroyed() return objects[d.GUID] == nil end
   o.AssetBundle = { playTriggerEffect = function(i) o.triggered = i end }
   function o.hasTag(t) return o.tags[t] == true end
@@ -127,7 +128,8 @@ function makeObj(d)
   function o.addAttachment(r) o.attached = (o.attached or 0) + 1; objects[r.getGUID()] = nil end
   function o.setInvisibleTo(t) o.invisible = #t > 0 end
   function o.getPosition()
-    local p = o.pos or {d.Transform.posX, d.Transform.posY, d.Transform.posZ}
+    local tr = d.Transform or {posX = 0, posY = 0, posZ = 0}   -- spawnObject() zones carry position, not Transform
+    local p = o.pos or (d.position and {d.position[1], d.position[2], d.position[3]}) or {tr.posX, tr.posY, tr.posZ}
     return {x = p[1], y = p[2], z = p[3]}
   end
   function o.destruct() objects[d.GUID] = nil end
@@ -155,6 +157,7 @@ function makeObj(d)
 end
 function spawnObjectData(p) local o = makeObj(p.data); spawned = p.data; if p.callback_function then p.callback_function(o) end; return o end
 function getObjectFromGUID(g) return objects[g] end
+function getObjects() local r = {} for _, o in pairs(objects) do r[#r+1] = o end return r end
 function getObjectsWithTag(t) local r = {} for _, o in pairs(objects) do if o.hasTag(t) then r[#r+1] = o end end return r end
 hotkeys = {}
 function addHotkey(name, f) hotkeys[name] = f end
@@ -430,6 +433,17 @@ c.onObjectDrop("Purple", card); assert fx() is None
 card.is_face_down = False
 c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"] and g.spawned.Tags[1] == "fx"
 g.spawned = None; c.onObjectDrop("Purple", card); assert fx() is None             # already played
+other = next(o for o in g.getObjectsWithTag("card_Purple").values() if o.data.Nickname == "Shrink")
+other.is_face_down = False; other.pos = lua.table_from([40, TOP, 0])                    # off the map: plays too
+other.zones = lua.table_from([lua.table_from({"type": "Hand"})])
+g.spawned = None; c.onObjectDrop("Purple", other); assert fx() is None                # ...but not into a hand
+other.zones = None
+g.spawned = None; c.onObjectDrop("Purple", other); assert fx() == data_fx["swirl_purple"]["url"]
+# scene change: loose things on the map go to a pile on the east border; hero figures and scenery stay
+coin = g.makeObj(lua.table_from({"Name": "Custom_Model", "Nickname": "Gold coin", "Transform": lua.table_from(
+    {"posX": 1, "posY": TOP, "posZ": 1, "scaleX": 1, "scaleY": 1, "scaleZ": 1})}))
+c.setScene(3)
+assert coin.pos and coin.pos[1] > ART[0] and abs(coin.pos[3]) < 3 * SQ
 c.rest(); assert fx() == data_fx["swirl_yellow"]["url"]
 g.spawned = None; c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"]   # playable again after REST
 for s in scenes:   # ambient effects and flames are scene spawns with a known effect
