@@ -411,8 +411,9 @@ CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud
 def fx_obj(name, x, z, n, scene, base, lift=0.0):
     f = FX[name]
     url = f["url"] if f["url"].startswith("http") else base + f["url"]
-    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n), Tags=["scene", "fx"] + (["fxhide"] if f["hide"] else []),
-               Tooltip=False, Locked=True, ColorDiffuse={"r": 1.0, "g": 1.0, "b": 1.0, "a": 0.0 if f["clear"] else 1.0},
+    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n),
+               Tags=["scene", "fx"] + (["fxhide"] if f["hide"] else []) + (["fxclear"] if f["clear"] else []),
+               Tooltip=False, Locked=True,
                grid={"x": x, "z": z, "k": "fx", "s": [f["s"]] * 3, "ly": f["lift"] + lift},
                CustomAssetbundle={"AssetbundleURL": url, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": f["loop"]})
