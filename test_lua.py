@@ -109,6 +109,9 @@ function makeObj(d)
   local o = {data = d, tags = {}, type = d.Name == "Deck" and "Deck" or (d.Name == "Card" and "Card" or "Other")}
   for _, t in ipairs(d.Tags or {}) do o.tags[t] = true end
   function o.getGUID() return d.GUID end
+  function o.getName() return d.Nickname or "" end
+  function o.isDestroyed() return objects[d.GUID] == nil end
+  o.AssetBundle = { playTriggerEffect = function(i) o.triggered = i end }
   function o.hasTag(t) return o.tags[t] == true end
   function o.removeTag(t) o.tags[t] = nil end
   function o.addTag(t) o.tags[t] = true end
@@ -150,7 +153,7 @@ function makeObj(d)
   end
   return o
 end
-function spawnObjectData(p) local o = makeObj(p.data); if p.callback_function then p.callback_function(o) end; return o end
+function spawnObjectData(p) local o = makeObj(p.data); spawned = p.data; if p.callback_function then p.callback_function(o) end; return o end
 function getObjectFromGUID(g) return objects[g] end
 function getObjectsWithTag(t) local r = {} for _, o in pairs(objects) do if o.hasTag(t) then r[#r+1] = o end end return r end
 hotkeys = {}
@@ -413,6 +416,27 @@ for s in scenes:
     names = [o["Name"] for o in s["spawns"]]
     assert names.count("Custom_Assetbundle") >= sum("props/torch.obj" in (o.get("CustomMesh") or {}).get("MeshURL", "") for o in s["spawns"])
 
+# effects: a card dropped face up on the map plays its own; in a hand / face down / twice: nothing. REST: a swirl per hero
+fx = lambda: (g.spawned.CustomAssetbundle or {}).AssetbundleURL if g.spawned else None
+card = next(o for o in g.getObjectsWithTag("card_Purple").values() if o.data.Nickname == "Fireball") \
+    if any(o.data.Nickname == "Fireball" for o in g.getObjectsWithTag("card_Purple").values()) else None
+if card is None:   # still in the deck: deal it out
+    deck = next(iter(g.getObjectsWithTag("card_Purple").values())); deck.deal(6, "Purple")
+    card = next(o for o in g.getObjectsWithTag("card_Purple").values() if o.data.Nickname == "Fireball")
+g.spawned = None
+data_fx = to_py(c.DATA.fx)
+card.pos = lua.table_from([2, TOP, 0]); card.is_face_down = True
+c.onObjectDrop("Purple", card); assert fx() is None
+card.is_face_down = False
+c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"] and g.spawned.Tags[1] == "fx"
+g.spawned = None; c.onObjectDrop("Purple", card); assert fx() is None             # already played
+c.rest(); assert fx() == data_fx["swirl_yellow"]["url"]
+g.spawned = None; c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"]   # playable again after REST
+for s in scenes:   # ambient effects and flames are scene spawns with a known effect
+    for o in s["spawns"]:
+        if o["Name"] == "Custom_Assetbundle" and "flame" not in o["GUID"]:
+            assert o["CustomAssetbundle"]["AssetbundleURL"].startswith("https://"), o
+
 # ---- npc.lua on a giant
 giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")
 npc = LuaRuntime(unpack_returned_tuples=True)
@@ -425,9 +449,11 @@ log, attrs, died, swung = {}, {}, 0, 0
 typed = ""
 Player = setmetatable({}, { __index = function(_, c) return { showInputDialog = function(_, _, cb) cb(typed, c) end } end })
 function damage(color, text) typed = text; menu(color) end
-self = { addContextMenuItem = function(label, fn) menu = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
+self = { getGUID = function() return "npc001" end, addContextMenuItem = function(label, fn) menu = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
          getRotation = function() return { x = 0, y = 270, z = 0 } end,
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
+fxlog = {}
+function getObjectFromGUID() return { call = function(f, a) fxlog[#fxlog+1] = a.name end } end
 function broadcastToAll(m) log[#log+1] = m end
 function broadcastToColor(m, c) log[#log+1] = c .. ": " .. m end
 -- MoonSharp (TTS) throws where real Lua returns nil when a base is given
@@ -461,6 +487,7 @@ for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())
 assert all("to hit" in m and "dmg" in m for m in msgs[2:]) and ng.swung == 200
+assert {"blood", "puff", "swirl_green", "crit"} <= set(ng.fxlog.values())   # hit, fall, heal, crit effects
 for n in range(20):
     t, detail = ng.roll("2d8+4")
     assert 6 <= t <= 20 and detail.endswith("+4")

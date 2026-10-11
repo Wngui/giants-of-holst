@@ -75,8 +75,12 @@ end
 function pct() return math.floor(100 * S.hp / S.max) end
 function hpText() return S.hp .. "/" .. S.max end
 
+-- a particle effect on this NPC, spawned by the controller (game.lua fxAt)
+function fx(name) getObjectFromGUID(S.ctl).call("fx", { name = name, guid = self.getGUID() }) end
+
 function hurt(n)   -- negative heals; 0 HP plays the death animation (and healing stands it back up)
     if not n or n == 0 then return end
+    fx(n > 0 and (S.hp - n <= 0 and S.hp > 0 and "puff" or "blood") or "swirl_green")
     S.hp = math.max(0, math.min(S.max, S.hp - n))
     self.UI.setAttribute("bar", "percentage", pct())
     self.UI.setAttribute("hp", "text", hpText())
@@ -121,6 +125,7 @@ function attack(player, _, id)
     end
     msg = msg .. "(" .. a.note .. ")"
     if a.hit and self.RPGFigurine then self.RPGFigurine.attack() end
+    if crit then fx("crit") elseif a.hit then fx("swipe") end
     broadcastToColor(msg, "Black", { 1, 0.8, 0.4 })
     if player.color ~= "Black" then broadcastToColor(msg, player.color, { 1, 0.8, 0.4 }) end
 end

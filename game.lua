@@ -27,7 +27,8 @@ function start(s)
         install(s.scene or 1)
     end
     Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
-    Wait.time(applyHands, 2, 15)   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
+    Wait.time(applyHands, 2, 15)
+    Wait.time(storm, 20, -1)   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
 end
 
 function onSave()
@@ -129,7 +130,7 @@ function placed(d)
         for _, c in ipairs(g.inner and d.ContainedObjects or {}) do   -- coins etc. in bags: grid-sized too
             c.Transform.scaleX, c.Transform.scaleY, c.Transform.scaleZ = g.inner * SQ, g.inner * SQ, g.inner * SQ
         end
-        local unit = (g.k == "model") and SQ or SQ / 2
+        local unit = (g.k == "model") and SQ or (g.k == "fx") and 1 or SQ / 2   -- effects: their own world size
         local s = g.s or { 1, 1, 1 }
         t.scaleX, t.scaleY, t.scaleZ = s[1] * unit, s[2] * unit, s[3] * unit
     end
@@ -187,6 +188,7 @@ function hide(o)
 end
 
 function reveal(o)
+    if o.hasTag("npc") then fxAt("puff", o.getPosition()) end   -- out of the dust
     o.setInvisibleTo({})
     o.removeTag("hidden")
     if tints[o.getGUID()] then o.setColorTint(tints[o.getGUID()]) end
@@ -241,6 +243,7 @@ function revealGuid(p)
 end
 
 function onObjectDrop(player, o)
+    cardPlayed(o)
     for _, color in ipairs(DATA.colors) do
         if o.hasTag("fig_" .. color) then
             local q = o.getPosition()
@@ -255,6 +258,54 @@ function onObjectDrop(player, o)
             gmShow(o)
         end
     end
+end
+
+-- ---------------------------------------------------------------- particle effects (build.py FX)
+-- An effect bundle spawned at a point; a one-shot fires its trigger once loaded and is removed after its lifetime.
+-- Lasting ones (smoke cloud) are tagged "scene": the GM deletes them, or the next scene does.
+function fxAt(name, p)
+    local f = DATA.fx[name]
+    if not f or not T then return end
+    if f.snd then fxAt(f.snd, p) end
+    spawnObjectData({ data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { f.life and "fx" or "scene" },
+        Transform = { posX = p.x, posY = T.top + f.lift * SQ, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
+                      scaleX = f.s, scaleY = f.s, scaleZ = f.s },
+        CustomAssetbundle = { AssetbundleURL = f.url, AssetbundleSecondaryURL = "", MaterialIndex = 0, TypeIndex = 0,
+                              LoopingEffectIndex = f.loop } },
+        callback_function = function(o)
+            if f.hide then o.setInvisibleTo(ALL) end   -- sound-only bundle: its carrier cube stays out of sight
+            if f.trig then
+                Wait.condition(function() pcall(function() o.AssetBundle.playTriggerEffect(f.trig) end) end,
+                               function() return o.isDestroyed() or not o.loading_custom end, 20)
+            end
+            if f.life then Wait.time(function() if not o.isDestroyed() then o.destruct() end end, f.life) end
+        end })
+end
+
+ALL = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey", "Black" }
+
+-- storm scenes: every 20 s, half the time, a lightning strike with thunder somewhere on the map
+function storm()
+    local s = DATA.scenes[scene]
+    if s and s.storm and T and math.random() < 0.5 then
+        fxAt("lightning", { x = T.cx + (math.random() - 0.5) * 16 * SQ, z = T.cz + (math.random() - 0.5) * 10 * SQ })
+    end
+end
+
+-- for npc.lua: fx { name =, guid = }
+function fx(p)
+    local o = getObjectFromGUID(p.guid)
+    if o then fxAt(p.name, o.getPosition()) end
+end
+
+-- a hero card or item put face up on the map plays its effect there, once until REST picks it up again
+local played = {}
+function cardPlayed(o)
+    if o.type ~= "Card" or o.is_face_down or played[o.getGUID()] or o.hasTag("gm") then return end
+    local q, half = o.getPosition(), T.w * DATA.layout.art_w / 2
+    if math.abs(q.x - T.cx) > half or math.abs(q.z - T.cz) > DATA.layout.rows * SQ / 2 then return end   -- hand/border
+    played[o.getGUID()] = true
+    fxAt(DATA.card_fx[o.getName()] or "swirl_white", q)
 end
 
 -- ---------------------------------------------------------------- GM desk
@@ -510,6 +561,11 @@ function rest()
                 end
             end
         end
+    end
+    played = {}
+    for _, color in ipairs(DATA.colors) do
+        local fig = kit("fig_" .. color)
+        if fig then fxAt("swirl_yellow", fig.getPosition()) end
     end
     broadcastToAll("REST: HP back to full, all cards return to your hand.", { 0.5, 0.9, 0.5 })
 end
