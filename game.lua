@@ -336,10 +336,11 @@ function preload()
     end
 end
 
--- ponytail: temporary. FX test cards: Frost Nova's blue burst, hiding the pack's carrier cube 7 different ways
+-- ponytail: temporary. FX test cards: Cleave's blood spray, hiding the pack's carrier cube 7 different ways
 function fxTest(k, card)
-    local f, q = DATA.fx.burst_blue, card.getPosition()
-    local loopBlue = 3                       -- Magic Explosion looping effects: Off, Transparent, White, Blue, ...
+    local f, q = DATA.fx.blood, card.getPosition()
+    local loopBlue = 2                       -- Blood Spray looping effects: Off, Transparent, Blood spray
+    fxAt(f.snd, q)
     local alpha0 = { r = 1, g = 1, b = 1, a = 0 }
     local useLoop = k == "C" or k == "D" or k == "G"
     local hidden = k == "E" or k == "G"
