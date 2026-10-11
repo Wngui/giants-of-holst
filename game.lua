@@ -187,7 +187,7 @@ end
 -- Before a scene change: whatever lies on the map that isn't the scene's own (played cards, coins, items, dice...) goes
 -- to a pile on the east border, between the two right-hand player kits. Hero figures stay (setScene moves them), and so
 -- do the players' own dice and sheets; played hero cards go to the pile (REST returns them to hands).
-local KEEP = { "scene", "fx", "fxcache", "gm", "gmtable", "gmscreen", "gmconsole" }
+local KEEP = { "scene", "fx", "fxcache", "gm", "gmtable", "gmscreen", "gmconsole", "loot" }   -- loot: the gold die
 function tidy()
     local halfX, halfZ, n = T.w * DATA.layout.art_w / 2, DATA.layout.rows * SQ / 2, 0
     for _, o in ipairs(getObjects()) do

@@ -406,6 +406,10 @@ assert len(list(g.tabs.values())) == 1 + len(scenes)
 c.setScene(3)
 gold = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Loaded gold die"]
 assert len(gold) == 1 and gold[0].invisible and gold[0].hasTag("manual")
+gold[0].env.onPickUp("Red")                       # a player takes it: party loot, survives scene changes, never piled
+gold[0].pos = lua.table_from([1, TOP, 1])
+c.setScene(4); c.setScene(3)
+assert not gold[0].isDestroyed() and gold[0].hasTag("loot") and gold[0].pos[1] == 1
 # den: 5 street kids; the players' wonky dice start hidden. Passage: trap markers hidden, loot noted for the GM;
 # every brazier carries a flame
 c.setScene(4)

@@ -14,10 +14,10 @@ POUCH_LUA = f"""function onNumberTyped(color, n)
 end
 function setHidden() end
 """
-# the sewer's loaded gold die: whenever it's rolled it settles on 6; once a player picks it up it's theirs, no longer
-# scenery (scene changes clear and tidy away "scene" objects). setHidden: game.lua's hide() calls it
+# the sewer's loaded gold die: whenever it's rolled it settles on 6; once a player picks it up it's the party's loot:
+# no longer scenery (cleared on scene change), and "loot" keeps the tidy-up from piling it. setHidden: game.lua's hide() calls it
 LOADED_LUA = """function onRandomize() Wait.condition(function() self.setRotationValue(6) end, function() return self.resting end, 10) end
-function onPickUp(color) if color ~= "Black" then self.removeTag("scene") end end
+function onPickUp(color) if color ~= "Black" then self.removeTag("scene"); self.addTag("loot") end end
 function setHidden() end
 """
 RAW, OUT = ROOT / "art" / "raw", ROOT / "art" / "out"
@@ -388,10 +388,9 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "whoosh": (_SE, 0, 6, 0.1, 0, 3),   
            # Fireball: a distant-sounding explosion, its source sunk under the table to soften it (no volume control)
            "boom": (_FX + "2404446659868465020/DDEC7C0DC8D32C2C0B1F9AE643FC6D8CBC8FCE71/", 0, 15, 0.1, -4, 8),
            "crash": (_DESTRUCT, 0, 10, 0.1, 0, 6),
-           # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
-           "rain": (_RAIN, 4, None, 0.1, -8, None),   # light rain loop, source well under the table: quieter
+           # cart: thunder now and then (Soundscape "Rainscapes"; its rain loops were too loud, TTS has no volume)
            "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
-SOUND = {"swipe", "whoosh", "thud", "boom", "crash", "rain", "thunder"}
+SOUND = {"swipe", "whoosh", "thud", "boom", "crash", "thunder"}
 # steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
 # off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
 # scale 0.01: TTS turns the bundle's (disabled) cube back on; a light's range doesn't scale, so only the cube shrinks
