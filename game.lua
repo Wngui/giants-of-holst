@@ -304,9 +304,15 @@ function storm()
     end
 end
 
--- the effect pack's carrier cube turns transparent at tint alpha 0 (the pack's own advice); set a second after spawning
+-- the effect pack's carrier cube turns transparent at tint alpha 0 (the pack's own advice). Set too early it doesn't
+-- stick, so wait for the bundle to finish loading, then set it, and again a moment later
 function clearCube(o)
-    Wait.time(function() if not o.isDestroyed() then o.setColorTint({ r = 1, g = 1, b = 1, a = 0 }) end end, 1)
+    local function clear() if not o.isDestroyed() then o.setColorTint({ r = 1, g = 1, b = 1, a = 0 }) end end
+    Wait.condition(function()
+        clear()
+        Wait.time(clear, 0.5)
+        Wait.time(clear, 2)
+    end, function() return o.isDestroyed() or not o.loading_custom end, 30)
 end
 
 -- for npc.lua: fx { name =, guid = }
