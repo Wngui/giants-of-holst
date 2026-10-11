@@ -345,7 +345,7 @@ FLAME_URL = "https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.un
 
 
 def flame(x, z, n, scene):
-    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "flame", n), Tags=["scene"], Tooltip=False, Locked=True,
+    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "flame", n), Tags=["scene", "fx"], Tooltip=False, Locked=True,
                grid={"x": x, "z": z, "k": "model", "s": [0.25] * 3, "ly": 0.74},
                CustomAssetbundle={"AssetbundleURL": FLAME_URL, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": 0})
@@ -382,12 +382,15 @@ FX.update({"swipe": (_SE, 0, 5, 0.1, 0, 3), "pop": (_SE, 0, 2, 0.1, 0, 3),
            # cart: rain on the leaves all scene long, and thunder now and then (Soundscape "Rainscapes")
            "rain": (_RAIN, 16, None, 0.1, 0, None), "thunder": (_RAIN, 0, [1, 2, 3, 4, 5, 6, 7], 0.1, 0, 15)})
 SOUND = {"swipe", "pop", "thud", "boom", "crash", "rain", "thunder"}
+# steady warm candle light: RobMayer's TTSLibrary point light, edited (warm, dim, short range, no shadows, cube and collider
+# off) and served from this repo as props/candle_light.unity3d. Particle-light flames flickered.
+FX["candle"] = ("props/candle_light.unity3d", 0, None, 1.0, 0, None)
 # visual -> sound played with it
 WITH_SOUND = {"crit": "thud", "fireball": "boom", "puff": "swipe", "poison": "swipe", "smoke_cloud": "swipe", "blood": "swipe"}
 for i, c in enumerate(COLOURS):
-    FX["swirl_" + c.lower()] = (_SWIRL, 0, i, 1.0, 0.3, 5)
-    FX["burst_" + c.lower()] = (_MAGIC, 0, i, 1.0, 0.3, 5)
-FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, snd=WITH_SOUND.get(k) or
+    FX["swirl_" + c.lower()] = (_SWIRL, 0, i, 0.5, 0.3, 2.5)   # small and quick: a card shouldn't fog the table
+    FX["burst_" + c.lower()] = (_MAGIC, 0, i, 0.7, 0.3, 3)
+FX = {k: dict(url=u, loop=lp, trig=tr, s=sc, lift=li, life=lf, hide=k in SOUND, clear=u.startswith(_FX), snd=WITH_SOUND.get(k) or
               ("pop" if k.startswith(("swirl_", "burst_")) else None)) for k, (u, lp, tr, sc, li, lf) in FX.items()}
 FX["steam"]["loop"] = 1   # its "w/ Sound" looping effect
 for f in FX.values():   # the pack's one-shots: "Off" (0) shows the carrier cube, "Transparent" (1) hides it
@@ -405,13 +408,28 @@ CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud
            "Mirror Image": "swirl_purple", "Frost Nova": "burst_blue", "Detect Magic": "swirl_blue",
            "Healing Draught": "swirl_green", "Smoke Egg": "smoke_cloud", "Vasko's Lucky Ring": "swirl_yellow",
            "Lantern of True Sight": "swirl_blue", "Moonstaff Shard": "burst_white"}
-def fx_obj(name, x, z, n, scene, lift=0.0):
+def fx_obj(name, x, z, n, scene, base, lift=0.0):
     f = FX[name]
-    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n), Tags=["scene"] + (["fxhide"] if f["hide"] else []),
-               Tooltip=False, Locked=True,
+    url = f["url"] if f["url"].startswith("http") else base + f["url"]
+    return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "fx", n), Tags=["scene", "fx"] + (["fxhide"] if f["hide"] else []),
+               Tooltip=False, Locked=True, ColorDiffuse={"r": 1.0, "g": 1.0, "b": 1.0, "a": 0.0 if f["clear"] else 1.0},
                grid={"x": x, "z": z, "k": "fx", "s": [f["s"]] * 3, "ly": f["lift"] + lift},
-               CustomAssetbundle={"AssetbundleURL": f["url"], "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
+               CustomAssetbundle={"AssetbundleURL": url, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": f["loop"]})
+
+
+def lights(s):
+    """Warm candle light at the den's sconces (inner face) and candelabras, and the tavern's door lanterns."""
+    out = []
+    for name, x, z, *rest in s.get("props", []):
+        if name == "wall_sconce":
+            r = math.hypot(x, z)
+            out.append(("candle", x - 0.5 * x / r, z - 0.5 * z / r, 1.3))
+        elif name == "candelabra":
+            out.append(("candle", x, z, 1.7))
+        elif name == "tavern":   # rotated 180: the door and its lanterns face south
+            out += [("candle", x - 0.6, z - 1.65, 1.3), ("candle", x + 0.6, z - 1.65, 1.3)]
+    return out
 
 
 FOG = False   # hidden enemies revealed by walking near: off for now, the GM toggles visibility by hand
@@ -423,8 +441,8 @@ def scene_data(s, base, textures):
         spawns.append(prop(spec, n, s["key"], base, textures))
         if spec[0] == "torch":
             spawns.append(flame(spec[1], spec[2], n, s["key"]))
-    for n, (name, x, z, *lift) in enumerate(s.get("fx", [])):   # ambient effects
-        spawns.append(fx_obj(name, x, z, n, s["key"], *lift))
+    for n, (name, x, z, *lift) in enumerate(s.get("fx", []) + lights(s)):   # ambient effects and candle light
+        spawns.append(fx_obj(name, x, z, n, s["key"], base, *lift))
     for n, spec in enumerate(s["npcs"]):
         o = npc(*spec[:3], n, s["key"], *spec[3:], face=s.get("face", {}).get(spec[0]))
         # living NPCs stay invisible to players until a hero comes near (fog) or the GM reveals them (hidden scenes)

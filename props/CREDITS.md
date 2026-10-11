@@ -13,3 +13,6 @@ Particle effects (spells, explosions, blood, smoke, fire, fog, rain, storm, cand
 "Effects: Lighting, Magic, Smoke, Fire and more" (2554037089) and "Lighting and Effects" (1469725554).
 Sounds: "Sound Effects" (Workshop 2113057305) and "Soundscape Assets" (Workshop 3323409166; Left 4 Dead 2 sounds,
 Valve). All loaded by URL from Steam, not redistributed here. For private play.
+
+candle_light.unity3d: RobMayer's TTSLibrary point light (github.com/RobMayer/TTSLibrary, lights/point.unity3d), recoloured
+warm, dimmed, shadows and cube off.

@@ -150,6 +150,7 @@ function setScene(i)
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
+            if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
             if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
             if o.hasTag("hidden") then
                 o.setInvisibleTo(PLAYERS)
@@ -269,11 +270,13 @@ function fxAt(name, p)
     if not f or not T then return end
     if f.snd then fxAt(f.snd, p) end
     spawnObjectData({ data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { f.life and "fx" or "scene" },
+        ColorDiffuse = { r = 1, g = 1, b = 1, a = f.clear and 0 or 1 },   -- alpha 0: the pack's carrier cube turns transparent
         Transform = { posX = p.x, posY = T.top + f.lift * SQ, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
                       scaleX = f.s, scaleY = f.s, scaleZ = f.s },
         CustomAssetbundle = { AssetbundleURL = f.url, AssetbundleSecondaryURL = "", MaterialIndex = 0, TypeIndex = 0,
                               LoopingEffectIndex = f.loop } },
         callback_function = function(o)
+            if f.life then o.interactable = false end   -- lasting ones (smoke cloud) stay grabbable so the GM can delete them
             if f.hide then o.setInvisibleTo(ALL) end   -- sound-only bundle: its carrier cube stays out of sight
             if f.trig then
                 local trig = type(f.trig) == "table" and f.trig[math.random(#f.trig)] or f.trig   -- a list: pick one
