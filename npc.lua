@@ -1,5 +1,6 @@
--- NPC: healthbar everyone sees (in battle only); HP and attack buttons only the GM (Black seat) sees.
--- GM hovers the NPC and types a number: that much damage. Right-click > Heal 5. Attack buttons roll and whisper to the GM.
+-- NPC: healthbar everyone sees (in battle only), with HP written on it for the GM; attack buttons only the GM (Black seat) sees.
+-- Damage: right-click > Take damage (negative heals), or hover and type a number. Attack buttons roll and whisper to the GM.
+-- Def, movement and attacks are in the object's description (build.py).
 -- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_HEIGHT in build.py or UI_ROT here.
 -- the bar stands upright and faces where the figure faces (its +z): Euler (90, -90, 90) in the object-UI frame
 -- (x = object x, z = object down). "0 0 180" lay flat; "(yaw - 90) -90 90" stood up facing south.
@@ -9,12 +10,19 @@ BTN_H = 60   -- attack/reveal button height (+4 spacing per row below)
 local GM = "Black"   -- not "Host": the host sitting in a player seat would still see GM-only UI
 local S
 -- the panel is placed by its centre; put the health bar (its bottom row) at S.ui above the base, per model (build.py)
-function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (60 + (BTN_H + 4) * (#S.attacks + (S.hidden and 1 or 0))) * 0.4 / 2)) end
+function uiPos() return string.format("0 0 %d", -math.floor((S.ui or 430) + (26 + (BTN_H + 4) * (#S.attacks + (S.hidden and 1 or 0))) * 0.4 / 2)) end
 
 function onLoad(saved)
     S = JSON.decode(saved)
     draw()
-    self.addContextMenuItem("Heal 5", function(color) if color == GM then hurt(-5) end end)
+    self.addContextMenuItem("Take damage", function(color)
+        if color ~= GM then return end
+        Player[color].showInputDialog("Damage to " .. S.name .. " (negative heals)", "", function(text)
+            -- MoonSharp's tonumber(s, 10) throws on "-5"/"", so pattern-check first and call it without a base
+            local num = (text or ""):match("^%s*%+?(%-?%d+)%s*$")
+            if num then hurt(tonumber(num)) end
+        end)
+    end)
 end
 
 function onNumberTyped(color, n)
@@ -25,10 +33,10 @@ end
 function onSave() return JSON.encode(S) end
 
 function draw()
-    -- top to bottom: attack buttons and HP/damage (GM only), then the health bar right above the figure
+    -- top to bottom: attack buttons (GM only), then the health bar right above the figure
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="%d"><VerticalLayout spacing="4" childForceExpandHeight="false">',
-        uiPos(), UI_ROT, UI_SCALE, 60 + (BTN_H + 4) * (#S.attacks + (S.hidden and 1 or 0))) }
+        uiPos(), UI_ROT, UI_SCALE, 26 + (BTN_H + 4) * (#S.attacks + (S.hidden and 1 or 0))) }
     if S.hidden then   -- GM-only: show this NPC to the players now
         x[#x + 1] = '<Button id="reveal" onClick="revealMe" visibility="' .. GM ..
             '" preferredHeight="' .. BTN_H .. '" fontSize="20" colors="#5a4a10|#7a6418|#3a2a08|#5a4a10" textColor="#f0d9a0">Reveal</Button>'
@@ -39,11 +47,11 @@ function draw()
             a.name .. '</Button>'
     end
     local off = S.battle and "" or ' active="false"'   -- bars only in battle (the GM's Battle button)
-    x[#x + 1] = '<Text id="hp" visibility="' .. GM .. '" preferredHeight="34" fontSize="18" color="#ffffff" outline="#000000"' ..
-        off .. '>' .. hpText() .. '</Text>'
-    x[#x + 1] = '<ProgressBar id="bar" preferredHeight="22"' .. off .. (S.hidden and ' visibility="' .. GM .. '"' or '') ..
-        ' percentage="' .. pct() ..
-        '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>'
+    x[#x + 1] = '<Panel preferredHeight="22"' .. off .. (S.hidden and ' visibility="' .. GM .. '"' or '') .. '>' ..
+        '<ProgressBar id="bar" percentage="' .. pct() ..
+        '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>' ..
+        '<Text id="hp" visibility="' .. GM .. '" fontSize="18" fontStyle="Bold" color="#ffffff" outline="#000000">' ..
+        hpText() .. '</Text></Panel>'
     x[#x + 1] = '</VerticalLayout></Panel>'
     self.UI.setXml(table.concat(x))
 end
@@ -65,9 +73,9 @@ function setBattle(p)
 end
 
 function pct() return math.floor(100 * S.hp / S.max) end
-function hpText() return S.hp .. "/" .. S.max .. "  Def " .. S.def end
+function hpText() return S.hp .. "/" .. S.max end
 
-function hurt(n)   -- negative heals
+function hurt(n)   -- negative heals; 0 HP plays the death animation (and healing stands it back up)
     if not n or n == 0 then return end
     S.hp = math.max(0, math.min(S.max, S.hp - n))
     self.UI.setAttribute("bar", "percentage", pct())

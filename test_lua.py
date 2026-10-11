@@ -266,7 +266,7 @@ c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
 kids = [o for o in objs if o.data.Nickname == "Street kid"]
-gm_bar = 'visibility="Black" percentage'
+gm_bar = 'visibility="Black"><ProgressBar'
 assert giants and kids and all(o.invisible and o.tint.a < 1 and not o.lit and gm_bar in o.xml for o in giants + kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
 g.selected = lua.table_from(giants)
@@ -401,7 +401,7 @@ assert len(list(g.tabs.values())) == 1 + len(scenes)
 c.setScene(4)
 objs = list(g.getObjectsWithTag("scene").values())
 assert sum(o.data.Nickname == "Street kid" for o in objs) == 5
-wonky = [o for o in objs if o.data.Nickname == "Wonky bone"]
+wonky = [o for o in objs if o.data.Nickname == "Wonky stained dice"]
 assert len(wonky) == 3 and all(o.invisible and o.hasTag("manual") for o in wonky)
 c.revealAll(); assert all(o.invisible for o in wonky)        # only the GM's toggle shows them
 c.setScene(5)
@@ -422,6 +422,9 @@ ng.JSON.decode = lambda s: npc.table_from({k: (npc.table_from([npc.table_from(a)
                                           for k, v in json.loads(s).items()})
 npc.execute("""
 log, attrs, died, swung = {}, {}, 0, 0
+typed = ""
+Player = setmetatable({}, { __index = function(_, c) return { showInputDialog = function(_, _, cb) cb(typed, c) end } end })
+function damage(color, text) typed = text; menu(color) end
 self = { addContextMenuItem = function(label, fn) menu = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
          getRotation = function() return { x = 0, y = 270, z = 0 } end,
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
@@ -446,8 +449,14 @@ ng.onNumberTyped("Black", 12)                                          # GM hove
 assert ng.attrs["bar.percentage"] == "80" and ng.attrs["hp.text"].startswith("48/60")
 ng.onNumberTyped("Black", 100)
 assert ng.died == 1 and "falls" in ng.log[1]
-ng.menu("Black"); ng.menu("Black"); ng.menu("Red")                   # right-click Heal 5, twice; players can't
-assert ng.died == 2 and ng.attrs["hp.text"].startswith("10/60")
+ng.damage("Black", "-10"); ng.damage("Red", "-30")                  # right-click Take damage: negative heals; players can't
+assert ng.died == 2 and ng.attrs["hp.text"] == "10/60"
+for junk in ("abc", "", " ", "--3"):                                # ignored, no error
+    ng.damage("Black", junk)
+ng.damage("Black", "+4")
+assert ng.attrs["hp.text"] == "6/60"
+desc = giant["Description"]
+assert desc.startswith("Def 12   Move 8   HP 60") and "Club smash: +7, 2d8+4, melee, reach 2" in desc
 for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())
@@ -461,8 +470,8 @@ isolde = next(o for s in scenes for o in s["spawns"] if o.get("Nickname") == "Pr
 assert isolde["RPGdead"]
 npc.execute("died, log = 0, {}")
 ng.onLoad(isolde["LuaScriptState"])
-ng.menu("Black"); ng.menu("Black")
-assert ng.died == 1 and "gets back up" in ng.log[1] and ng.attrs["hp.text"].startswith("14/20")
+ng.damage("Black", "-10")
+assert ng.died == 1 and "gets back up" in ng.log[1] and ng.attrs["hp.text"] == "14/20"
 ng.onNumberTyped("Black", 3)
 assert ng.died == 1                                      # still standing, no toggle
 print("ok -", msgs[-1])

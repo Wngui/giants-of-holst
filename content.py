@@ -163,7 +163,7 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, base=(0.2, 0.45, 0.15), hp=65, defense=11,
+    "giant_troll": dict(name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
                         attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
         ("Crack the chains", None, None, "every thrall moves 3 and makes a free Rusty knife attack"),
@@ -204,7 +204,7 @@ NPCS = {
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
     "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
                       notes="Thieves' guild. Search: 3 gold, a guild token, cart keys.", dead=True),
-    "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, notable=True,
+    "dying_giant": dict(name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, move=0, notable=True,
                         hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
     ], notes="Speaks only Giant (Giant-Talk, or Brannoc's few words). See scene notes."),

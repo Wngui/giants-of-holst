@@ -307,6 +307,10 @@ def npc(key, x, z, n, scene, hp=None, face=None):
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         o["Tags"] = o["Tags"] + ["npc"]
+        move = t.get("move", 8 if t.get("fig") == "rpg_CYCLOP" else 6)
+        o["Description"] = "\n".join([f"Def {t['defense']}   Move {move}   HP {hp}"] + [
+            f"{a['name']}: " + ", ".join(x for x in ((f"+{a['hit']}" if a["hit"] else ""), a["dmg"] or "", a["note"]) if x)
+            for a in attacks])
         o["LuaScriptState"] = json.dumps({"name": t["name"], "hp": t.get("start_hp", hp), "max": hp,
                                           "def": t["defense"], "down": bool(t.get("dead")), "attacks": attacks,
                                           "ui": bundles[n % len(bundles)][2] if bundles else UI_HEIGHT.get(t["fig"], 330),
@@ -317,7 +321,7 @@ def npc(key, x, z, n, scene, hp=None, face=None):
 # small props are loose physics objects (knock them over, push them about); everything else is scenery, spawned
 # locked in place with its own mesh as collider so figures and dice stop at walls instead of passing through
 LOOSE = ("barrel", "keg", "crate", "crates", "sack", "chest", "chest_gold", "coins", "chair", "goods", "door_smashed",
-         "wicker_shield", "giant_club", "lumber", "torch", "candelabra", "hoard", "hoard_b")
+         "wicker_shield", "giant_club", "lumber", "candelabra", "hoard", "hoard_b")   # not "torch": its fire must stay in the bowl
 
 
 def prop(spec, n, scene, base, textures):
@@ -334,14 +338,15 @@ def prop(spec, n, scene, base, textures):
                Nickname=extra.get("name", ""), **common, CustomMesh=mesh(base, name, Convex=loose))   # non-convex mesh: locked only
 
 
-# a real flame with a dim point light on every brazier: Cobop's lit torch (Steam Workshop 2264051910), its handle
-# sunk into the bowl so only the burning head shows. ponytail: lift/scale eyeballed from the bundle's mesh bounds
-FLAME_URL = "https://www.dropbox.com/s/852mb5n44cefo1h/torch-on-silent.unity3d?dl=1"
+# real fire with a warm point light in every brazier's bowl: ToMo's Flames (Steam Workshop 1114184498, the no-collider
+# bundle), effect 0 "Fire On (Light)", silent. A Custom_Model can't emit light, only an asset bundle can.
+# ponytail: scale/lift eyeballed (the bundle's fire particles keep their own size; scale only spreads the emitter)
+FLAME_URL = "https://www.dropbox.com/s/9cxfxq9azlhmvs0/ToMos%20Flame%20Effect.unity3d?dl=1"
 
 
 def flame(x, z, n, scene):
     return obj("Custom_Assetbundle", tf(), GUID=guid(scene, "flame", n), Tags=["scene"], Tooltip=False, Locked=True,
-               grid={"x": x, "z": z, "k": "model", "s": [0.45] * 3, "ly": 0.53},
+               grid={"x": x, "z": z, "k": "model", "s": [0.25] * 3, "ly": 0.74},
                CustomAssetbundle={"AssetbundleURL": FLAME_URL, "AssetbundleSecondaryURL": "", "MaterialIndex": 0,
                                   "TypeIndex": 0, "LoopingEffectIndex": 0})
 
@@ -368,9 +373,9 @@ def scene_data(s, base, textures):
                        ColorDiffuse={"r": 0.06, "g": 0.06, "b": 0.06},     # black, white pips: readable from across the table
                        grid={"x": -0.45 + 0.45 * i, "z": 0, "k": "fig", "s": [1.3, 1.3, 1.3], "lift": 4}) for i in range(3)]
         # the house's wonky dice for the players: lopsided and stained, hidden until the GM reveals them
-        wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((1.3, 0.8, 1.5), (0.7, 0.4, 0.3))]
+        wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((0.6, 0.45, 0.7), (0.7, 0.4, 0.3))]
         spawns += [obj("Die_6", tf(ry=50.0 * i), GUID=guid("den", "wonky", i), Tags=["scene", "hidden", "manual"],
-                       Nickname="Wonky bone", Description="Lopsided, chipped and sticky. The house dice, for guests.",
+                       Nickname="Wonky stained dice", Description="Lopsided, chipped and sticky. The house dice, for guests.",
                        ColorDiffuse=dict(zip("rgb", rgb)),
                        grid={"x": -1.6, "z": -0.6 + 0.6 * i, "k": "fig", "s": list(sc), "lift": 4})
                    for i, (sc, rgb) in enumerate(wonky)]

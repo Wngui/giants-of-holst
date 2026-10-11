@@ -635,20 +635,15 @@ def bedroll(seed=1):
 
 
 def brazier():
-    """Iron brazier: three splayed legs, a solid bowl (inner and outer wall), coals and a cluster of flame tongues."""
+    """Iron brazier: three splayed legs, a solid bowl (inner and outer wall) and coals. The fire itself is an asset
+    bundle with a light, set in the bowl by build.py (a model can't glow)."""
     a = Asset(3)
-    rnd = a.rnd
     for i in range(3):
         t = 2 * math.pi * i / 3
         a.box((0.04, 0.04, 0.7), (0.15 * math.cos(t), 0.15 * math.sin(t), 0.35), "iron", rot=(0.2 * math.sin(t), -0.2 * math.cos(t), 0))
     a.lathe([(0.08, 0.6), (0.27, 0.7), (0.3, 0.82), (0.26, 0.82), (0.23, 0.73), (0.0, 0.66)], (0, 0, 0), "iron", segs=14,
             cap_top=False, cap_bottom=True)
     a.blob(0.2, (0, 0, 0.74), "charcoal", scale=(1, 1, 0.45), jitter=0.2, subdiv=1)
-    for i in range(6):   # flame tongues of different heights leaning out a little
-        t = 2 * math.pi * i / 6 + rnd.uniform(-0.3, 0.3)
-        r, h = (0.0, 0.42) if i == 0 else (0.11, rnd.uniform(0.18, 0.32))
-        a.cyl(0.07 if i == 0 else 0.05, h, (r * math.cos(t), r * math.sin(t), 0.76), "flame", segs=6, r2=0.004,
-              rot=(0.25 * math.sin(t) if i else 0, -0.25 * math.cos(t) if i else 0, 0))
     return a.objs
 
 
