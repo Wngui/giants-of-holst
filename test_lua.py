@@ -93,7 +93,7 @@ MusicPlayer = { setCurrentAudioclip = function(t) MusicPlayer.url = t.url end, p
 Grid = {}
 decals = {}
 Global = { addDecal = function(d) decals[#decals + 1] = d end, setDecals = function(t) decals = t end }
-Wait = { time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
+Wait = { stop = function() end, time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
 WebRequest = { get = function(url, cb)
   requested = url
   local file = url:match("/main/([^?]+)%?t=%d+$")
@@ -115,6 +115,9 @@ function makeObj(d)
   function o.getName() return d.Nickname or "" end
   function o.getZones() return o.zones or {} end
   function o.getValue() return o.value end
+  function o.getBounds() local q = o.getPosition() return { center = Vector(q.x, q.y + 1.5, q.z), size = Vector(2, 3, 2) } end
+  function o.getTransformForward() return Vector(0, 0, 1) end
+  function o.setPosition(p) o.pos = p end
   function o.isDestroyed() return objects[d.GUID] == nil end
   o.AssetBundle = { playTriggerEffect = function(i) o.triggered = i end }
   function o.hasTag(t) return o.tags[t] == true end
@@ -519,7 +522,8 @@ for col in ("Blue", "Green", "Purple"):
     next(iter(g.getObjectsWithTag("fig_" + col).values())).pos = lua.table_from([100, TOP, 100])
 fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z])
 gi.menus["Grab nearest hero"]("Red"); assert not fig.locked
-gi.menus["Grab nearest hero"]("Black"); assert fig.locked and fig.pos[2] > TOP + 2 * SQ
+gi.menus["Grab nearest hero"]("Black"); assert fig.locked and fig.pos[2] > TOP + 1
+assert (fig.pos[1], fig.pos[3]) == (gp.x, gp.z + 0.9)          # in front of the giant, in its fist
 gi.menus["Throw the hero"]("Black")
 import re
 dmg = int(re.search(r": (\d+) damage", list(g.log.values())[-1]).group(1))

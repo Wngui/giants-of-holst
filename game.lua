@@ -852,11 +852,26 @@ function grab(o)
     if not best then return broadcastToColor("No hero within 6 squares.", "Black", { 1, 0.6, 0.2 }) end
     for _, c in pairs(held) do if c == best then return end end   -- already in another giant's fist
     held[o.getGUID()] = best
-    local f = kit("fig_" .. best)
+    local f, g = kit("fig_" .. best), o.getGUID()
     f.setLock(true)
-    f.setPositionSmooth({ p.x, T.top + 2.5 * SQ, p.z }, false, false)
+    f.setPositionSmooth(fist(o), false, false)
     fxAt("swipe", p)
     broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
+    -- held: the hero stays in the fist, facing the giant, wherever the GM moves or turns it
+    local id
+    id = Wait.time(function()
+        if held[g] ~= best or o.isDestroyed() or f.isDestroyed() then return Wait.stop(id) end
+        f.setPosition(fist(o))
+        f.setRotation({ 0, o.getRotation().y + 180, 0 })
+    end, 0.05, -1)
+end
+
+-- where the giant's fist is: in front of it at shoulder height, from its real size and facing
+-- ponytail: 0.45 forward / 0.6 up of its bounds eyeballed; tune if the hero hangs inside or beside the giant
+function fist(o)
+    local b, fwd = o.getBounds(), o.getTransformForward()
+    local r = math.max(b.size.x, b.size.z) * 0.45
+    return { b.center.x + fwd.x * r, b.center.y - b.size.y / 2 + b.size.y * 0.6, b.center.z + fwd.z * r }
 end
 
 function throw(o)
