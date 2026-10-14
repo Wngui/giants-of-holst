@@ -4,7 +4,7 @@
 DATA = {} --@DATA@
 VERSION = DATA.version
 
-local scene, setupDone, hp, doom = 1, {}, {}, 0
+local scene, setupDone, hp = 1, {}, {}
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
 function onLoad(saved)
@@ -22,19 +22,18 @@ end
 function start(s)
     measure()
     if s.version == VERSION then
-        scene, setupDone, hp, doom = s.scene, s.setupDone, s.hp or {}, s.doom or 0
+        scene, setupDone, hp = s.scene, s.setupDone, s.hp or {}
     else
         install(s.scene or 1)
     end
     Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
     Wait.time(applyHands, 2, 15)
     Wait.time(storm, 20, -1)
-    Wait.frames(drawDoom, 15)
     preload()   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
 end
 
 function onSave()
-    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp, doom = doom })
+    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp })
 end
 
 -- First load or a new version: fresh hero kits and notebook, same scene, re-deal to seated players.
@@ -736,29 +735,6 @@ function drawTurns()
     if waiting then table.insert(parts, "<i>waiting for d20s...</i>") end
     UI.setValue("turnsText", table.concat(parts, "   "))
     UI.setAttribute("turns", "active", #parts > 0 and "true" or "false")
-end
-
--- ---------------------------------------------------------------- doom clock
--- Six segments everyone sees; the GM adds one when time is wasted or a check fails badly. Full: thunder, the GM
--- springs a complication (GM guide), the clock empties.
-DOOM = 6
-function doomUp()
-    doom = math.min(DOOM, doom + 1)
-    drawDoom()
-    if doom == DOOM then
-        fxAt("thunder", { x = T.cx, z = T.cz })
-        broadcastToAll("The doom clock is full. Something has gone wrong...", { 0.9, 0.3, 0.2 })
-        Wait.time(function() doom = 0; drawDoom() end, 6)
-    else
-        fxAt("thud", { x = T.cx, z = T.cz })
-    end
-end
-
-function doomDown() doom = math.max(0, doom - 1); drawDoom() end
-
-function drawDoom()
-    for i = 1, DOOM do UI.setAttribute("doom" .. i, "color", i <= doom and "#b0281e" or "#3a2a1a") end
-    UI.setAttribute("doom", "active", doom > 0 and "true" or "false")
 end
 
 -- ---------------------------------------------------------------- tremor

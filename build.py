@@ -3,7 +3,7 @@ e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/ou
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT, DOOM_NOTES
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -532,7 +532,7 @@ TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM
 # +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
 PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.48
 GM_EXTRA = (("initiative", "Initiative"), ("nextTurn", "Next turn"), ("endFight", "End fight"),
-            ("doomUp", "Doom +1"), ("doomDown", "Doom -1"), ("tremor", "Tremor"))
+            ("tremor", "Tremor"))
 GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
               [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
@@ -606,9 +606,6 @@ def xml_ui(base):
 </VerticalLayout></Panel>"""
     turns = """<Panel id="turns" active="false" rectAlignment="UpperCenter" offsetXY="0 -10" width="1100" height="44"
  color="#1b1410dd" padding="10 10 4 4"><Text id="turnsText" fontSize="20" color="#f0d9a0" alignment="MiddleCenter"> </Text></Panel>"""
-    doom = f"""<Panel id="doom" active="false" rectAlignment="UpperLeft" offsetXY="10 -80" width="250" height="70"
- color="#1b1410dd" padding="8 8 6 8"><VerticalLayout spacing="4"><Text fontSize="16" color="#f0d9a0" fontStyle="Bold">DOOM CLOCK</Text>
-<HorizontalLayout spacing="4">{"".join(f'<Panel id="doom{i}" color="#3a2a1a"/>' for i in range(1, 7))}</HorizontalLayout></VerticalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image id="pickimg_{h['color']}" image="portrait_{h['key']}" {on}pick" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
@@ -621,7 +618,7 @@ def xml_ui(base):
     # Lua's UI.setXml wants lowercase name/url (the save-file format's Name/URL gives a null-reference error)
     assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES] + [
         {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}]
-    return gm + pick + turns + doom, assets
+    return gm + pick + turns, assets
 
 
 def lua_lit(v):
@@ -650,7 +647,7 @@ def gm_guide():
            "  bind the *Toggle visibility (GM)* hotkey (Options > Game Keys). Hidden things vanish for players and show",
            "  see-through with an outline for you. Press again to show them.",
            "- The same text as below sits in the Notebook (GM-only tabs).\n",
-           "## Rules\n", "```", RULES, "```\n", "## Doom clock\n", "```", DOOM_NOTES, "```\n", "## Heroes\n"]
+           "## Rules\n", "```", RULES, "```\n", "## Heroes\n"]
     for h in HEROES:
         out.append(f"**{h['name']}** ({h['color']}) HP {h['hp']}, Def {h['defense']}, "
                    + ", ".join(f"{k} {v:+d}" for k, v in h["stats"].items()))
@@ -683,8 +680,7 @@ def main(base):
         heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"],
                                      agility=h["stats"]["Agility"])
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
-               [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES] + \
-               [dict(title="Doom clock", body=DOOM_NOTES, color="Black")]
+               [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
                 gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT,
                 scenes=[scene_data(s, base, textures) for s in SCENES],

@@ -198,7 +198,7 @@ ctl = g.getObjectFromGUID(CTL)
 assert ctl and ctl.getVar("VERSION") == game["version"]
 c = ctl.env
 assert 'onClick="%s/pick"' % CTL in g.UIxml
-assert len(list(g.tabs.values())) == 2 + len(c.DATA.scenes)
+assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
 assert count("scene") == 0 and count("kit") == 20, (count("scene"), count("kit"))   # title: no props, 4 hero kits
 assert g.tableURL.endswith("table_title.jpg") and g.tableName == "Table_Custom"
@@ -404,7 +404,7 @@ assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
 assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
 assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
-assert len(list(g.tabs.values())) == 2 + len(scenes)
+assert len(list(g.tabs.values())) == 1 + len(scenes)
 
 # cave: the princess starts hidden, and "reveal all" leaves her hidden
 c.setScene(7)
@@ -502,11 +502,6 @@ strip = g.UIattr["turnsText.value"]
 assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip and "waiting" not in strip, strip
 c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"
-# doom clock: hidden at 0, fills, empties after it's full
-c.doomUp(); assert g.UIattr["doom.active"] == "true" and g.UIattr["doom1.color"] != g.UIattr["doom2.color"]
-for _ in range(5):
-    c.doomUp()
-assert g.UIattr["doom.active"] == "false" and "doom clock is full" in list(g.log.values())[-1]
 # searching: a chest/barrel without fixed loot, once, with the hero beside it; fixed-loot props have no Search
 c.setScene(3)
 objs = list(g.getObjectsWithTag("scene").values())
