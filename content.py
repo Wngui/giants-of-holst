@@ -152,7 +152,7 @@ COMMONERS = [
 
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
-    "giant_club": dict(name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
+    "giant_club": dict(shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
@@ -161,7 +161,7 @@ NPCS = {
         ("Hurl cart wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
         ("Club smash", 6, "2d8+2", "melee, reach 2"),
     ], notes="Hangs back and throws whatever the street offers. Moves 8."),
-    "giant_eye": dict(name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
+    "giant_eye": dict(shield=True, name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),

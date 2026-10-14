@@ -314,7 +314,7 @@ def npc(key, x, z, n, scene, hp=None, face=None):
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
         move = t.get("move", 8 if t.get("fig") == "rpg_CYCLOP" else 6)
         o["Tags"] = o["Tags"] + ["npc"] + (["boss"] if t.get("boss") else []) + \
-            (["giant"] if t.get("fig") == "rpg_CYCLOP" and move else [])   # boss: revealing it shakes the ground; giant: grab menu
+            (["giant"] if t.get("fig") == "rpg_CYCLOP" and move else []) + (["shield"] if t.get("shield") else [])   # boss: revealing it shakes the ground; giant: grab menu
         o["Description"] = "\n".join([f"Def {t['defense']}   Move {move}   HP {hp}"] + [
             f"{a['name']}: " + ", ".join(x for x in ((f"+{a['hit']}" if a["hit"] else ""), a["dmg"] or "", a["note"]) if x)
             for a in attacks])
@@ -643,7 +643,7 @@ def gm_guide():
            "- Host the game and take the **Black (Game Master)** seat. The GM panel (top right) is only visible to Black/host.",
            "- Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.",
            "- Right-click an NPC (GM-only entries): *Take damage* (`12` hurts, `-5` heals; or hover and type the number),",
-           "  *Reveal*, and one entry per attack. Attacks whisper the roll to you (Black); crits add an extra set of damage dice.",
+           "  and one entry per attack. Attacks whisper the roll to you (Black); crits add an extra set of damage dice.",
            "- Giants also have *Grab nearest hero* (within 6 squares, held up in the fist), then *Throw the hero* (4-6 squares,",
            "  2d6, prone) or *Let go* (they broke free, Might DC 14). Revealing the chainmaster shakes the ground.",
            "- Fireballs leave scorch marks until the scene changes. A hero's natural 20 / natural 1 on their d20 gets a flourish.",
@@ -687,6 +687,9 @@ def main(base):
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
                 gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, scorch=f"{base}props/scorch.png",
+                shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
+                                               Description="Ranged attacks at the giant: -5 unless the shield is burned.",
+                                               CustomMesh=mesh(base, "wicker_shield"))),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall

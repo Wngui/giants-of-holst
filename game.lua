@@ -166,6 +166,7 @@ function setScene(i)
                 end)
             end
             if o.hasTag("giant") then giantMenu(o) end
+            if o.hasTag("shield") then giveShield(o) end
             if o.hasTag("search") then o.addContextMenuItem("Search", function(color) search(o, color) end) end
             if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
             if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
@@ -277,12 +278,6 @@ function onPlayerAction(player, _, targets)
         end
     end
     return true
-end
-
--- an NPC's own GM-only Reveal button
-function revealGuid(p)
-    local o = getObjectFromGUID(p.guid)
-    if o then reveal(o) end
 end
 
 function onObjectDrop(player, o)
@@ -858,12 +853,40 @@ function grab(o)
     fxAt("swipe", p)
     broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
     -- held: the hero stays in the fist, facing the giant, wherever the GM moves or turns it
-    local id
+    carry(o, f, function() return fist(o), { 0, o.getRotation().y + 180, 0 } end, function() return held[g] == best end)
+end
+
+-- keeps f at at() (position, rotation) on holder o, 20 times a second, while keep() holds and both exist.
+-- A carried thing also hides/shows with its holder.
+function carry(o, f, at, keep)
+    local id, hidden
     id = Wait.time(function()
-        if held[g] ~= best or o.isDestroyed() or f.isDestroyed() then return Wait.stop(id) end
-        f.setPosition(fist(o))
-        f.setRotation({ 0, o.getRotation().y + 180, 0 })
+        if o.isDestroyed() or f.isDestroyed() or not keep() then return Wait.stop(id) end
+        local p, r = at()
+        f.setPosition(p)
+        f.setRotation(r)
+        if hidden ~= o.hasTag("hidden") then
+            hidden = o.hasTag("hidden")
+            f.setInvisibleTo(hidden and PLAYERS or {})
+        end
     end, 0.05, -1)
+end
+
+-- giants with a wicker shield carry it upright on their left, facing forward (the scene destroys it with them).
+-- ponytail: size and placement eyeballed like the fist
+function giveShield(o)
+    local q, s = o.getPosition(), DATA.shield.scale * SQ
+    local d = {}
+    for k, v in pairs(DATA.shield.obj) do d[k] = v end
+    d.Transform = { posX = q.x, posY = q.y + 3, posZ = q.z, rotX = 90, rotY = 0, rotZ = 0, scaleX = s, scaleY = s, scaleZ = s }
+    spawnObjectData({ data = d, callback_function = function(sh)
+        carry(o, sh, function()
+            local b, fwd, rt = o.getBounds(), o.getTransformForward(), o.getTransformRight()
+            local r = math.max(b.size.x, b.size.z) * 0.45
+            return { b.center.x + (fwd.x * 0.5 - rt.x * 0.8) * r, b.center.y - b.size.y / 2 + b.size.y * 0.4,
+                     b.center.z + (fwd.z * 0.5 - rt.z * 0.8) * r }, { 90, o.getRotation().y, 0 }
+        end, function() return true end)
+    end })
 end
 
 -- where the giant's fist is: in front of it at shoulder height, from its real size and facing

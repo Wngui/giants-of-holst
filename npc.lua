@@ -1,5 +1,5 @@
 -- NPC: healthbar everyone sees (in battle only), with HP written on it for the GM.
--- GM right-click menu: Take damage (negative heals; or hover and type a number), Reveal, and one entry per attack,
+-- GM right-click menu: Take damage (negative heals; or hover and type a number) and one entry per attack,
 -- which rolls and whispers to the GM.
 -- Def, movement and attacks are in the object's description (build.py).
 -- ponytail: UI placement is eyeballed; if the bar sits oddly on a model, tweak UI_HEIGHT in build.py or UI_ROT here.
@@ -23,7 +23,6 @@ function onLoad(saved)
             if num then hurt(tonumber(num)) end
         end)
     end)
-    self.addContextMenuItem("Reveal", function(color) revealMe({ color = color }) end)
     for i, a in ipairs(S.attacks) do
         self.addContextMenuItem(a.name, function(color)
             if color == GM then attack({ color = color }, nil, "a" .. i) end
@@ -51,10 +50,6 @@ function draw()
         hpText() .. '</Text></Panel>'
     x[#x + 1] = '</VerticalLayout></Panel>'
     self.UI.setXml(table.concat(x))
-end
-
-function revealMe(player)
-    if player.color == "Black" then getObjectFromGUID(S.ctl).call("revealGuid", { guid = self.getGUID() }) end
 end
 
 -- called by the controller: while hidden from players, the health bar is GM-only too

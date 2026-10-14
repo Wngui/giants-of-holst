@@ -117,6 +117,7 @@ function makeObj(d)
   function o.getValue() return o.value end
   function o.getBounds() local q = o.getPosition() return { center = Vector(q.x, q.y + 1.5, q.z), size = Vector(2, 3, 2) } end
   function o.getTransformForward() return Vector(0, 0, 1) end
+  function o.getTransformRight() return Vector(1, 0, 0) end
   function o.setPosition(p) o.pos = p end
   function o.isDestroyed() return objects[d.GUID] == nil end
   o.AssetBundle = { playTriggerEffect = function(i) o.triggered = i end }
@@ -248,7 +249,8 @@ for col, t in zones.items():
 scenes = to_py(c.DATA.scenes)
 for i, s in enumerate(scenes, 1):
     c.setScene(i)
-    assert count("scene") == len(s["spawns"]), (i, count("scene"))
+    shields = sum("shield" in o["Tags"] for o in s["spawns"])   # + the wicker shields their giants carry
+    assert count("scene") == len(s["spawns"]) + shields, (i, count("scene"))
     assert g.tableURL == s["table"]
     if os.environ.get("DUMP"):          # object list for preview.py (Blender)
         dump.append({"title": s["title"], "key": s["table"].rsplit("_", 1)[1][:-4], "objects": [
@@ -512,6 +514,14 @@ strip = g.UIattr["turnsText.value"]
 assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip and "waiting" not in strip, strip
 c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"
+c.setScene(2)
+# the club and one-eyed giants carry a wicker shield on their left, hidden while they are
+sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield"]
+holders = [o for o in g.getObjectsWithTag("shield").values()]
+assert len(sh) == len(holders) == 2 and all(o.locked or o.data.Locked for o in sh)
+assert any(abs(o.pos[1] - (h.getPosition().x - 0.72)) < 1e-6 for o in sh for h in holders), [to_py(o.pos) for o in sh]
+c.setScene(6)
+assert all(o.invisible for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield")
 # a giant grabs the nearest hero, throws them (on the map, 2-12 damage) or lets go; players can't
 c.setScene(2)
 giants = [o for o in g.getObjectsWithTag("giant").values()]
