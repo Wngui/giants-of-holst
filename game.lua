@@ -4,7 +4,7 @@
 DATA = {} --@DATA@
 VERSION = DATA.version
 
-local scene, setupDone, hp = 1, {}, {}
+local scene, setupDone, hp, doom = 1, {}, {}, 0
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
 function onLoad(saved)
@@ -22,18 +22,19 @@ end
 function start(s)
     measure()
     if s.version == VERSION then
-        scene, setupDone, hp = s.scene, s.setupDone, s.hp or {}
+        scene, setupDone, hp, doom = s.scene, s.setupDone, s.hp or {}, s.doom or 0
     else
         install(s.scene or 1)
     end
     Wait.frames(refreshPick, 15)   -- the loader has just set the UI XML; give TTS a moment to build it
     Wait.time(applyHands, 2, 15)
     Wait.time(storm, 20, -1)
+    Wait.frames(drawDoom, 15)
     preload()   -- TTS resets hand zones a few seconds after the table switch: keep putting them back
 end
 
 function onSave()
-    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp })
+    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp, doom = doom })
 end
 
 -- First load or a new version: fresh hero kits and notebook, same scene, re-deal to seated players.
@@ -163,6 +164,7 @@ function setScene(i)
                     if color == "Black" then fxAt("gas_cloud", o.getPosition()) end
                 end)
             end
+            if o.hasTag("search") then o.addContextMenuItem("Search", function(color) search(o, color) end) end
             if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
             if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
             if o.hasTag("fxclear") then clearCube(o) end
@@ -193,12 +195,14 @@ end
 -- to a pile on the east border, between the two right-hand player kits. Hero figures stay (setScene moves them), and so
 -- do the players' own dice and sheets; played hero cards go to the pile (REST returns them to hands).
 local KEEP = { "scene", "fx", "fxcache", "gm", "gmtable", "gmscreen", "gmconsole", "loot" }   -- loot: the gold die
+function onMap(q)
+    return math.abs(q.x - T.cx) <= T.w * DATA.layout.art_w / 2 and math.abs(q.z - T.cz) <= DATA.layout.rows * SQ / 2
+end
+
 function tidy()
-    local halfX, halfZ, n = T.w * DATA.layout.art_w / 2, DATA.layout.rows * SQ / 2, 0
+    local n = 0
     for _, o in ipairs(getObjects()) do
-        local q = o.getPosition()
-        local keep = o == self or o.type == "Hand" or o.type == "Scripting" or o.type == "Fog" or
-                     math.abs(q.x - T.cx) > halfX or math.abs(q.z - T.cz) > halfZ
+        local keep = o == self or o.type == "Hand" or o.type == "Scripting" or o.type == "Fog" or not onMap(o.getPosition())
         for _, tag in ipairs(KEEP) do keep = keep or o.hasTag(tag) end
         for _, c in ipairs(DATA.colors) do keep = keep or o.hasTag("fig_" .. c) end
         keep = keep or (o.hasTag("kit") and o.type ~= "Card" and o.type ~= "Deck")   -- a player's own d20/sheet stays
@@ -225,6 +229,7 @@ end
 
 function reveal(o)
     if o.hasTag("npc") then fxAt("puff", o.getPosition()) end   -- out of the dust
+    if o.hasTag("boss") and o.hasTag("hidden") then tremor() end   -- the chainmaster steps out: the ground shakes
     o.setInvisibleTo({})
     o.removeTag("hidden")
     if tints[o.getGUID()] then o.setColorTint(tints[o.getGUID()]) end
@@ -299,10 +304,10 @@ end
 -- ---------------------------------------------------------------- particle effects (build.py FX)
 -- An effect bundle spawned at a point; a one-shot fires its trigger once loaded and is removed after its lifetime.
 -- Lasting ones (smoke cloud) are tagged "scene": the GM deletes them, or the next scene does.
-function fxAt(name, p)
+function fxAt(name, p, quiet)   -- quiet: without its sound
     local f = DATA.fx[name]
     if not f or not T then return end
-    if f.snd then fxAt(f.snd, p) end
+    if f.snd and not quiet then fxAt(f.snd, p) end
     spawnObjectData({ data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { f.life and "fx" or "scene" },
         Transform = { posX = p.x, posY = T.top + f.lift * SQ, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
                       scaleX = f.s, scaleY = f.s, scaleZ = f.s },
@@ -658,4 +663,160 @@ function rest()
         if fig then fxAt("swirl_yellow", fig.getPosition()) end
     end
     broadcastToAll("REST: HP back to full, all cards return to your hand.", { 0.5, 0.9, 0.5 })
+end
+
+-- ---------------------------------------------------------------- turn order
+-- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); seated heroes roll
+-- their own d20 (+ Agility) within 20 s, or it is rolled for them. The strip on top shows the order, current turn lit
+-- (and its figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
+local order, turn, waiting = {}, 0, nil
+function initiative()
+    order, turn, waiting = {}, 0, {}
+    local kinds = {}
+    for _, o in ipairs(getObjectsWithTag("npc")) do
+        local i = not o.hasTag("hidden") and o.call("info")
+        if i and i.fight and not i.down then
+            local k = kinds[i.name]
+            if not k then
+                k = { name = i.name, roll = math.random(20), objs = {} }
+                kinds[i.name] = k
+                table.insert(order, k)
+            end
+            table.insert(k.objs, o)
+        end
+    end
+    for _, color in ipairs(DATA.colors) do
+        if Player[color].seated then waiting[color] = true end
+    end
+    broadcastToAll("Roll initiative! Heroes: roll your d20.", { 0.94, 0.85, 0.63 })
+    drawTurns()
+    local w = waiting   -- a newer Initiative press has its own timer
+    Wait.time(function() if waiting == w then for color in pairs(w) do heroInit(color, math.random(20)) end end end, 20)
+end
+
+function heroInit(color, roll)
+    if not (waiting and waiting[color]) then return end
+    waiting[color] = nil
+    local h = DATA.heroes[color]
+    table.insert(order, { name = h.short, roll = roll + h.agility, hero = true, objs = { kit("fig_" .. color) } })
+    if next(waiting) == nil then waiting = nil end
+    drawTurns()
+end
+
+function onObjectRandomize(o, color)
+    if waiting and waiting[color] and o.hasTag("kit") and o.type == "Dice" then
+        Wait.condition(function() heroInit(color, o.getValue()) end, function() return o.isDestroyed() or o.resting end, 10)
+    end
+end
+
+function nextTurn()
+    if #order == 0 then return end
+    turn = turn % #order + 1
+    drawTurns()
+    broadcastToAll(order[turn].name .. "'s turn", { 0.94, 0.85, 0.63 })
+end
+
+function endFight() order, turn, waiting = {}, 0, nil; drawTurns() end
+
+function drawTurns()
+    table.sort(order, function(a, b)
+        if a.roll ~= b.roll then return a.roll > b.roll end
+        return a.hero and not b.hero
+    end)
+    local parts = {}
+    for i, e in ipairs(order) do
+        local label = e.name .. (#e.objs > 1 and (" x" .. #e.objs) or "") .. " (" .. e.roll .. ")"
+        table.insert(parts, i == turn and ("<color=#ffd060><b>> " .. label .. "</b></color>") or label)
+        for _, o in ipairs(e.objs) do
+            if not o.isDestroyed() then
+                if i == turn then o.highlightOn({ 1, 0.8, 0.3 }) else o.highlightOff() end
+            end
+        end
+    end
+    if waiting then table.insert(parts, "<i>waiting for d20s...</i>") end
+    UI.setValue("turnsText", table.concat(parts, "   "))
+    UI.setAttribute("turns", "active", #parts > 0 and "true" or "false")
+end
+
+-- ---------------------------------------------------------------- doom clock
+-- Six segments everyone sees; the GM adds one when time is wasted or a check fails badly. Full: thunder, the GM
+-- springs a complication (GM guide), the clock empties.
+DOOM = 6
+function doomUp()
+    doom = math.min(DOOM, doom + 1)
+    drawDoom()
+    if doom == DOOM then
+        fxAt("thunder", { x = T.cx, z = T.cz })
+        broadcastToAll("The doom clock is full. Something has gone wrong...", { 0.9, 0.3, 0.2 })
+        Wait.time(function() doom = 0; drawDoom() end, 6)
+    else
+        fxAt("thud", { x = T.cx, z = T.cz })
+    end
+end
+
+function doomDown() doom = math.max(0, doom - 1); drawDoom() end
+
+function drawDoom()
+    for i = 1, DOOM do UI.setAttribute("doom" .. i, "color", i <= doom and "#b0281e" or "#3a2a1a") end
+    UI.setAttribute("doom", "active", doom > 0 and "true" or "false")
+end
+
+-- ---------------------------------------------------------------- tremor
+-- Giant footsteps: two thuds, everything loose on the map hops, dust rises here and there.
+function tremor()
+    for step = 0, 1 do
+        Wait.time(function()
+            fxAt("thud", { x = T.cx, z = T.cz })
+            for _, o in ipairs(getObjects()) do
+                if not o.getLock() and o.type ~= "Hand" and o.type ~= "Scripting" and o.type ~= "Fog" and onMap(o.getPosition())
+                   and not o.hasTag("fx") then
+                    local inHand = false
+                    for _, z in ipairs(o.getZones() or {}) do inHand = inHand or z.type == "Hand" end
+                    if not inHand then
+                        o.addForce({ (math.random() - 0.5) * 2, 2.5 - step, (math.random() - 0.5) * 2 }, 4)   -- 4: velocity change
+                        o.addTorque({ math.random() - 0.5, math.random() - 0.5, math.random() - 0.5 }, 4)
+                    end
+                end
+            end
+            local half = T.w * DATA.layout.art_w / 2
+            for _ = 1, 2 do
+                fxAt("puff", { x = T.cx + (math.random() * 2 - 1) * half * 0.8, z = T.cz + (math.random() * 2 - 1) * DATA.layout.rows * SQ * 0.4 }, true)
+            end
+        end, step * 0.9)
+    end
+end
+
+-- ---------------------------------------------------------------- searching
+-- Chests, barrels, crates and sacks without fixed loot: right-click > Search, once each, with the hero beside it.
+local searched = {}
+function search(o, color)
+    if o.isDestroyed() then return end
+    local who = color == "Black" and "The GM" or (DATA.heroes[color] and DATA.heroes[color].short)
+    if not who then return end
+    local q, fig = o.getPosition(), kit("fig_" .. color)
+    if color ~= "Black" then
+        local f = fig and fig.getPosition()
+        if not f or (f.x - q.x) ^ 2 + (f.z - q.z) ^ 2 > (2.5 * SQ) ^ 2 then
+            broadcastToColor("Move your hero next to it first.", color, { 1, 0.6, 0.2 })
+            return
+        end
+    end
+    if searched[o.getGUID()] then
+        broadcastToColor("Already searched: nothing more in there.", color, { 1, 0.6, 0.2 })
+        return
+    end
+    searched[o.getGUID()] = true
+    local total = 0
+    for _, l in ipairs(DATA.loot) do total = total + l[1] end
+    local r = math.random(total)
+    for _, l in ipairs(DATA.loot) do
+        r = r - l[1]
+        if r <= 0 then
+            local text = l[2]:gsub("{gold}", tostring(math.random(2, 8)))
+            broadcastToAll(who .. " searches the " .. (o.getName() ~= "" and o.getName():lower() or "container") .. ": " .. text,
+                           { 0.94, 0.85, 0.63 })
+            if l[1] <= 3 then fxAt("burst_yellow", q) end   -- the rare finds sparkle
+            return
+        end
+    end
 end

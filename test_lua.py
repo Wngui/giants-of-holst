@@ -51,6 +51,7 @@ function tonumber(v, base)   -- MoonSharp (TTS) throws where real Lua returns ni
 end
 UIattr = {}
 UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) end,
+       setValue = function(id, v) UIattr[id .. ".value"] = v end,
        setXml = function(x, assets)
          for _, a in ipairs(assets) do assert(a.name and a.url, "UI asset needs lowercase name/url") end
          UIxml, UIassets = x, assets
@@ -134,6 +135,9 @@ function makeObj(d)
   end
   function o.destruct() objects[d.GUID] = nil end
   function o.setLock(v) o.locked = v end
+  function o.getLock() if o.locked == nil then return d.Locked or false end return o.locked end
+  function o.addForce(v) o.forced = (o.forced or 0) + 1 end
+  function o.addTorque(v) end
   function o.setPositionSmooth(p) o.pos = p end
   function o.setRotation(r) end
   function o.setRotationSmooth(r) end
@@ -194,7 +198,7 @@ ctl = g.getObjectFromGUID(CTL)
 assert ctl and ctl.getVar("VERSION") == game["version"]
 c = ctl.env
 assert 'onClick="%s/pick"' % CTL in g.UIxml
-assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
+assert len(list(g.tabs.values())) == 2 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
 assert count("scene") == 0 and count("kit") == 20, (count("scene"), count("kit"))   # title: no props, 4 hero kits
 assert g.tableURL.endswith("table_title.jpg") and g.tableName == "Table_Custom"
@@ -400,7 +404,7 @@ assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
 assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
 assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
-assert len(list(g.tabs.values())) == 1 + len(scenes)
+assert len(list(g.tabs.values())) == 2 + len(scenes)
 
 # cave: the princess starts hidden, and "reveal all" leaves her hidden
 c.setScene(7)
@@ -480,6 +484,40 @@ item = next(o for o in g.getObjectsWithTag("gm").values() if o.data.Name == "Car
 decks = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Deck"]
 assert decks and all(abs(o.data.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks)
 assert all(abs(c.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks for c in o.data.ContainedObjects.values())
+
+# outskirts: revealing the chainmaster shakes the ground (loose things hop, dust puffs); others don't
+c.setScene(2)
+objs = list(g.getObjectsWithTag("scene").values())
+boss = [o for o in objs if o.hasTag("boss")]
+assert len(boss) == 1 and boss[0].data.Nickname == "Giant chainmaster"
+other = next(o for o in objs if o.hasTag("npc") and not o.hasTag("boss"))
+other.tags["hidden"] = True; c.reveal(other); assert not any(o.forced for o in objs)
+boss[0].tags["hidden"] = True; c.reveal(boss[0])
+assert any(o.forced for o in objs) and not any(o.forced for o in objs if o.getLock())
+# turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time
+for o in objs:
+    o.tags["hidden"] = None
+c.initiative()
+strip = g.UIattr["turnsText.value"]
+assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip and "waiting" not in strip, strip
+c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
+c.endFight(); assert g.UIattr["turns.active"] == "false"
+# doom clock: hidden at 0, fills, empties after it's full
+c.doomUp(); assert g.UIattr["doom.active"] == "true" and g.UIattr["doom1.color"] != g.UIattr["doom2.color"]
+for _ in range(5):
+    c.doomUp()
+assert g.UIattr["doom.active"] == "false" and "doom clock is full" in list(g.log.values())[-1]
+# searching: a chest/barrel without fixed loot, once, with the hero beside it; fixed-loot props have no Search
+c.setScene(3)
+objs = list(g.getObjectsWithTag("scene").values())
+bins = [o for o in objs if o.hasTag("search")]
+assert bins and not any(o.hasTag("search") for o in objs if o.data.GMNotes)
+b = bins[0]
+fig = next(iter(g.getObjectsWithTag("fig_Red").values()))
+fig.pos = lua.table_from([100, TOP, 100]); b.menu("Red"); assert "next to it" in list(g.log.values())[-1]
+fig.pos = lua.table_from([b.getPosition().x, TOP, b.getPosition().z]); b.menu("Red")
+assert "searches the" in list(g.log.values())[-1]
+b.menu("Red"); assert "Already searched" in list(g.log.values())[-1]
 
 # ---- npc.lua on a giant
 giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")

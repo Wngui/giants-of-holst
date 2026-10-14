@@ -3,7 +3,7 @@ e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/ou
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT, DOOM_NOTES
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -312,7 +312,7 @@ def npc(key, x, z, n, scene, hp=None, face=None):
         o["RPGdead"] = True
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
-        o["Tags"] = o["Tags"] + ["npc"]
+        o["Tags"] = o["Tags"] + ["npc"] + (["boss"] if t.get("boss") else [])   # boss: revealing it shakes the ground
         move = t.get("move", 8 if t.get("fig") == "rpg_CYCLOP" else 6)
         o["Description"] = "\n".join([f"Def {t['defense']}   Move {move}   HP {hp}"] + [
             f"{a['name']}: " + ", ".join(x for x in ((f"+{a['hit']}" if a["hit"] else ""), a["dmg"] or "", a["note"]) if x)
@@ -330,6 +330,9 @@ LOOSE = ("barrel", "keg", "crate", "crates", "sack", "chest", "chest_gold", "coi
          "wicker_shield", "giant_club", "lumber", "candelabra", "hoard", "hoard_b")   # not "torch": its fire must stay in the bowl
 
 
+SEARCH = ("chest", "barrel", "crate", "crates", "sack")
+
+
 def prop(spec, n, scene, base, textures):
     name, x, z, *rest = spec
     extra = rest.pop() if rest and isinstance(rest[-1], dict) else {}   # {"name", "gm": GM-only note, "hidden": trap, "gas": trap 3}
@@ -337,7 +340,8 @@ def prop(spec, n, scene, base, textures):
     s = list(scale) if isinstance(scale, (list, tuple)) else [scale] * 3
     loose = name in LOOSE
     common = dict(GUID=guid(scene, "prop", n), Tags=["scene"] + (["hidden", "manual"] if extra.get("hidden") else []) +
-                  (["trapgas"] if extra.get("gas") else []),
+                  (["trapgas"] if extra.get("gas") else []) +
+                  (["search"] if name in SEARCH and "gm" not in extra else []),   # random loot (content.LOOT)
                   Tooltip="gm" in extra, Locked=not loose, GMNotes=extra.get("gm", ""))
     if name.startswith("Tileset_"):                       # built-in TTS tileset piece
         return obj(name, tf(ry=rot), grid={"x": x, "z": z, "k": "builtin", "s": s}, **common)
@@ -526,13 +530,16 @@ DIE_COLOURS = {"Die_4": (0.55, 0.06, 0.08), "Die_6": (0.55, 0.06, 0.08), "Die_8"
 TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM control panel's buttons
 # GM control panel, like the floating one: bottom left of the red mat as the GM sees it (GM looks west, so "down" is
 # +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
-PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.52
+PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.48
+GM_EXTRA = (("initiative", "Initiative"), ("nextTurn", "Next turn"), ("endFight", "End fight"),
+            ("doomUp", "Doom +1"), ("doomDown", "Doom -1"), ("tremor", "Tremor"))
 GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
               [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
                enumerate((("musicScene", "Scene music"), ("musicBattle", "Battle"), ("musicStop", "Stop")))] +
               [dict(label="Toggle visibility (selected)", fn="toggleSelected", row=len(SCENES) + 2),
-               dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)])
+               dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)] +
+              [dict(label=t, fn=f, row=len(SCENES) + 4 + k // 3, slot=k % 3) for k, (f, t) in enumerate(GM_EXTRA)])
 for b in GM_BUTTONS:
     b["x"] = round(TRAY[0] - (PANEL_X0 + ROW * b["row"]), 2)   # mirrored: rows came out bottom-to-top in TTS
     b["z"] = round(PANEL_Z + (b["slot"] - 1) * 1.1 - TRAY[1] if "slot" in b else PANEL_Z - TRAY[1], 2)
@@ -555,7 +562,7 @@ def gm_objects(base):
            model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False,
                  Tags=["gm", "gmconsole"], grid={"x": X0 + TRAY[0], "z": TRAY[1], "k": "model", "lift": 0}),
            model("gm_board", GUID=guid("gm", "board"), Nickname="GM controls", Locked=True, **gm,
-                 grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 3) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
+                 grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 5) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
            obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
                CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
                grid={"x": X0 + 2.6, "z": -6.9, "k": "tile", "s": [1.8, 1, 1.8]})]
@@ -584,8 +591,10 @@ def xml_ui(base):
     on = f'onClick="{CONTROLLER}/'   # UI lives in Global, handlers live on the controller object
     scenes = "".join(f'<Button id="scene_{i + 1}" {on}onSceneButton" {btn}>{s["title"]}</Button>'
                      for i, s in enumerate(SCENES))
+    extra = "".join('<HorizontalLayout spacing="4" preferredHeight="34">' + "".join(
+        f'<Button {on}{f}" {btn}>{t}</Button>' for f, t in GM_EXTRA[k:k + 3]) + "</HorizontalLayout>" for k in (0, 3))
     gm = f"""<Panel id="gm" visibility="Black" rectAlignment="UpperRight" offsetXY="-10 -80" width="260"
- height="{80 + 38 * (len(SCENES) + 4)}" color="#1b1410ee" padding="8 8 8 8">
+ height="{80 + 38 * (len(SCENES) + 6)}" color="#1b1410ee" padding="8 8 8 8">
 <VerticalLayout spacing="4" childForceExpandHeight="false">
 <Text id="sceneTitle" fontSize="18" color="#f0d9a0" fontStyle="Bold" preferredHeight="40">GM</Text>
 {scenes}
@@ -593,7 +602,13 @@ def xml_ui(base):
 <Button {on}musicBattle" {btn}>Battle</Button><Button {on}musicStop" {btn}>Stop</Button></HorizontalLayout>
 <Button {on}toggleSelected" {btn}>Toggle visibility (selected)</Button>
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
+{extra}
 </VerticalLayout></Panel>"""
+    turns = """<Panel id="turns" active="false" rectAlignment="UpperCenter" offsetXY="0 -10" width="1100" height="44"
+ color="#1b1410dd" padding="10 10 4 4"><Text id="turnsText" fontSize="20" color="#f0d9a0" alignment="MiddleCenter"> </Text></Panel>"""
+    doom = f"""<Panel id="doom" active="false" rectAlignment="UpperLeft" offsetXY="10 -80" width="250" height="70"
+ color="#1b1410dd" padding="8 8 6 8"><VerticalLayout spacing="4"><Text fontSize="16" color="#f0d9a0" fontStyle="Bold">DOOM CLOCK</Text>
+<HorizontalLayout spacing="4">{"".join(f'<Panel id="doom{i}" color="#3a2a1a"/>' for i in range(1, 7))}</HorizontalLayout></VerticalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image id="pickimg_{h['color']}" image="portrait_{h['key']}" {on}pick" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
@@ -606,7 +621,7 @@ def xml_ui(base):
     # Lua's UI.setXml wants lowercase name/url (the save-file format's Name/URL gives a null-reference error)
     assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES] + [
         {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}]
-    return gm + pick, assets
+    return gm + pick + turns + doom, assets
 
 
 def lua_lit(v):
@@ -635,7 +650,7 @@ def gm_guide():
            "  bind the *Toggle visibility (GM)* hotkey (Options > Game Keys). Hidden things vanish for players and show",
            "  see-through with an outline for you. Press again to show them.",
            "- The same text as below sits in the Notebook (GM-only tabs).\n",
-           "## Rules\n", "```", RULES, "```\n", "## Heroes\n"]
+           "## Rules\n", "```", RULES, "```\n", "## Doom clock\n", "```", DOOM_NOTES, "```\n", "## Heroes\n"]
     for h in HEROES:
         out.append(f"**{h['name']}** ({h['color']}) HP {h['hp']}, Def {h['defense']}, "
                    + ", ".join(f"{k} {v:+d}" for k, v in h["stats"].items()))
@@ -665,11 +680,13 @@ def main(base):
     heroes, kits = {}, []
     for n, h in enumerate(HEROES):
         kits += hero_objects(h, n, base)
-        heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"])
+        heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"],
+                                     agility=h["stats"]["Agility"])
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
-               [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
+               [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES] + \
+               [dict(title="Doom clock", body=DOOM_NOTES, color="Black")]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX,
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT,
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall

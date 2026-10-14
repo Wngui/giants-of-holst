@@ -23,6 +23,25 @@ HP: track it with the - and + on your HP shield. At 0 you are down; an ally can 
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
+Initiative: when the GM calls it, roll your d20 (+ Agility). The strip on top shows whose turn it is.
+Searching: right-click a chest, barrel, crate or sack next to your hero > Search. Once each.
+Doom clock: wasted time and bad failures fill it. When it is full, something goes wrong.
+```
+
+## Doom clock
+
+```
+DOOM CLOCK (GM panel: Doom +1 / -1; everyone sees it, hidden while empty)
++1 when: the party dawdles or argues for long, a check fails by 5 or more, someone makes a lot of noise,
+  they rest outside the sewer, or a giant escapes. -1 for a clever shortcut or a great plan.
+FULL (thunder, it empties again): spring one complication.
+  Outskirts: two more giants round the corner / a house collapses, blocking the sewer grate.
+  Sewer: the hunters come back empty-handed and blame the party / a refugee sells them out to Vasko.
+  Den: Vasko's bruisers lock the door / the price for the information doubles.
+  Passage: the door behind them is barred; the rats are awake.
+  Cart: the giants' leader arrives (the chainmaster, full HP).
+  Cave: Isolde is down to 1 HP and Hrothga dies before she can talk.
+Tremor (GM panel): giant footsteps. Revealing the chainmaster does it automatically.
 ```
 
 ## Heroes

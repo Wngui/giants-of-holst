@@ -129,7 +129,10 @@ Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thi
 HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
-Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk)."""
+Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
+Initiative: when the GM calls it, roll your d20 (+ Agility). The strip on top shows whose turn it is.
+Searching: right-click a chest, barrel, crate or sack next to your hero > Search. Once each.
+Doom clock: wasted time and bad failures fill it. When it is full, something goes wrong."""
 
 # ---------------------------------------------------------------- npcs
 # Animated townsfolk from the Steam workshop packs "Male Human Commoners" (2960527540) and "Female Human
@@ -163,7 +166,7 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
+    "giant_troll": dict(boss=True, name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
                         attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
         ("Crack the chains", None, None, "every thrall moves 3 and makes a free Rusty knife attack"),
@@ -530,6 +533,35 @@ BATTLE_MUSIC = "battle.mp3"
 
 # ---------------------------------------------------------------- GM desk (GM-only, beside the table)
 # magic items as cards the GM hands out: (name, rules text, card art prompt, copies)
+DOOM_NOTES = """DOOM CLOCK (GM panel: Doom +1 / -1; everyone sees it, hidden while empty)
++1 when: the party dawdles or argues for long, a check fails by 5 or more, someone makes a lot of noise,
+  they rest outside the sewer, or a giant escapes. -1 for a clever shortcut or a great plan.
+FULL (thunder, it empties again): spring one complication.
+  Outskirts: two more giants round the corner / a house collapses, blocking the sewer grate.
+  Sewer: the hunters come back empty-handed and blame the party / a refugee sells them out to Vasko.
+  Den: Vasko's bruisers lock the door / the price for the information doubles.
+  Passage: the door behind them is barred; the rats are awake.
+  Cart: the giants' leader arrives (the chainmaster, full HP).
+  Cave: Isolde is down to 1 HP and Hrothga dies before she can talk.
+Tremor (GM panel): giant footsteps. Revealing the chainmaster does it automatically."""
+
+# what a right-click > Search turns up in a chest/barrel/crate/sack without fixed loot: (weight, text); {gold} = 2-8.
+# Weight 3 or less sparkles. The two prizes are item cards on the GM desk: hand one over.
+LOOT = [
+    (14, "rot, mould and rat droppings. Nothing."),
+    (6, "an angry rat! It bites (1 damage) and is gone."),
+    (5, "a love letter in Dravic, unsent. Worthless, but touching."),
+    (5, "a cracked mug and a lucky horseshoe nail. Worthless."),
+    (18, "{gold} gold."),
+    (12, "a ration (food)."),
+    (9, "a torch."),
+    (7, "a coil of rope."),
+    (5, "a flask of lamp oil (thrown: 1d6 fire, once)."),
+    (5, "a guild token: Vasko's men will take it as a bribe."),
+    (3, "a HEALING DRAUGHT! (GM: hand over the card)"),
+    (3, "a SMOKE EGG! (GM: hand over the card)"),
+]
+
 ITEMS = [
     ("Warren Whistle", "Blow it once: 1d4 street kids turn up to help or cause a distraction.",
      "a small carved bone whistle on a leather cord lying on worn cobblestones, warm candlelight", 1),

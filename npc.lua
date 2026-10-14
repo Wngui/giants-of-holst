@@ -72,6 +72,9 @@ function setBattle(p)
     draw()
 end
 
+-- called by the controller's turn order
+function info() return { name = S.name, fight = #S.attacks > 0, down = S.down or false } end
+
 function pct() return math.floor(100 * S.hp / S.max) end
 function hpText() return S.hp .. "/" .. S.max end
 
