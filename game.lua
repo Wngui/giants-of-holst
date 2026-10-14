@@ -589,7 +589,6 @@ function showGrid(on)
         pcall(function() Grid[k] = set[k] end)   -- one unknown field must not stop the rest
     end
 end
-function musicStop() MusicPlayer.pause() end
 
 -- ---------------------------------------------------------------- class pick
 function pick(player, _, id)
@@ -668,6 +667,7 @@ end
 -- figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
 local order, turn = {}, 0
 function initiative()
+    musicBattle()   -- battle mode: battle music, grid, NPC health bars
     order, turn = {}, 0
     local kinds = {}
     for _, o in ipairs(getObjectsWithTag("npc")) do
@@ -720,7 +720,7 @@ function nextTurn()
     broadcastToAll(order[turn].name .. "'s turn", { 0.94, 0.85, 0.63 })
 end
 
-function endFight() order, turn = {}, 0; drawTurns() end
+function endFight() order, turn = {}, 0; drawTurns(); musicScene() end   -- back to the scene's music, out of battle
 
 function drawTurns()
     table.sort(order, function(a, b)

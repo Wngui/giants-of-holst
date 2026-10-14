@@ -114,7 +114,7 @@ function makeObj(d)
   function o.getGUID() return d.GUID end
   function o.getName() return d.Nickname or "" end
   function o.getZones() return o.zones or {} end
-  function o.getValue() return o.value end
+  function o.getValue() return o.value or 1 end   -- TTS dice always show a face
   function o.getBounds() local q = o.getPosition() return { center = Vector(q.x, q.y + 1.5, q.z), size = Vector(2, 3, 2) } end
   function o.getTransformForward() return Vector(0, 0, 1) end
   function o.getTransformRight() return Vector(1, 0, 0) end
@@ -271,9 +271,9 @@ for i, s in enumerate(scenes, 1):
     assert g.UIattr["sceneTitle.text"] == s["title"]
 assert g.Grid.show_lines is False
 npcs = list(g.getObjectsWithTag("npc").values())
-c.musicBattle(); assert g.Grid.show_lines is True and abs(g.Grid.sizeX - SQ) < 1e-9   # Battle shows the grid...
+c.initiative(); assert g.Grid.show_lines is True and abs(g.Grid.sizeX - SQ) < 1e-9   # Battle shows the grid...
 assert npcs and all('active="false"' not in o.xml for o in npcs)                       # ...and the health bars
-c.musicScene(); assert g.Grid.show_lines is False and all('active="false"' in o.xml for o in npcs)
+c.endFight(); assert g.Grid.show_lines is False and all('active="false"' in o.xml for o in npcs)
 fig = list(g.getObjectsWithTag("fig_Red").values())[0]
 assert abs(fig.pos[3] - scenes[-1]["heroes"][0][1] * SQ) < 1e-9       # heroes moved to the last scene
 if os.environ.get("DUMP"):
@@ -523,7 +523,7 @@ assert all(h["short"] in names for h in to_py(c.DATA.heroes).values())   # seate
 assert g.UIattr["turns.width"] == str(len(cards) * 102)
 c.nextTurn(); assert g.UIattr["ts1.color"] == "#d9a633" and g.UIattr["ts2.color"] != "#d9a633"
 assert any(o.lit for o in g.getObjects().values())
-c.endFight(); assert g.UIattr["turns.active"] == "false"
+c.endFight(); assert g.UIattr["turns.active"] == "false" and g.MusicPlayer.url == scenes[1]["music"]["url"]
 c.setScene(2)
 # the club and one-eyed giants carry a wicker shield on their left, hidden while they are
 sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield"]

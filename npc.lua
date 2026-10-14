@@ -42,7 +42,7 @@ function draw()
     local x = { string.format(
         '<Panel position="%s" rotation="%s" scale="%s" width="300" height="26"><VerticalLayout spacing="4" childForceExpandHeight="false">',
         uiPos(), UI_ROT, UI_SCALE) }
-    local off = S.battle and "" or ' active="false"'   -- bars only in battle (the GM's Battle button)
+    local off = S.battle and "" or ' active="false"'   -- bars only in battle (the GM's Initiative button; End fight hides them)
     x[#x + 1] = '<Panel preferredHeight="22"' .. off .. (S.hidden and ' visibility="' .. GM .. '"' or '') .. '>' ..
         '<ProgressBar id="bar" percentage="' .. pct() ..
         '" fillImageColor="#b8322a" color="#000000cc" showPercentageText="false"/>' ..

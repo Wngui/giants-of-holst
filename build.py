@@ -535,15 +535,13 @@ TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM
 # GM control panel, like the floating one: bottom left of the red mat as the GM sees it (GM looks west, so "down" is
 # +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
 PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.48
-GM_EXTRA = (("initiative", "Initiative"), ("nextTurn", "Next turn"), ("endFight", "End fight"),
+GM_EXTRA = (("initiative", "Initiative"), ("nextTurn", "Next turn"), ("endFight", "End fight"),   # + battle music/grid/bars
             ("tremorButton", "Tremor"))
 GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
-              [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in
-               enumerate((("musicScene", "Scene music"), ("musicBattle", "Battle"), ("musicStop", "Stop")))] +
-              [dict(label="Toggle visibility (selected)", fn="toggleSelected", row=len(SCENES) + 2),
-               dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 3)] +
-              [dict(label=t, fn=f, row=len(SCENES) + 4 + k // 3, slot=k % 3) for k, (f, t) in enumerate(GM_EXTRA)])
+              [dict(label="Toggle visibility (selected)", fn="toggleSelected", row=len(SCENES) + 1),
+               dict(label="REST (cards + full HP)", fn="rest", row=len(SCENES) + 2)] +
+              [dict(label=t, fn=f, row=len(SCENES) + 3 + k // 3, slot=k % 3) for k, (f, t) in enumerate(GM_EXTRA)])
 for b in GM_BUTTONS:
     b["x"] = round(TRAY[0] - (PANEL_X0 + ROW * b["row"]), 2)   # mirrored: rows came out bottom-to-top in TTS
     b["z"] = round(PANEL_Z + (b["slot"] - 1) * 1.1 - TRAY[1] if "slot" in b else PANEL_Z - TRAY[1], 2)
@@ -566,7 +564,7 @@ def gm_objects(base):
            model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False,
                  Tags=["gm", "gmconsole"], grid={"x": X0 + TRAY[0], "z": TRAY[1], "k": "model", "lift": 0}),
            model("gm_board", GUID=guid("gm", "board"), Nickname="GM controls", Locked=True, **gm,
-                 grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 5) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
+                 grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 4) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
            obj("Custom_PDF", tf(ry=90.0), GUID=guid("gm", "book"), Nickname="GM guide", **gm,
                CustomPDF={"PDFUrl": f"{base}art/out/gm_guide.pdf", "PDFPassword": "", "PDFPage": 0, "PDFPageOffset": 0},
                grid={"x": X0 + 2.6, "z": -6.9, "k": "tile", "s": [1.8, 1, 1.8]})]
@@ -601,12 +599,10 @@ def xml_ui(base):
     extra = "".join('<HorizontalLayout spacing="4" preferredHeight="34">' + "".join(
         f'<Button {on}{f}" {btn}>{t}</Button>' for f, t in GM_EXTRA[k:k + 3]) + "</HorizontalLayout>" for k in (0, 3))
     gm = f"""<Panel id="gm" visibility="Black" rectAlignment="UpperRight" offsetXY="-10 -80" width="260"
- height="{80 + 38 * (len(SCENES) + 6)}" color="#1b1410ee" padding="8 8 8 8">
+ height="{80 + 38 * (len(SCENES) + 5)}" color="#1b1410ee" padding="8 8 8 8">
 <VerticalLayout spacing="4" childForceExpandHeight="false">
 <Text id="sceneTitle" fontSize="18" color="#f0d9a0" fontStyle="Bold" preferredHeight="40">GM</Text>
 {scenes}
-<HorizontalLayout spacing="4" preferredHeight="34"><Button {on}musicScene" {btn}>Scene music</Button>
-<Button {on}musicBattle" {btn}>Battle</Button><Button {on}musicStop" {btn}>Stop</Button></HorizontalLayout>
 <Button {on}toggleSelected" {btn}>Toggle visibility (selected)</Button>
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 {extra}

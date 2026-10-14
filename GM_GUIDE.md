@@ -115,7 +115,7 @@ STREET KIDS: hands out, "Coin? Spare a coin? We're hungry."
 GIANTS and thralls start hidden (see-through for you). After a few minutes the ground shakes: select them and
 TOGGLE VISIBILITY. Four giants round the
 corner with thralls on chains, wicker shields raised. THIS FIGHT IS MEANT TO BE FLED.
-  Switch to BATTLE music. Giants move 8 (the Chainmaster 6), thralls 6.
+  Press INITIATIVE (battle music, grid, health bars). Giants move 8 (the Chainmaster 6), thralls 6.
   The Chainmaster (big, green base) holds every thrall's chain: drop him and the thralls scatter. Let them feel the danger: first giant hit is big.
   Escape: the sewer grate (centre-south). Might DC 12 to lift, or the kids point at it and scatter.
   Anyone who jumps in: next scene.
@@ -207,7 +207,7 @@ OUTWARD, scorched. Something burned its way out. Giant footprints lead north-eas
 GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
 (magic: works like Smoke Bomb, once).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
-opens the fight (2x2 on the cart). Switch to BATTLE music; select the giants and TOGGLE VISIBILITY (all start hidden). 3 giants.
+opens the fight (2x2 on the cart). Select the giants and TOGGLE VISIBILITY (all start hidden), then press INITIATIVE. 3 giants.
 CHAINMASTER (north-west, with 3 thralls): only if he survived Holst City. Otherwise leave him and his thralls hidden.
 These giants are already hurt from the cart fight (lower HP). Fire burns wicker shields.
 When the first giant falls the others hesitate; when the second falls the last one flees north-east (to the cave).
