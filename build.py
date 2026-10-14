@@ -611,12 +611,12 @@ def xml_ui(base):
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 {extra}
 </VerticalLayout></Panel>"""
-    # initiative strip along the bottom: up to TURN_SLOTS portrait cards (name, roll), the current one framed gold
+    # initiative strip along the top (below TTS's menu bar): up to TURN_SLOTS portrait cards (name, roll), the current one framed gold
     slots = "".join(f"""<Panel id="ts{k}" active="false" preferredWidth="96" minWidth="96" flexibleWidth="0" color="#1b1410ee" padding="4 4 4 4">
 <VerticalLayout spacing="2" childForceExpandHeight="false"><Image id="ti{k}" preserveAspect="true" preferredHeight="84"/>
 <Text id="tn{k}" fontSize="13" color="#f0d9a0" alignment="MiddleCenter" preferredHeight="34"> </Text></VerticalLayout></Panel>"""
                     for k in range(1, TURN_SLOTS + 1))
-    turns = f"""<Panel id="turns" active="false" rectAlignment="LowerCenter" offsetXY="0 12" width="{TURN_SLOTS * 102}" height="136"
+    turns = f"""<Panel id="turns" active="false" rectAlignment="UpperCenter" offsetXY="0 -70" width="{TURN_SLOTS * 102}" height="136"
  color="#00000000"><HorizontalLayout spacing="6" childAlignment="MiddleCenter" childForceExpandWidth="false">{slots}</HorizontalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image id="pickimg_{h['color']}" image="portrait_{h['key']}" {on}pick" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
@@ -699,7 +699,8 @@ def main(base):
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
                 gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, turn_slots=TURN_SLOTS,
-                npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins scorch=f"{base}props/scorch.png",
+                npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins
+                scorch=f"{base}props/scorch.png",
                 shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
                                                CustomMesh=mesh(base, "wicker_shield", ColliderURL=f"{base}props/nocollide.obj"))),

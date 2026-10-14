@@ -460,7 +460,7 @@ card.pos = lua.table_from([2, TOP, 0]); card.is_face_down = True
 c.onObjectDrop("Purple", card); assert fx() is None
 card.is_face_down = False
 c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"] and g.spawned.Tags[1] == "fx"
-assert len(g.decals) == 1 and g.decals[1].url == c.DATA.scorch                       # fireball: a scorch mark
+assert len(g.decals) == 1 and g.decals[1].url and g.decals[1].url.endswith("props/scorch.png")                       # fireball: a scorch mark
 g.spawned = None; c.onObjectDrop("Purple", card); assert fx() is None             # already played
 other = next(o for o in g.getObjectsWithTag("card_Purple").values() if o.data.Nickname == "Shrink")
 other.is_face_down = False; other.pos = lua.table_from([40, TOP, 0])                    # off the map: plays too
@@ -529,7 +529,8 @@ c.setScene(2)
 sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield"]
 holders = [o for o in g.getObjectsWithTag("shield").values()]
 assert len(sh) == len(holders) == 2 and all(o.locked or o.data.Locked for o in sh)
-assert any(abs(o.pos[1] - (h.getPosition().x - 0.72)) < 1e-6 for o in sh for h in holders), [to_py(o.pos) for o in sh]
+assert any(abs(o.pos[1] - (h.getPosition().x - 0.72)) < 1e-6 and abs(o.pos[3] - (h.getPosition().z + 0.9)) < 1e-6
+           for o in sh for h in holders), [to_py(o.pos) for o in sh]   # left of the giant and out in front
 assert all(o.data.CustomMesh.ColliderURL.endswith("props/nocollide.obj") for o in sh)
 holders[0].menus["Shield burned"]("Red"); assert all(not o.isDestroyed() for o in sh)
 holders[0].menus["Shield burned"]("Black"); assert sum(o.isDestroyed() for o in sh) == 1

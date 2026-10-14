@@ -885,8 +885,8 @@ function giveShield(o)
         carry(o, sh, function()
             local b, fwd, rt = o.getBounds(), o.getTransformForward(), o.getTransformRight()
             local r = math.max(b.size.x, b.size.z) * 0.45
-            return { b.center.x + (fwd.x * 0.5 - rt.x * 0.8) * r, b.center.y - b.size.y / 2 + b.size.y * 0.4,
-                     b.center.z + (fwd.z * 0.5 - rt.z * 0.8) * r }, { 90, o.getRotation().y, 0 }
+            return { b.center.x + (fwd.x * 1.0 - rt.x * 0.8) * r, b.center.y - b.size.y / 2 + b.size.y * 0.4,
+                     b.center.z + (fwd.z * 1.0 - rt.z * 0.8) * r }, { 90, o.getRotation().y, 0 }
         end, function() return true end)
         -- its collider sits far below the table (build.py), so it can't be clicked: the GM removes it from the giant
         o.addContextMenuItem("Shield burned", function(c)
