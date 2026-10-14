@@ -91,6 +91,8 @@ Notes = { getNotebookTabs = function() local r = {} for i, t in ipairs(tabs) do 
 MusicPlayer = { setCurrentAudioclip = function(t) MusicPlayer.url = t.url end, pause = function() end,
                 play = function() end, player_status = "Ready" }
 Grid = {}
+decals = {}
+Global = { addDecal = function(d) decals[#decals + 1] = d end, setDecals = function(t) decals = t end }
 Wait = { time = function(f) f() end, frames = function(f) f() end, condition = function(f, c) if c() then f() end end }
 WebRequest = { get = function(url, cb)
   requested = url
@@ -112,6 +114,7 @@ function makeObj(d)
   function o.getGUID() return d.GUID end
   function o.getName() return d.Nickname or "" end
   function o.getZones() return o.zones or {} end
+  function o.getValue() return o.value end
   function o.isDestroyed() return objects[d.GUID] == nil end
   o.AssetBundle = { playTriggerEffect = function(i) o.triggered = i end }
   function o.hasTag(t) return o.tags[t] == true end
@@ -150,7 +153,7 @@ function makeObj(d)
   end
   o.Counter = { setValue = function(v) o.counter = v end }
   o.UI = { setXml = function(x) o.xml = x end, setAttribute = function() end }
-  function o.addContextMenuItem(label, fn) o.menu = fn end
+  function o.addContextMenuItem(label, fn) o.menu = fn; o.menus = o.menus or {}; o.menus[label] = fn end
   o.RPGFigurine = { die = function() end, attack = function() end }
   objects[d.GUID] = o
   if d.LuaScript and d.LuaScript ~= "" then
@@ -452,6 +455,7 @@ card.pos = lua.table_from([2, TOP, 0]); card.is_face_down = True
 c.onObjectDrop("Purple", card); assert fx() is None
 card.is_face_down = False
 c.onObjectDrop("Purple", card); assert fx() == data_fx["fireball"]["url"] and g.spawned.Tags[1] == "fx"
+assert len(g.decals) == 1 and g.decals[1].url == c.DATA.scorch                       # fireball: a scorch mark
 g.spawned = None; c.onObjectDrop("Purple", card); assert fx() is None             # already played
 other = next(o for o in g.getObjectsWithTag("card_Purple").values() if o.data.Nickname == "Shrink")
 other.is_face_down = False; other.pos = lua.table_from([40, TOP, 0])                    # off the map: plays too
@@ -502,6 +506,32 @@ strip = g.UIattr["turnsText.value"]
 assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip and "waiting" not in strip, strip
 c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"
+# a giant grabs the nearest hero, throws them (on the map, 2-12 damage) or lets go; players can't
+c.setScene(2)
+giants = [o for o in g.getObjectsWithTag("giant").values()]
+assert len(giants) == 4 and not any(o.data.Nickname.startswith("Hrothga") for o in g.getObjectsWithTag("giant").values())
+gi = giants[0]; gp = gi.getPosition()
+fig = next(iter(g.getObjectsWithTag("fig_Red").values()))
+for col in ("Blue", "Green", "Purple"):
+    next(iter(g.getObjectsWithTag("fig_" + col).values())).pos = lua.table_from([100, TOP, 100])
+fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z])
+gi.menus["Grab nearest hero"]("Red"); assert not fig.locked
+gi.menus["Grab nearest hero"]("Black"); assert fig.locked and fig.pos[2] > TOP + 2 * SQ
+gi.menus["Throw the hero"]("Black")
+import re
+dmg = int(re.search(r": (\d+) damage", list(g.log.values())[-1]).group(1))
+assert not fig.locked and abs(fig.pos[1]) <= ART[0] and abs(fig.pos[3]) <= ART[1] and 2 <= dmg <= 12
+gi.menus["Grab nearest hero"]("Black"); assert "No hero" in list(g.log.values())[-1] or fig.locked
+fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z]); gi.menus["Grab nearest hero"]("Black")
+gi.menus["Let go"]("Black"); assert not fig.locked and fig.pos[2] == TOP + 1
+# hero d20: natural 20 bursts, natural 1 fizzles, anything else is quiet
+d20 = next(o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Die_20")
+d20.type, d20.resting = "Dice", True
+for v, effect in ((20, "crit"), (1, "crash"), (12, None)):
+    d20.value, g.spawned = v, None
+    c.onObjectRandomize(d20, "Red")
+    assert (fx() == data_fx[effect]["url"]) if effect else fx() is None, v
+
 # searching: a chest/barrel without fixed loot, once, with the hero beside it; fixed-loot props have no Search
 c.setScene(3)
 objs = list(g.getObjectsWithTag("scene").values())
@@ -525,8 +555,9 @@ npc.execute("""
 log, attrs, died, swung = {}, {}, 0, 0
 typed = ""
 Player = setmetatable({}, { __index = function(_, c) return { showInputDialog = function(_, _, cb) cb(typed, c) end } end })
-function damage(color, text) typed = text; menu(color) end
-self = { getGUID = function() return "npc001" end, addContextMenuItem = function(label, fn) menu = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
+function damage(color, text) typed = text; menus["Take damage"](color) end
+menus = {}
+self = { getGUID = function() return "npc001" end, addContextMenuItem = function(label, fn) menus[label] = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
          getRotation = function() return { x = 0, y = 270, z = 0 } end,
          RPGFigurine = { die = function() died = died + 1 end, attack = function() swung = swung + 1 end } }
 fxlog = {}
@@ -542,7 +573,10 @@ end
 """)
 npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
-assert "ProgressBar" in ng.xml and ng.xml.count("<Button") == len(json.loads(giant["LuaScriptState"])["attacks"])
+assert "ProgressBar" in ng.xml and "<Button" not in ng.xml              # attacks live in the right-click menu
+ng.menus["Club smash"]("Red"); assert ng.swung == 0                    # players can't
+ng.menus["Club smash"]("Black"); assert ng.swung == 1 and "Club smash" in list(ng.log.values())[-1]
+npc.execute("log, swung = {}, 0")
 assert 'rotation="90 -90 90"' in ng.xml            # upright bar facing the way the figure faces
 assert 'active="false"' in ng.xml and "InputField" not in ng.xml   # bars hidden out of battle, no damage box
 ng.setBattle(npc.table_from({"on": True}))

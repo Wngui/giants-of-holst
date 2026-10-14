@@ -152,6 +152,8 @@ end
 
 function setScene(i)
     tidy()
+    pcall(function() Global.setDecals({}) end)   -- scorch marks belong to the old scene
+    held = {}
     for _, o in ipairs(getObjectsWithTag("scene")) do o.destruct() end
     scene = i
     local s = DATA.scenes[i]
@@ -163,6 +165,7 @@ function setScene(i)
                     if color == "Black" then fxAt("gas_cloud", o.getPosition()) end
                 end)
             end
+            if o.hasTag("giant") then giantMenu(o) end
             if o.hasTag("search") then o.addContextMenuItem("Search", function(color) search(o, color) end) end
             if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
             if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
@@ -307,6 +310,7 @@ function fxAt(name, p, quiet)   -- quiet: without its sound
     local f = DATA.fx[name]
     if not f or not T then return end
     if f.snd and not quiet then fxAt(f.snd, p) end
+    if name == "fireball" then Wait.time(function() scorch(p) end, 0.8) end
     spawnObjectData({ data = { Name = "Custom_Assetbundle", Locked = true, Tooltip = false, Tags = { f.life and "fx" or "scene" },
         Transform = { posX = p.x, posY = T.top + f.lift * SQ, posZ = p.z, rotX = 0, rotY = 0, rotZ = 0,
                       scaleX = f.s, scaleY = f.s, scaleZ = f.s },
@@ -702,10 +706,25 @@ function heroInit(color, roll)
     drawTurns()
 end
 
+-- a hero's d20 landing: initiative if called for; natural 20 bursts, natural 1 fizzles
+local rolling = {}
 function onObjectRandomize(o, color)
-    if waiting and waiting[color] and o.hasTag("kit") and o.type == "Dice" then
-        Wait.condition(function() heroInit(color, o.getValue()) end, function() return o.isDestroyed() or o.resting end, 10)
-    end
+    if not (o.hasTag("kit") and o.type == "Dice") or rolling[o] then return end
+    rolling[o] = true   -- shaking fires this again and again: one reaction per landing
+    Wait.condition(function()
+        rolling[o] = nil
+        if o.isDestroyed() then return end
+        local v, q = o.getValue(), o.getPosition()
+        if waiting and waiting[color] then heroInit(color, v) end
+        local who = DATA.heroes[color] and DATA.heroes[color].short or color
+        if v == 20 then
+            fxAt("crit", q)
+            broadcastToAll("NATURAL 20! " .. who .. " rolls a crit!", { 1, 0.85, 0.3 })
+        elseif v == 1 then
+            fxAt("puff", q, true); fxAt("crash", q)
+            broadcastToAll("Natural 1... " .. who .. " fumbles.", { 0.7, 0.6, 0.55 })
+        end
+    end, function() return o.isDestroyed() or o.resting end, 10)
 end
 
 function nextTurn()
@@ -795,4 +814,71 @@ function search(o, color)
             return
         end
     end
+end
+
+-- ---------------------------------------------------------------- scorch marks
+-- a fireball leaves a burnt patch on the map (a decal: flat, no collision) until the scene changes
+function scorch(p)
+    pcall(function()
+        Global.addDecal({ name = "scorch", url = DATA.scorch, position = { p.x, T.top + 0.03, p.z },
+                          rotation = { 90, math.random(360), 0 }, scale = { 3 * SQ, 3 * SQ, 1 } })
+    end)
+end
+
+-- ---------------------------------------------------------------- giant grab
+-- GM right-clicks a giant: Grab nearest hero (within 6 squares, lifted up in its fist), then Throw (4-6 squares,
+-- 2d6 damage) or Let go (they broke free). ponytail: hold height and throw distance eyeballed
+held = {}   -- giant GUID -> hero colour (setScene empties it)
+function giantMenu(o)
+    o.addContextMenuItem("Grab nearest hero", function(c) if c == "Black" then grab(o) end end)
+    o.addContextMenuItem("Throw the hero", function(c) if c == "Black" then throw(o) end end)
+    o.addContextMenuItem("Let go", function(c) if c == "Black" then letGo(o) end end)
+end
+
+function grab(o)
+    if held[o.getGUID()] then return end
+    local p, best, bd = o.getPosition(), nil, (6 * SQ) ^ 2
+    for _, color in ipairs(DATA.colors) do
+        local f = kit("fig_" .. color)
+        local q = f and f.getPosition()
+        if q and (q.x - p.x) ^ 2 + (q.z - p.z) ^ 2 <= bd then best, bd = color, (q.x - p.x) ^ 2 + (q.z - p.z) ^ 2 end
+    end
+    if not best then return broadcastToColor("No hero within 6 squares.", "Black", { 1, 0.6, 0.2 }) end
+    for _, c in pairs(held) do if c == best then return end end   -- already in another giant's fist
+    held[o.getGUID()] = best
+    local f = kit("fig_" .. best)
+    f.setLock(true)
+    f.setPositionSmooth({ p.x, T.top + 2.5 * SQ, p.z }, false, false)
+    fxAt("swipe", p)
+    broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
+end
+
+function throw(o)
+    local color = held[o.getGUID()]
+    if not color then return end
+    held[o.getGUID()] = nil
+    local f, p, a, d = kit("fig_" .. color), o.getPosition(), math.random() * 2 * math.pi, (4 + math.random() * 2) * SQ
+    local hx, hz = T.w * DATA.layout.art_w / 2 - SQ, DATA.layout.rows * SQ / 2 - SQ   -- land on the map
+    local x = math.max(T.cx - hx, math.min(T.cx + hx, p.x + math.cos(a) * d))
+    local z = math.max(T.cz - hz, math.min(T.cz + hz, p.z + math.sin(a) * d))
+    f.setLock(false)
+    f.setPositionSmooth({ x, T.top + 1, z }, false, false)
+    fxAt("whoosh", p)
+    Wait.time(function()
+        local dmg = math.random(6) + math.random(6)
+        fxAt("puff", { x = x, z = z }, true); fxAt("thud", { x = x, z = z })
+        setHP(color, hp[color] - dmg)
+        broadcastToAll(o.getName() .. " hurls " .. DATA.heroes[color].short .. " across the field: " .. dmg ..
+                       " damage, prone.", { 0.9, 0.4, 0.3 })
+    end, 0.8)
+end
+
+function letGo(o)
+    local color = held[o.getGUID()]
+    if not color then return end
+    held[o.getGUID()] = nil
+    local f, p = kit("fig_" .. color), o.getPosition()
+    f.setLock(false)
+    f.setPositionSmooth({ p.x + (p.x > T.cx and -SQ or SQ), T.top + 1, p.z }, false, false)   -- beside it, mapwards
+    broadcastToAll(DATA.heroes[color].short .. " breaks free!", { 0.5, 0.9, 0.5 })
 end

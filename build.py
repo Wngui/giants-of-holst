@@ -312,8 +312,9 @@ def npc(key, x, z, n, scene, hp=None, face=None):
         o["RPGdead"] = True
     if attacks or not t.get("dead"):   # corpses and carcasses are props, everyone else gets a healthbar
         o["LuaScript"] = (ROOT / "npc.lua").read_text()
-        o["Tags"] = o["Tags"] + ["npc"] + (["boss"] if t.get("boss") else [])   # boss: revealing it shakes the ground
         move = t.get("move", 8 if t.get("fig") == "rpg_CYCLOP" else 6)
+        o["Tags"] = o["Tags"] + ["npc"] + (["boss"] if t.get("boss") else []) + \
+            (["giant"] if t.get("fig") == "rpg_CYCLOP" and move else [])   # boss: revealing it shakes the ground; giant: grab menu
         o["Description"] = "\n".join([f"Def {t['defense']}   Move {move}   HP {hp}"] + [
             f"{a['name']}: " + ", ".join(x for x in ((f"+{a['hit']}" if a["hit"] else ""), a["dmg"] or "", a["note"]) if x)
             for a in attacks])
@@ -641,8 +642,11 @@ def gm_guide():
     out = ["# The Giants of Holst - GM guide\n", "## Setup\n",
            "- Host the game and take the **Black (Game Master)** seat. The GM panel (top right) is only visible to Black/host.",
            "- Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.",
-           "- NPC controls (HP, damage box, attack buttons) float over each NPC, GM-only. Type `12` (or `+12`) to hurt, `-5` to heal.",
-           "- Attack buttons whisper the roll to you (Black). Crits add an extra set of damage dice.",
+           "- Right-click an NPC (GM-only entries): *Take damage* (`12` hurts, `-5` heals; or hover and type the number),",
+           "  *Reveal*, and one entry per attack. Attacks whisper the roll to you (Black); crits add an extra set of damage dice.",
+           "- Giants also have *Grab nearest hero* (within 6 squares, held up in the fist), then *Throw the hero* (4-6 squares,",
+           "  2d6, prone) or *Let go* (they broke free, Might DC 14). Revealing the chainmaster shakes the ground.",
+           "- Fireballs leave scorch marks until the scene changes. A hero's natural 20 / natural 1 on their d20 gets a flourish.",
            "- Hiding things: select NPCs or props (drag a box) and press *Toggle visibility (selected)* in a GM menu, or",
            "  bind the *Toggle visibility (GM)* hotkey (Options > Game Keys). Hidden things vanish for players and show",
            "  see-through with an outline for you. Press again to show them.",
@@ -682,7 +686,7 @@ def main(base):
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT,
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, scorch=f"{base}props/scorch.png",
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
