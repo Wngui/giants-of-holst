@@ -751,9 +751,10 @@ function drawTurns()
 end
 
 -- ---------------------------------------------------------------- tremor
--- Giant footsteps: two thuds, dust here and there, and every seated player's camera swings to the spot and shakes.
--- TTS has no camera shake and can't read a player's camera, so this is lookAt() jittered: their view ends up there.
--- p: where to look (the chainmaster on his reveal); the GM panel's button: the middle of the map. The GM's camera shakes too.
+-- Giant footsteps: two thuds and dust here and there, and every seated camera (the GM's too) shakes in place.
+-- TTS has no camera shake and can't read a camera, so this is lookAt() jittered around each player's pointer (what
+-- they're looking at, near enough); pitch and zoom are ours. p: where the thuds sound (the chainmaster on his reveal,
+-- the middle of the map from the GM panel's button).
 -- ponytail: pitch/distance/yaw-per-seat eyeballed; tune CAM if the view is off
 CAM = { pitch = 55, distance = 32, shake = 0.5 }
 SHAKE = { "Red", "Blue", "Green", "Purple", "Black" }
@@ -768,14 +769,20 @@ function tremor(p)
             end
         end, step * 0.9)
     end
+    -- each camera shakes around what that player is looking at: TTS can't read a camera, so their pointer stands in for it
+    local at = {}
+    for _, color in ipairs(SHAKE) do
+        local ok, q = pcall(function() return Player[color].getPointerPosition() end)
+        at[color] = ok and q and q.x and q or p
+    end
     for i = 0, 16 do   -- shakes twice (one per thud), dying away
         Wait.time(function()
             local k = i == 16 and 0 or (1 - (i % 8) / 8) * CAM.shake * SQ
             for _, color in ipairs(SHAKE) do
                 if Player[color].seated then
                     -- the GM sits at the east end looking west. ponytail: yaw 270 assumes yaw 0 looks north like the seats
-                    local yaw = color == "Black" and 270 or corner(color).ry
-                    Player[color].lookAt({ position = { p.x + (math.random() - 0.5) * k, T.top, p.z + (math.random() - 0.5) * k },
+                    local yaw, c = color == "Black" and 270 or corner(color).ry, at[color]
+                    Player[color].lookAt({ position = { c.x + (math.random() - 0.5) * k, T.top, c.z + (math.random() - 0.5) * k },
                                            pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = yaw,
                                            distance = CAM.distance })
                 end
