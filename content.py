@@ -534,22 +534,22 @@ BATTLE_MUSIC = "battle.mp3"
 # ---------------------------------------------------------------- GM desk (GM-only, beside the table)
 # magic items as cards the GM hands out: (name, rules text, card art prompt, copies)
 # what a right-click > Search turns up in a chest/barrel/crate/sack without fixed loot: (weight, text); {gold} = 2-8.
-# Weight 3 or less sparkles.
+# Out of 100: gold 5, each item card 1. Weight 3 or less sparkles.
 LOOT = [   # (weight, text, what turns up on the table: False (nothing), "gold" (that many coins), or an item name: a loot sack,
            # the ration model, or for an item card's name a copy of that card)
-    (14, "rot, mould and rat droppings. Nothing.", False),
-    (6, "an angry rat! It bites (1 damage) and is gone.", False),
-    (5, "a love letter in Dravic, unsent. Worthless, but touching.", "Love letter (Dravic)"),
-    (5, "a cracked mug and a lucky horseshoe nail. Worthless.", "Lucky horseshoe nail"),
-    (18, "{gold} gold.", "gold"),
-    (12, "a ration (food).", "Ration"),
-    (9, "a torch.", "Torch"),
-    (7, "a coil of rope.", "Rope"),
+    (30, "rot, mould and rat droppings. Nothing.", False),
+    (8, "an angry rat! It bites (1 damage) and is gone.", False),
+    (8, "a love letter in Dravic, unsent. Worthless, but touching.", "Love letter (Dravic)"),
+    (8, "a cracked mug and a lucky horseshoe nail. Worthless.", "Lucky horseshoe nail"),
+    (5, "{gold} gold.", "gold"),
+    (10, "a ration (food).", "Ration"),
+    (10, "a torch.", "Torch"),
+    (8, "a coil of rope.", "Rope"),
     (5, "a flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil"),
     (5, "a guild token: Vasko's men will take it as a bribe.", "Guild token"),
-    (3, "a HEALING DRAUGHT!", "Healing Draught"),
-    (3, "a SMOKE EGG!", "Smoke Egg"),
-    (4, "a POISON FLASK!", "Poison Flask"),
+    (1, "a HEALING DRAUGHT!", "Healing Draught"),
+    (1, "a SMOKE EGG!", "Smoke Egg"),
+    (1, "a POISON FLASK!", "Poison Flask"),
 ]
 
 ITEMS = [
