@@ -139,8 +139,6 @@ function makeObj(d)
   function o.destruct() objects[d.GUID] = nil end
   function o.setLock(v) o.locked = v end
   function o.getLock() if o.locked == nil then return d.Locked or false end return o.locked end
-  function o.addForce(v) o.forced = (o.forced or 0) + 1 end
-  function o.addTorque(v) end
   function o.setPositionSmooth(p) o.pos = p end
   function o.setRotation(r) end
   function o.setRotationSmooth(r) end
@@ -174,12 +172,14 @@ function emit(ev, ...)   -- universal events reach every script
   for _, o in pairs(objects) do if o.env and o.env[ev] then o.env[ev](...) end end
 end
 seated = {}
+looked = {}
 Player = {}
 for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
   Player[c] = setmetatable({}, {__index = function(_, k)
     if k == "seated" then return seated[c] ~= nil end
     if k == "steam_name" then return seated[c] end
     if k == "getSelectedObjects" then return function() return selected end end
+    if k == "lookAt" then return function(v) looked[c] = v end end
     if k == "getHandObjects" then return function() local r = {} for _, o in pairs(objects) do if o.inHand == c then r[#r+1] = o end end return r end end
   end})
 end
@@ -489,15 +489,18 @@ decks = [o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Deck"
 assert decks and all(abs(o.data.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks)
 assert all(abs(c.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in decks for c in o.data.ContainedObjects.values())
 
-# outskirts: revealing the chainmaster shakes the ground (loose things hop, dust puffs); others don't
+# outskirts: revealing the chainmaster shakes the players' cameras onto him (dust, thuds); other NPCs don't
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 boss = [o for o in objs if o.hasTag("boss")]
 assert len(boss) == 1 and boss[0].data.Nickname == "Giant chainmaster"
 other = next(o for o in objs if o.hasTag("npc") and not o.hasTag("boss"))
-other.tags["hidden"] = True; c.reveal(other); assert not any(o.forced for o in objs)
+other.tags["hidden"] = True; c.reveal(other); assert len(g.looked) == 0
 boss[0].tags["hidden"] = True; c.reveal(boss[0])
-assert any(o.forced for o in objs) and not any(o.forced for o in objs if o.getLock())
+bp = boss[0].getPosition(); cam = g.looked["Red"]
+assert "Black" not in g.looked and (cam.position[1], cam.position[3]) == (bp.x, bp.z)   # settles on the chainmaster
+g.looked = lua.table_from({}); c.tremorButton(g.Player.Black)
+assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (0, 0)   # GM button: middle of the map
 # turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time
 for o in objs:
     o.tags["hidden"] = None

@@ -533,7 +533,7 @@ TRAY = (7.2, -7.5)                  # dice tray, from X0; it also carries the GM
 # +x and "left" is -z). Rows run down the mat; each entry: label, what it does, its row, and its slot in a 3-wide row.
 PANEL_Z, PANEL_X0, ROW = -3.0, 4.2, 0.48
 GM_EXTRA = (("initiative", "Initiative"), ("nextTurn", "Next turn"), ("endFight", "End fight"),
-            ("tremor", "Tremor"))
+            ("tremorButton", "Tremor"))
 GM_BUTTONS = ([dict(label="Game Master", row=0, kind="title")] +
               [dict(label=s["title"], scene=i + 1, row=i + 1) for i, s in enumerate(SCENES)] +
               [dict(label=t, fn=f, row=len(SCENES) + 1, slot=k) for k, (f, t) in

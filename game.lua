@@ -231,7 +231,7 @@ end
 
 function reveal(o)
     if o.hasTag("npc") then fxAt("puff", o.getPosition()) end   -- out of the dust
-    if o.hasTag("boss") and o.hasTag("hidden") then tremor() end   -- the chainmaster steps out: the ground shakes
+    if o.hasTag("boss") and o.hasTag("hidden") then tremor(o.getPosition()) end   -- the chainmaster steps out: the ground shakes
     o.setInvisibleTo({})
     o.removeTag("hidden")
     if tints[o.getGUID()] then o.setColorTint(tints[o.getGUID()]) end
@@ -757,27 +757,33 @@ function drawTurns()
 end
 
 -- ---------------------------------------------------------------- tremor
--- Giant footsteps: two thuds, everything loose on the map hops, dust rises here and there.
-function tremor()
+-- Giant footsteps: two thuds, dust here and there, and every seated player's camera swings to the spot and shakes.
+-- TTS has no camera shake and can't read a player's camera, so this is lookAt() jittered: their view ends up there.
+-- p: where to look (the chainmaster on his reveal); the GM panel's button: the middle of the map. The GM's camera is left alone.
+-- ponytail: pitch/distance/yaw-per-seat eyeballed; tune CAM if the view is off
+CAM = { pitch = 55, distance = 32, shake = 0.5 }
+function tremorButton() tremor({ x = T.cx, z = T.cz }) end   -- GM panel (it passes the clicking player)
+function tremor(p)
     for step = 0, 1 do
         Wait.time(function()
-            fxAt("thud", { x = T.cx, z = T.cz })
-            for _, o in ipairs(getObjects()) do
-                if not o.getLock() and o.type ~= "Hand" and o.type ~= "Scripting" and o.type ~= "Fog" and onMap(o.getPosition())
-                   and not o.hasTag("fx") then
-                    local inHand = false
-                    for _, z in ipairs(o.getZones() or {}) do inHand = inHand or z.type == "Hand" end
-                    if not inHand then
-                        o.addForce({ (math.random() - 0.5) * 2, 2.5 - step, (math.random() - 0.5) * 2 }, 4)   -- 4: velocity change
-                        o.addTorque({ math.random() - 0.5, math.random() - 0.5, math.random() - 0.5 }, 4)
-                    end
-                end
-            end
+            fxAt("thud", p)
             local half = T.w * DATA.layout.art_w / 2
             for _ = 1, 2 do
                 fxAt("puff", { x = T.cx + (math.random() * 2 - 1) * half * 0.8, z = T.cz + (math.random() * 2 - 1) * DATA.layout.rows * SQ * 0.4 }, true)
             end
         end, step * 0.9)
+    end
+    for i = 0, 16 do   -- shakes twice (one per thud), dying away
+        Wait.time(function()
+            local k = i == 16 and 0 or (1 - (i % 8) / 8) * CAM.shake * SQ
+            for _, color in ipairs(DATA.colors) do
+                if Player[color].seated then
+                    Player[color].lookAt({ position = { p.x + (math.random() - 0.5) * k, T.top, p.z + (math.random() - 0.5) * k },
+                                           pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = corner(color).ry,
+                                           distance = CAM.distance })
+                end
+            end
+        end, i * 0.11)
     end
 end
 
