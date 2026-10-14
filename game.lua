@@ -816,13 +816,46 @@ function search(o, color)
     for _, l in ipairs(DATA.loot) do
         r = r - l[1]
         if r <= 0 then
-            local text = l[2]:gsub("{gold}", tostring(math.random(2, 8)))
+            local gold = math.random(2, 8)
+            local text = l[2]:gsub("{gold}", tostring(gold))
             broadcastToAll(who .. " searches the " .. (o.getName() ~= "" and o.getName():lower() or "container") .. ": " .. text,
                            { 0.94, 0.85, 0.63 })
             if l[1] <= 3 then fxAt("burst_yellow", q) end   -- the rare finds sparkle
+            -- the find itself, on the floor between the container and the hero: players drag it to their side of the table
+            local f = fig and fig.getPosition() or { x = q.x + SQ, z = q.z }
+            local d = math.sqrt((f.x - q.x) ^ 2 + (f.z - q.z) ^ 2)
+            local at = d > 0.01 and { x = q.x + (f.x - q.x) / d * SQ, z = q.z + (f.z - q.z) / d * SQ } or { x = q.x + SQ, z = q.z }
+            dropLoot(l[3], text, gold, at)
             return
         end
     end
+end
+
+-- what a search turns up, as a thing on the table: gold = the GM pouch's coins, an item card's name = a copy of that
+-- card, anything else = a small loot sack (a ration: the ration model) named after it. Tagged "loot": players can
+-- handle it and it doesn't count as scenery.
+function dropLoot(item, text, gold, at)
+    if not item then return end
+    local function spawn(src, scale, y, name, desc)
+        local d = {}
+        for k, v in pairs(src) do d[k] = v end
+        d.GUID, d.Tags, d.Locked, d.Nickname, d.Description = nil, { "loot" }, false, name or src.Nickname, desc or src.Description
+        d.s = nil
+        d.Transform = { posX = at.x + (math.random() - 0.5) * SQ * 0.4, posY = T.top + y, posZ = at.z + (math.random() - 0.5) * SQ * 0.4,
+                        rotX = 0, rotY = math.random(360), rotZ = 0, scaleX = scale, scaleY = scale, scaleZ = scale }
+        spawnObjectData({ data = d })
+    end
+    if item == "gold" then
+        local coin
+        for _, g in ipairs(DATA.gm) do if g.Nickname == "Gold pouch" then coin = g.ContainedObjects[1] end end
+        for n = 1, gold do spawn(coin, SQ, 1 + n * 0.3) end
+        return
+    end
+    for _, g in ipairs(DATA.gm) do
+        if g.Name == "Card" and g.Nickname == item then return spawn(g, SQ / 2, 1) end   -- the real item card
+    end
+    local m = DATA.loot_models[item] or DATA.loot_models.default
+    spawn(m, m.s * SQ, 1, item, text:gsub("^%l", string.upper))
 end
 
 -- ---------------------------------------------------------------- scorch marks

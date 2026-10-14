@@ -582,6 +582,18 @@ fig.pos = lua.table_from([100, TOP, 100]); b.menu("Red"); assert "next to it" in
 fig.pos = lua.table_from([b.getPosition().x, TOP, b.getPosition().z]); b.menu("Red")
 assert "searches the" in list(g.log.values())[-1]
 b.menu("Red"); assert "Already searched" in list(g.log.values())[-1]
+# finds land on the table as things players can take: coins, the real item card, or a named loot sack
+loot = lambda: [o for o in g.getObjectsWithTag("loot").values() if o.data.Name != "Die_6"]
+c.dropLoot("gold", "3 gold.", 3, lua.table_from({"x": 0, "z": 0}))
+new = [o for o in loot() if o.data.Nickname == "Gold coin"]
+assert len(new) == 3 and all(not o.data.Locked for o in new)
+c.dropLoot("Healing Draught", "a HEALING DRAUGHT!", 0, lua.table_from({"x": 0, "z": 0}))
+card = [o for o in loot() if o.data.Nickname == "Healing Draught"]
+assert len(card) == 1 and card[0].data.Name == "Card" and not card[0].hasTag("gm")
+c.dropLoot("Torch", "a torch.", 0, lua.table_from({"x": 0, "z": 0}))
+torch = [o for o in loot() if o.data.Nickname == "Torch"]
+assert len(torch) == 1 and torch[0].data.Description == "A torch." and "sack" in torch[0].data.CustomMesh.MeshURL and torch[0].data.s is None
+n = len(loot()); c.dropLoot(None, "Nothing.", 0, lua.table_from({"x": 0, "z": 0})); assert len(loot()) == n
 
 # ---- npc.lua on a giant
 giant = next(o for o in scenes[1]["spawns"] if o.get("Nickname") == "Giant" and o["Name"] == "rpg_CYCLOP")

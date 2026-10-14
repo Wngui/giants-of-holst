@@ -700,6 +700,8 @@ def main(base):
                 gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, turn_slots=TURN_SLOTS,
                 npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins
                 scorch=f"{base}props/scorch.png",
+                loot_models={k: obj("Custom_Model", tf(), Tags=["loot"], CustomMesh=mesh(base, m), s=sc)
+                             for k, (m, sc) in {"default": ("sack", 0.3), "Ration": ("ration", 0.8)}.items()},
                 shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
                                                CustomMesh=mesh(base, "wicker_shield", ColliderURL=f"{base}props/nocollide.obj"))),
