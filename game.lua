@@ -147,7 +147,15 @@ end
 
 -- ---------------------------------------------------------------- scenes
 function onSceneButton(player, _, id)
-    setScene(tonumber(id:sub(7)))
+    fadeToScene(tonumber(id:sub(7)))
+end
+
+-- GM scene buttons: everyone's screen fades to black, the scene switches in the dark, then fades back in
+-- (the "fade" panel's show/hide animations, build.py)
+function fadeToScene(i)
+    UI.show("fade")
+    Wait.time(function() setScene(i) end, 0.4)
+    Wait.time(function() UI.hide("fade") end, 1.4)   -- a moment for the new table image and props to load
 end
 
 function setScene(i)
@@ -429,7 +437,7 @@ function console(o)
             fn = "gmButton" .. i
             _G[fn] = function(_, color)
                 if color ~= "Black" then return end
-                if b.scene then setScene(b.scene) else _G[b.fn](Player[color]) end
+                if b.scene then fadeToScene(b.scene) else _G[b.fn](Player[color]) end
             end
         end
         o.createButton({ click_function = fn, function_owner = self, label = b.label, position = { b.x, 0.06, b.z },

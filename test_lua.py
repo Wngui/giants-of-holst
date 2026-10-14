@@ -52,6 +52,8 @@ end
 UIattr = {}
 UI = { setAttribute = function(id, k, v) UIattr[id .. "." .. k] = tostring(v) end,
        setValue = function(id, v) UIattr[id .. ".value"] = v end,
+       show = function(id) UIattr[id .. ".shown"] = (UIattr[id .. ".shown"] or "") .. "+" end,
+       hide = function(id) UIattr[id .. ".shown"] = (UIattr[id .. ".shown"] or "") .. "-" end,
        setXml = function(x, assets)
          for _, a in ipairs(assets) do assert(a.name and a.url, "UI asset needs lowercase name/url") end
          UIxml, UIassets = x, assets
@@ -565,6 +567,10 @@ for v, effect in ((20, "crit"), (1, "crash"), (12, None)):
     c.onObjectRandomize(d20, "Red")
     assert (fx() == data_fx[effect]["url"]) if effect else fx() is None, v
 
+# scene buttons fade to black and back around the switch
+g.UIattr["fade.shown"] = ""; c.onSceneButton(g.Player.Black, None, "scene_3")
+assert g.UIattr["fade.shown"] == "+-" and g.UIattr["sceneTitle.text"] == scenes[2]["title"]
+assert 'id="fade"' in g.UIxml and 'raycastTarget="false"' in g.UIxml
 # searching: a chest/barrel without fixed loot, once, with the hero beside it; fixed-loot props have no Search
 c.setScene(3)
 objs = list(g.getObjectsWithTag("scene").values())

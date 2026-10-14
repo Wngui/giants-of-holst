@@ -627,7 +627,10 @@ def xml_ui(base):
     assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES] + [
         {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}] + [
         {"name": f"npc_{k}", "url": f"{base}art/out/npc_{k}.jpg"} for k, t in NPCS.items() if t.get("portrait")]
-    return gm + pick + turns, assets
+    # scene-change fade: covers the whole screen (last, so on top), never catches clicks
+    fade = """<Panel id="fade" active="false" width="10000" height="10000" color="#000000" raycastTarget="false"
+ showAnimation="FadeIn" hideAnimation="FadeOut" animationDuration="0.4"/>"""
+    return gm + pick + turns + fade, assets
 
 
 def lua_lit(v):
