@@ -177,7 +177,6 @@ function emit(ev, ...)   -- universal events reach every script
 end
 seated = {}
 looked = {}
-pointer = {}
 Player = {}
 for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
   Player[c] = setmetatable({}, {__index = function(_, k)
@@ -185,7 +184,6 @@ for _, c in ipairs({"Red","Blue","Green","Purple","White","Black"}) do
     if k == "steam_name" then return seated[c] end
     if k == "getSelectedObjects" then return function() return selected end end
     if k == "lookAt" then return function(v) looked[c] = v end end
-    if k == "getPointerPosition" then return function() return pointer[c] end end
     if k == "getHandObjects" then return function() local r = {} for _, o in pairs(objects) do if o.inHand == c then r[#r+1] = o end end return r end end
   end})
 end
@@ -504,11 +502,8 @@ assert len(boss) == 1 and boss[0].data.Nickname == "Giant chainmaster"
 other = next(o for o in objs if o.hasTag("npc") and not o.hasTag("boss"))
 other.tags["hidden"] = True; c.reveal(other); assert len(g.looked) == 0
 boss[0].tags["hidden"] = True; c.reveal(boss[0])
-bp = boss[0].getPosition(); cam = g.looked["Red"]
-assert g.looked["Black"] and g.looked["Black"].yaw == 270 and (cam.position[1], cam.position[3]) == (bp.x, bp.z)   # no pointer: on him
-g.pointer["Red"] = g.Vector(3, TOP, -2); c.tremorButton()
-assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (3, -2)   # settles back on what Red was looking at
-g.pointer["Red"] = None
+assert all(g.looked[c] and (g.looked[c].position[1], g.looked[c].position[3], g.looked[c].yaw) == (0, 0, 0)
+           for c in ("Red", "Black"))   # one shared view from the south side, settling on the middle of the map
 g.looked = lua.table_from({}); c.tremorButton(g.Player.Black)
 assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (0, 0)   # GM button: middle of the map
 # turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time
