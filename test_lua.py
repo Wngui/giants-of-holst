@@ -503,7 +503,7 @@ other = next(o for o in objs if o.hasTag("npc") and not o.hasTag("boss"))
 other.tags["hidden"] = True; c.reveal(other); assert len(g.looked) == 0
 boss[0].tags["hidden"] = True; c.reveal(boss[0])
 bp = boss[0].getPosition(); cam = g.looked["Red"]
-assert "Black" not in g.looked and (cam.position[1], cam.position[3]) == (bp.x, bp.z)   # settles on the chainmaster
+assert g.looked["Black"] and g.looked["Black"].yaw == 270 and (cam.position[1], cam.position[3]) == (bp.x, bp.z)   # settles on the chainmaster
 g.looked = lua.table_from({}); c.tremorButton(g.Player.Black)
 assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (0, 0)   # GM button: middle of the map
 # turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time

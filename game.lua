@@ -753,9 +753,10 @@ end
 -- ---------------------------------------------------------------- tremor
 -- Giant footsteps: two thuds, dust here and there, and every seated player's camera swings to the spot and shakes.
 -- TTS has no camera shake and can't read a player's camera, so this is lookAt() jittered: their view ends up there.
--- p: where to look (the chainmaster on his reveal); the GM panel's button: the middle of the map. The GM's camera is left alone.
+-- p: where to look (the chainmaster on his reveal); the GM panel's button: the middle of the map. The GM's camera shakes too.
 -- ponytail: pitch/distance/yaw-per-seat eyeballed; tune CAM if the view is off
 CAM = { pitch = 55, distance = 32, shake = 0.5 }
+SHAKE = { "Red", "Blue", "Green", "Purple", "Black" }
 function tremorButton() tremor({ x = T.cx, z = T.cz }) end   -- GM panel (it passes the clicking player)
 function tremor(p)
     for step = 0, 1 do
@@ -770,10 +771,12 @@ function tremor(p)
     for i = 0, 16 do   -- shakes twice (one per thud), dying away
         Wait.time(function()
             local k = i == 16 and 0 or (1 - (i % 8) / 8) * CAM.shake * SQ
-            for _, color in ipairs(DATA.colors) do
+            for _, color in ipairs(SHAKE) do
                 if Player[color].seated then
+                    -- the GM sits at the east end looking west. ponytail: yaw 270 assumes yaw 0 looks north like the seats
+                    local yaw = color == "Black" and 270 or corner(color).ry
                     Player[color].lookAt({ position = { p.x + (math.random() - 0.5) * k, T.top, p.z + (math.random() - 0.5) * k },
-                                           pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = corner(color).ry,
+                                           pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = yaw,
                                            distance = CAM.distance })
                 end
             end
