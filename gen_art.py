@@ -2,7 +2,7 @@
 so delete one to re-roll it. Usage: python gen_art.py  (ComfyUI must be on 127.0.0.1:8188)"""
 import json, time, urllib.request, urllib.parse
 from pathlib import Path
-from content import HEROES, SCENES, STYLE, MAP_STYLE, ITEMS, SKIES, SKY_STYLE, SCREEN_ART, GROUNDS, GROUND_STYLE
+from content import NPCS, HEROES, SCENES, STYLE, MAP_STYLE, ITEMS, SKIES, SKY_STYLE, SCREEN_ART, GROUNDS, GROUND_STYLE
 
 COMFY = "http://127.0.0.1:8188"
 RAW = Path(__file__).parent / "art" / "raw"
@@ -32,6 +32,9 @@ def jobs():
     yield "screen_art", f"{SCREEN_ART}, {STYLE}", 1536, 768
     yield "gm_top", ("A top-down view of an old dark oak tabletop with a large worn crimson leather desk mat in the middle, "
                      f"its edges tooled with a thin gold border pattern, seen from directly above, filling the frame, {STYLE}"), 768, 1536
+    for key, t in NPCS.items():   # initiative strip portraits
+        if t.get("portrait"):
+            yield f"npc_{key}", f"portrait of {t['portrait']}, {STYLE}", 768, 768
 
 
 def workflow(prompt, w, h, seed):

@@ -686,7 +686,8 @@ function initiative()
         local d = kit("d20_" .. color)
         if Player[color].seated and d then
             local h = DATA.heroes[color]
-            table.insert(order, { name = h.short, roll = d.getValue() + h.agility, hero = true, objs = { kit("fig_" .. color) } })
+            table.insert(order, { name = h.short, roll = d.getValue() + h.agility, hero = true, art = h.art,
+                                 objs = { kit("fig_" .. color) } })
         end
     end
     drawTurns()
@@ -726,18 +727,26 @@ function drawTurns()
         if a.roll ~= b.roll then return a.roll > b.roll end
         return a.hero and not b.hero
     end)
-    local parts = {}
     for i, e in ipairs(order) do
-        local label = e.name .. (#e.objs > 1 and (" x" .. #e.objs) or "") .. " (" .. e.roll .. ")"
-        table.insert(parts, i == turn and ("<color=#ffd060><b>> " .. label .. "</b></color>") or label)
         for _, o in ipairs(e.objs) do
             if not o.isDestroyed() then
                 if i == turn then o.highlightOn({ 1, 0.8, 0.3 }) else o.highlightOff() end
             end
         end
     end
-    UI.setValue("turnsText", table.concat(parts, "   "))
-    UI.setAttribute("turns", "active", #parts > 0 and "true" or "false")
+    -- the bottom strip: one portrait card per entry (hero portrait, NPC kind's portrait, or just the name)
+    for k = 1, DATA.turn_slots do
+        local e = order[k]
+        UI.setAttribute("ts" .. k, "active", e and "true" or "false")
+        if e then
+            local art = e.hero and e.art or DATA.npc_art[e.name]
+            UI.setAttribute("ts" .. k, "color", k == turn and "#d9a633" or "#1b1410ee")
+            UI.setAttribute("ti" .. k, "image", art or "")
+            UI.setAttribute("ti" .. k, "color", art and "#ffffff" or "#00000000")
+            UI.setValue("tn" .. k, e.name .. (#e.objs > 1 and (" x" .. #e.objs) or "") .. "\n" .. e.roll)
+        end
+    end
+    UI.setAttribute("turns", "active", #order > 0 and "true" or "false")
 end
 
 -- ---------------------------------------------------------------- tremor

@@ -221,6 +221,9 @@ def build_images():
         items.paste(make_item_card(i), ((i % 4) * 500, (i // 4) * 700))
     items.save(OUT / "items.jpg", quality=90)
     Image.open(RAW / "portrait_gm.png").convert("RGB").resize((256, 256)).save(OUT / "portrait_gm.jpg", quality=90)
+    for key, t in NPCS.items():   # initiative strip
+        if t.get("portrait"):
+            Image.open(RAW / f"npc_{key}.png").convert("RGB").resize((192, 192)).save(OUT / f"npc_{key}.jpg", quality=88)
     art = Image.open(upscaled("screen_art")).convert("RGB")
     pw = art.width // 3
     for i, (title, body, fs) in enumerate(screen_panels()):
@@ -587,6 +590,9 @@ def gm_objects(base):
     return out
 
 
+TURN_SLOTS = 12
+
+
 def xml_ui(base):
     btn = 'fontSize="16" preferredHeight="34" colors="#3a2a1a|#5a4028|#2a1a0a|#3a2a1a" textColor="#f0d9a0"'
     on = f'onClick="{CONTROLLER}/'   # UI lives in Global, handlers live on the controller object
@@ -605,8 +611,13 @@ def xml_ui(base):
 <Button {on}rest" {btn}>REST (cards + full HP)</Button>
 {extra}
 </VerticalLayout></Panel>"""
-    turns = """<Panel id="turns" active="false" rectAlignment="UpperCenter" offsetXY="0 -10" width="1100" height="44"
- color="#1b1410dd" padding="10 10 4 4"><Text id="turnsText" fontSize="20" color="#f0d9a0" alignment="MiddleCenter"> </Text></Panel>"""
+    # initiative strip along the bottom: up to TURN_SLOTS portrait cards (name, roll), the current one framed gold
+    slots = "".join(f"""<Panel id="ts{k}" active="false" preferredWidth="96" color="#1b1410ee" padding="4 4 4 4">
+<VerticalLayout spacing="2" childForceExpandHeight="false"><Image id="ti{k}" preserveAspect="true" preferredHeight="84"/>
+<Text id="tn{k}" fontSize="13" color="#f0d9a0" alignment="MiddleCenter" preferredHeight="34"> </Text></VerticalLayout></Panel>"""
+                    for k in range(1, TURN_SLOTS + 1))
+    turns = f"""<Panel id="turns" active="false" rectAlignment="LowerCenter" offsetXY="0 12" width="{TURN_SLOTS * 102}" height="136"
+ color="#00000000"><HorizontalLayout spacing="6" childAlignment="MiddleCenter" childForceExpandWidth="false">{slots}</HorizontalLayout></Panel>"""
     picks = "".join(f"""<VerticalLayout spacing="4"><Image id="pickimg_{h['color']}" image="portrait_{h['key']}" {on}pick" preserveAspect="true"/>
 <Button id="pick_{h['color']}" {on}pick" {btn}>{h['name'].split(' the ')[0]}</Button></VerticalLayout>"""
                     for h in HEROES)
@@ -618,7 +629,8 @@ def xml_ui(base):
 <HorizontalLayout spacing="10">{picks}</HorizontalLayout></VerticalLayout></Panel>"""
     # Lua's UI.setXml wants lowercase name/url (the save-file format's Name/URL gives a null-reference error)
     assets = [{"name": f"portrait_{h['key']}", "url": f"{base}art/out/portrait_{h['key']}.jpg"} for h in HEROES] + [
-        {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}]
+        {"name": "portrait_gm", "url": f"{base}art/out/portrait_gm.jpg"}] + [
+        {"name": f"npc_{k}", "url": f"{base}art/out/npc_{k}.jpg"} for k, t in NPCS.items() if t.get("portrait")]
     return gm + pick + turns, assets
 
 
@@ -682,11 +694,12 @@ def main(base):
     for n, h in enumerate(HEROES):
         kits += hero_objects(h, n, base)
         heroes[h["color"]] = dict(name=h["name"], short=h["name"].split(" the ")[0], hp=h["hp"],
-                                     agility=h["stats"]["Agility"])
+                                     agility=h["stats"]["Agility"], art=f"portrait_{h['key']}")
     notebook = [dict(title="Rules", body=RULES, color="Grey")] + \
                [dict(title=s["title"], body=s["notes"], color="Black") for s in SCENES]
     data = dict(colors=[h["color"] for h in HEROES], heroes=heroes, kits=kits, notebook=notebook, layout=LAYOUT,
-                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, scorch=f"{base}props/scorch.png",
+                gm=gm_objects(base), gm_buttons=GM_BUTTONS, fog=FOG, fx=FX, card_fx=CARD_FX, loot=LOOT, turn_slots=TURN_SLOTS,
+                npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins scorch=f"{base}props/scorch.png",
                 shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
                                                CustomMesh=mesh(base, "wicker_shield"))),

@@ -511,10 +511,14 @@ for o in objs:
     o.tags["hidden"] = None
 red_d20 = next(iter(g.getObjectsWithTag("d20_Red").values())); red_d20.value = 17
 c.initiative()
-strip = g.UIattr["turnsText.value"]
-assert to_py(c.DATA.heroes)["Red"]["short"] + " (%d)" % (17 + to_py(c.DATA.heroes)["Red"]["agility"]) in strip, strip
-assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip, strip
-c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
+cards = [g.UIattr["tn%d.value" % k] for k in range(1, 13) if g.UIattr["ts%d.active" % k] == "true"]
+names = [x.split("\n")[0] for x in cards]
+red = to_py(c.DATA.heroes)["Red"]
+assert g.UIattr["turns.active"] == "true" and "Giant x2" in names and red["short"] + "\n%d" % (17 + red["agility"]) in cards, cards
+k = names.index(red["short"]) + 1; assert g.UIattr["ti%d.image" % k] == red["art"]
+k = names.index("Giant x2") + 1; assert g.UIattr["ti%d.image" % k] == "npc_giant_club"
+c.nextTurn(); assert g.UIattr["ts1.color"] == "#d9a633" and g.UIattr["ts2.color"] != "#d9a633"
+assert any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"
 c.setScene(2)
 # the club and one-eyed giants carry a wicker shield on their left, hidden while they are
