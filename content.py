@@ -153,7 +153,7 @@ COMMONERS = [
 
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
-    "giant_club": dict(portrait="a monstrous brutish hill giant three times the height of a man, slightly low angle, standing in a muddy town street, two terrified townsmen beside him only reach up to his knees, his head level with the thatched roof of a two-storey house, roaring with rage, heavy jutting brow ridge, small deep-set furious eyes, crooked tusk-like teeth, grey warty leathery skin, bulging veins, gripping a tree-trunk club and a big round wicker shield, ragged furs and iron-studded leather, smoke and fire behind", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
+    "giant_club": dict(portrait="a primeval troll-like hill giant seen in three-quarter view from below, three times the height of a man, hunched with massive shoulders, his whole body overgrown like an ancient statue: shaggy fur matted with green moss, dried mud, crusted dirt and patches of blue lichen, weathered stone-grey hide, scowling ape-like face with a heavy brow and a long matted beard, enormous forearms bound in studded iron plates and rope, dragging a rope-wrapped tree-trunk club, a big round wicker shield on his back, a belt of bones and trinkets, small armoured soldiers at his feet reach only to his knees, ruined stone castle courtyard, dust and haze, detailed epic matte painting", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
