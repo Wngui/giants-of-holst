@@ -542,14 +542,16 @@ for col in ("Blue", "Green", "Purple"):
 fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z])
 gi.menus["Grab nearest hero"]("Red"); assert not fig.locked
 gi.menus["Grab nearest hero"]("Black"); assert fig.locked and fig.pos[2] > TOP + 1
-assert (fig.pos[1], fig.pos[3]) == (gp.x, gp.z + 0.9)          # in front of the giant, in its fist
+assert fig.pos[1] == gp.x and fig.pos[3] >= gp.z + 1 + 1          # in front, clear of the giant (radius 1 + hero 1)
 gi.menus["Throw the hero"]("Black")
 import re
 dmg = int(re.search(r": (\d+) damage", list(g.log.values())[-1]).group(1))
 assert not fig.locked and abs(fig.pos[1]) <= ART[0] and abs(fig.pos[3]) <= ART[1] and 2 <= dmg <= 12
+assert fig.pos[3] > gp.z or abs(fig.pos[3]) >= ART[1] - SQ - 1e-6              # thrown forward (giant faces +z here)
 gi.menus["Grab nearest hero"]("Black"); assert "No hero" in list(g.log.values())[-1] or fig.locked
-fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z]); gi.menus["Grab nearest hero"]("Black")
-gi.menus["Let go"]("Black"); assert not fig.locked and fig.pos[2] == TOP + 1
+if not fig.locked:
+    fig.pos = lua.table_from([gp.x + SQ, TOP, gp.z]); gi.menus["Grab nearest hero"]("Black")
+gi.menus["Let go"]("Black"); assert not fig.locked and fig.pos[2] == TOP + 1 and fig.pos[3] >= gp.z + 2
 # hero d20: natural 20 bursts, natural 1 fizzles, anything else is quiet
 d20 = next(o for o in g.getObjectsWithTag("kit").values() if o.data.Name == "Die_20")
 d20.type, d20.resting = "Dice", True

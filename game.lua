@@ -846,12 +846,14 @@ function grab(o)
     for _, c in pairs(held) do if c == best then return end end   -- already in another giant's fist
     held[o.getGUID()] = best
     local f, g = kit("fig_" .. best), o.getGUID()
+    local fb = f.getBounds()
+    local fr = math.max(fb.size.x, fb.size.z) / 2   -- the hero's own radius: held clear of the giant's body
     f.setLock(true)
-    f.setPositionSmooth(fist(o), false, false)
+    f.setPosition(fist(o, fr))   -- straight there: a smooth move could drag it through the giant
     fxAt("swipe", p)
     broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
     -- held: the hero stays in the fist, facing the giant, wherever the GM moves or turns it
-    carry(o, f, function() return fist(o), { 0, o.getRotation().y + 180, 0 } end, function() return held[g] == best end)
+    carry(o, f, function() return fist(o, fr), { 0, o.getRotation().y + 180, 0 } end, function() return held[g] == best end)
 end
 
 -- keeps f at at() (position, rotation) on holder o, 20 times a second, while keep() holds and both exist.
@@ -895,11 +897,12 @@ function giveShield(o)
     end })
 end
 
--- where the giant's fist is: in front of it at shoulder height, from its real size and facing
--- ponytail: 0.45 forward / 0.6 up of its bounds eyeballed; tune if the hero hangs inside or beside the giant
-function fist(o)
+-- where the giant's fist is: in front of it at shoulder height, from its real size and facing. A held hero (radius fr)
+-- hangs just outside the giant's footprint: the locked hero overlapping it would shove the giant across the table.
+-- ponytail: 0.6 up of its bounds eyeballed; tune if the hero hangs too high or low
+function fist(o, fr)
     local b, fwd = o.getBounds(), o.getTransformForward()
-    local r = math.max(b.size.x, b.size.z) * 0.45
+    local r = math.max(b.size.x, b.size.z) / 2 + (fr or 0) + 0.1 * SQ
     return { b.center.x + fwd.x * r, b.center.y - b.size.y / 2 + b.size.y * 0.6, b.center.z + fwd.z * r }
 end
 
@@ -907,10 +910,13 @@ function throw(o)
     local color = held[o.getGUID()]
     if not color then return end
     held[o.getGUID()] = nil
-    local f, p, a, d = kit("fig_" .. color), o.getPosition(), math.random() * 2 * math.pi, (4 + math.random() * 2) * SQ
+    -- forward, up to 60 degrees either side: the hero flies away from the giant, never back through it
+    local f, p, fwd, t, d = kit("fig_" .. color), o.getPosition(), o.getTransformForward(),
+                            (math.random() - 0.5) * 2 * math.pi / 3, (4 + math.random() * 2) * SQ
+    local dx, dz = fwd.x * math.cos(t) - fwd.z * math.sin(t), fwd.x * math.sin(t) + fwd.z * math.cos(t)
     local hx, hz = T.w * DATA.layout.art_w / 2 - SQ, DATA.layout.rows * SQ / 2 - SQ   -- land on the map
-    local x = math.max(T.cx - hx, math.min(T.cx + hx, p.x + math.cos(a) * d))
-    local z = math.max(T.cz - hz, math.min(T.cz + hz, p.z + math.sin(a) * d))
+    local x = math.max(T.cx - hx, math.min(T.cx + hx, p.x + dx * d))
+    local z = math.max(T.cz - hz, math.min(T.cz + hz, p.z + dz * d))
     f.setLock(false)
     f.setPositionSmooth({ x, T.top + 1, z }, false, false)
     fxAt("whoosh", p)
@@ -927,8 +933,9 @@ function letGo(o)
     local color = held[o.getGUID()]
     if not color then return end
     held[o.getGUID()] = nil
-    local f, p = kit("fig_" .. color), o.getPosition()
+    local f = kit("fig_" .. color)
+    local q = f.getPosition()
     f.setLock(false)
-    f.setPositionSmooth({ p.x + (p.x > T.cx and -SQ or SQ), T.top + 1, p.z }, false, false)   -- beside it, mapwards
+    f.setPosition({ q.x, T.top + 1, q.z })   -- dropped straight down from the fist, clear of the giant
     broadcastToAll(DATA.heroes[color].short .. " breaks free!", { 0.5, 0.9, 0.5 })
 end
