@@ -153,7 +153,7 @@ COMMONERS = [
 
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
-    "giant_club": dict(portrait="a huge bearded hill giant in furs and leather holding a tree-trunk club and a big round wicker shield, a big rough man with a wild beard, ruined town street", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
+    "giant_club": dict(portrait="a huge brutish hill giant warrior in ragged furs and iron-studded leather, gripping a tree-trunk club and a big round wicker shield, wild matted beard, snarling, burning town behind", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
