@@ -157,7 +157,7 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
-    "giant_thrower": dict(portrait="a hulking hill giant hefting a broken cart wheel over its head to throw it, ragged furs, missing teeth, smoke behind", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
+    "giant_thrower": dict(portrait="a hunched brutish hill giant three times the height of a man, huge round pot belly, long thick muscular arms, sloping shoulders, small head with patchy greasy hair, heavy lumpy deformed brow, crooked yellow teeth bared, dirt-smeared tanned skin, ragged loincloth, crude leather sandals, hefting a broken cart wheel over his head to throw it, terrified townsmen beside him reach only to his knees, ruined town street, smoke", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
         ("Hurl rubble", 5, "2d6+2", "range 10"),
         ("Hurl cart wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
         ("Club smash", 6, "2d8+2", "melee, reach 2"),
