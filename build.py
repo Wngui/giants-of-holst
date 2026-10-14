@@ -632,7 +632,7 @@ def xml_ui(base):
         {"name": f"npc_{k}", "url": f"{base}art/out/npc_{k}.jpg"} for k, t in NPCS.items() if t.get("portrait")]
     # scene-change fade: covers the whole screen (last, so on top), never catches clicks
     fade = """<Panel id="fade" active="false" width="10000" height="10000" color="#000000" raycastTarget="false"
- showAnimation="FadeIn" hideAnimation="FadeOut" animationDuration="0.4"/>"""
+ showAnimation="FadeIn" hideAnimation="FadeOut" animationDuration="0.2"/>"""
     return gm + pick + turns + fade, assets
 
 

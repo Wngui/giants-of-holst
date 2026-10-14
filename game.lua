@@ -154,8 +154,8 @@ end
 -- (the "fade" panel's show/hide animations, build.py)
 function fadeToScene(i)
     UI.show("fade")
-    Wait.time(function() setScene(i); viewAll(0) end, 0.4)   -- everyone's camera framed on the new scene, in the dark
-    Wait.time(function() UI.hide("fade") end, 1.4)   -- a moment for the new table image and props to load
+    Wait.time(function() setScene(i); viewAll(0) end, 0.2)   -- everyone's camera framed on the new scene, in the dark
+    Wait.time(function() UI.hide("fade") end, 0.8)   -- a moment for the new table image and props to load
 end
 
 function setScene(i)
