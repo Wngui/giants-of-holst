@@ -509,6 +509,8 @@ assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (0, 0)   # 
 # turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time
 for o in objs:
     o.tags["hidden"] = None
+for col in ("Blue", "Green", "Purple"):
+    next(iter(g.getObjectsWithTag("d20_" + col).values())).value = 5
 red_d20 = next(iter(g.getObjectsWithTag("d20_Red").values())); red_d20.value = 17
 c.initiative()
 cards = [g.UIattr["tn%d.value" % k] for k in range(1, 13) if g.UIattr["ts%d.active" % k] == "true"]
@@ -517,6 +519,8 @@ red = to_py(c.DATA.heroes)["Red"]
 assert g.UIattr["turns.active"] == "true" and "Giant x2" in names and red["short"] + "\n%d" % (17 + red["agility"]) in cards, cards
 k = names.index(red["short"]) + 1; assert g.UIattr["ti%d.image" % k] == red["art"]
 k = names.index("Giant x2") + 1; assert g.UIattr["ti%d.image" % k] == "npc_giant_club"
+assert all(h["short"] in names for h in to_py(c.DATA.heroes).values())   # seated or not
+assert g.UIattr["turns.width"] == str(len(cards) * 102)
 c.nextTurn(); assert g.UIattr["ts1.color"] == "#d9a633" and g.UIattr["ts2.color"] != "#d9a633"
 assert any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"

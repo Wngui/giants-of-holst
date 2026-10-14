@@ -663,7 +663,7 @@ function rest()
 end
 
 -- ---------------------------------------------------------------- turn order
--- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); seated heroes take
+-- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); all four heroes take
 -- the face their own d20 shows right now (+ Agility). The strip on top shows the order, current turn lit (and its
 -- figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
 local order, turn = {}, 0
@@ -684,7 +684,7 @@ function initiative()
     end
     for _, color in ipairs(DATA.colors) do
         local d = kit("d20_" .. color)
-        if Player[color].seated and d then
+        if d then   -- every hero, seated or not
             local h = DATA.heroes[color]
             table.insert(order, { name = h.short, roll = d.getValue() + h.agility, hero = true, art = h.art,
                                  objs = { kit("fig_" .. color) } })
@@ -746,6 +746,7 @@ function drawTurns()
             UI.setValue("tn" .. k, e.name .. (#e.objs > 1 and (" x" .. #e.objs) or "") .. "\n" .. e.roll)
         end
     end
+    UI.setAttribute("turns", "width", math.min(#order, DATA.turn_slots) * 102)   -- cards keep their width: the strip fits them
     UI.setAttribute("turns", "active", #order > 0 and "true" or "false")
 end
 

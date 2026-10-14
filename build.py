@@ -612,7 +612,7 @@ def xml_ui(base):
 {extra}
 </VerticalLayout></Panel>"""
     # initiative strip along the bottom: up to TURN_SLOTS portrait cards (name, roll), the current one framed gold
-    slots = "".join(f"""<Panel id="ts{k}" active="false" preferredWidth="96" color="#1b1410ee" padding="4 4 4 4">
+    slots = "".join(f"""<Panel id="ts{k}" active="false" preferredWidth="96" minWidth="96" flexibleWidth="0" color="#1b1410ee" padding="4 4 4 4">
 <VerticalLayout spacing="2" childForceExpandHeight="false"><Image id="ti{k}" preserveAspect="true" preferredHeight="84"/>
 <Text id="tn{k}" fontSize="13" color="#f0d9a0" alignment="MiddleCenter" preferredHeight="34"> </Text></VerticalLayout></Panel>"""
                     for k in range(1, TURN_SLOTS + 1))
