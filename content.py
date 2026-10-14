@@ -534,22 +534,21 @@ BATTLE_MUSIC = "battle.mp3"
 # ---------------------------------------------------------------- GM desk (GM-only, beside the table)
 # magic items as cards the GM hands out: (name, rules text, card art prompt, copies)
 # what a right-click > Search turns up in a chest/barrel/crate/sack without fixed loot: (weight, text); {gold} = 2-8.
-# Out of 100: gold 5, each item card 1. Weight 3 or less sparkles.
-LOOT = [   # (weight, text, what turns up on the table: False (nothing), "gold" (that many coins), or an item name: a loot sack,
-           # the ration model, or for an item card's name a copy of that card)
-    (30, "rot, mould and rat droppings. Nothing.", False),
-    (8, "an angry rat! It bites (1 damage) and is gone.", False),
-    (8, "a love letter in Dravic, unsent. Worthless, but touching.", "Love letter (Dravic)"),
-    (8, "a cracked mug and a lucky horseshoe nail. Worthless.", "Lucky horseshoe nail"),
-    (5, "{gold} gold.", "gold"),
-    (10, "a ration (food).", "Ration"),
-    (10, "a torch.", "Torch"),
-    (8, "a coil of rope.", "Rope"),
-    (5, "a flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil"),
-    (5, "a guild token: Vasko's men will take it as a bribe.", "Guild token"),
-    (1, "a HEALING DRAUGHT!", "Healing Draught"),
-    (1, "a SMOKE EGG!", "Smoke Egg"),
-    (1, "a POISON FLASK!", "Poison Flask"),
+# Out of 100: gold 15, each item card 1. Weight 3 or less sparkles.
+FOOD = [("an apple.", "Apple"), ("a strip of salted venison.", "Salted venison"), ("a wedge of hard cheese.", "Hard cheese"),
+        ("a heel of rye bread.", "Rye bread"), ("a dried fish.", "Dried fish")]   # food finds use the ration model
+LOOT = [   # (weight, [(text, what turns up on the table), ...]: one of the variants at random. On the table: False (nothing),
+           # "gold" (that many coins), or an item name: a loot sack, the ration model for FOOD, or a copy of that item card)
+    (30, [("rot, mould and rat droppings. Nothing.", False)]),
+    (6, [("an angry rat! It bites (1 damage) and is gone.", False)]),
+    (8, [("a love letter in Dravic, unsent. Worthless, but touching.", "Love letter (Dravic)")]),
+    (8, [("a cracked mug and a lucky horseshoe nail. Worthless.", "Lucky horseshoe nail")]),
+    (15, [("{gold} gold.", "gold")]),
+    (30, FOOD + [("a torch.", "Torch"), ("a coil of rope.", "Rope"),
+                 ("a flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil")]),   # supplies
+    (1, [("a HEALING DRAUGHT!", "Healing Draught")]),
+    (1, [("a SMOKE EGG!", "Smoke Egg")]),
+    (1, [("a POISON FLASK!", "Poison Flask")]),
 ]
 
 ITEMS = [

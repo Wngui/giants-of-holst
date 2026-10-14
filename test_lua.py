@@ -596,6 +596,7 @@ assert len(card) == 1 and card[0].data.Name == "Card" and not card[0].hasTag("gm
 torch = drop("Torch", "a torch.", 0)
 assert len(torch) == 1 and torch[0].data.Description == "A torch." and "sack" in torch[0].data.CustomMesh.MeshURL and torch[0].data.s is None
 assert drop("Poison Flask", "a POISON FLASK!", 0)[0].data.Name == "Card"
+assert "ration" in drop("Salted venison", "a strip of salted venison.", 0)[0].data.CustomMesh.MeshURL   # food: ration model
 n = len(loot()); c.dropLoot(None, "Nothing.", 0, lua.table_from({"x": 0, "z": 0})); assert len(loot()) == n
 
 # ---- npc.lua on a giant

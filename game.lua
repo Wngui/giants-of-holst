@@ -823,8 +823,8 @@ function search(o, color)
     for _, l in ipairs(DATA.loot) do
         r = r - l[1]
         if r <= 0 then
-            local gold = math.random(2, 8)
-            local text = l[2]:gsub("{gold}", tostring(gold))
+            local v, gold = l[2][math.random(#l[2])], math.random(2, 8)   -- one of the entry's variants
+            local text = v[1]:gsub("{gold}", tostring(gold))
             broadcastToAll(who .. " searches the " .. (o.getName() ~= "" and o.getName():lower() or "container") .. ": " .. text,
                            { 0.94, 0.85, 0.63 })
             if l[1] <= 3 then fxAt("burst_yellow", q) end   -- the rare finds sparkle
@@ -832,14 +832,14 @@ function search(o, color)
             local f = fig and fig.getPosition() or { x = q.x + SQ, z = q.z }
             local d = math.sqrt((f.x - q.x) ^ 2 + (f.z - q.z) ^ 2)
             local at = d > 0.01 and { x = q.x + (f.x - q.x) / d * SQ, z = q.z + (f.z - q.z) / d * SQ } or { x = q.x + SQ, z = q.z }
-            dropLoot(l[3], text, gold, at)
+            dropLoot(v[2], text, gold, at)
             return
         end
     end
 end
 
 -- what a search turns up, as a thing on the table: gold = the GM pouch's coins, an item card's name = a copy of that
--- card, anything else = a small loot sack (a ration: the ration model) named after it. Tagged "loot": players can
+-- card, anything else = a small loot sack (food: the ration model) named after it. Tagged "loot": players can
 -- handle it and it doesn't count as scenery.
 function dropLoot(item, text, gold, at)
     if not item then return end

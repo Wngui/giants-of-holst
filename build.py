@@ -3,7 +3,7 @@ e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/ou
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT, FOOD
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -706,7 +706,7 @@ def main(base):
                 npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins
                 scorch=f"{base}props/scorch.png",
                 loot_models={k: obj("Custom_Model", tf(), Tags=["loot"], CustomMesh=mesh(base, m), s=sc)
-                             for k, (m, sc) in {"default": ("sack", 0.3), "Ration": ("ration", 0.8)}.items()},
+                             for k, (m, sc) in ({"default": ("sack", 0.5)} | {n: ("ration", 1.2) for _, n in FOOD}).items()},
                 shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
                                                CustomMesh=mesh(base, "wicker_shield", ColliderURL=f"{base}props/nocollide.obj"))),
