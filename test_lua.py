@@ -568,7 +568,8 @@ for v, effect in ((20, "crit"), (1, "crash"), (12, None)):
     assert (fx() == data_fx[effect]["url"]) if effect else fx() is None, v
 
 # scene buttons fade to black and back around the switch
-g.UIattr["fade.shown"] = ""; c.onSceneButton(g.Player.Black, None, "scene_3")
+g.UIattr["fade.shown"] = ""; g.looked = lua.table_from({}); c.onSceneButton(g.Player.Black, None, "scene_3")
+assert g.looked["Red"].yaw == 0 and g.looked["Red"].pitch == c.CAM.pitch and g.looked["Black"]   # framed, no shake
 assert g.UIattr["fade.shown"] == "+-" and g.UIattr["sceneTitle.text"] == scenes[2]["title"]
 assert 'id="fade"' in g.UIxml and 'raycastTarget="false"' in g.UIxml
 # searching: a chest/barrel without fixed loot, once, with the hero beside it; fixed-loot props have no Search
@@ -584,15 +585,17 @@ assert "searches the" in list(g.log.values())[-1]
 b.menu("Red"); assert "Already searched" in list(g.log.values())[-1]
 # finds land on the table as things players can take: coins, the real item card, or a named loot sack
 loot = lambda: [o for o in g.getObjectsWithTag("loot").values() if o.data.Name != "Die_6"]
-c.dropLoot("gold", "3 gold.", 3, lua.table_from({"x": 0, "z": 0}))
-new = [o for o in loot() if o.data.Nickname == "Gold coin"]
-assert len(new) == 3 and all(not o.data.Locked for o in new)
-c.dropLoot("Healing Draught", "a HEALING DRAUGHT!", 0, lua.table_from({"x": 0, "z": 0}))
-card = [o for o in loot() if o.data.Nickname == "Healing Draught"]
+def drop(item, text, gold):   # just what this drop spawned (the search above may already have left something)
+    old = {o.data.GUID for o in loot()}
+    c.dropLoot(item, text, gold, lua.table_from({"x": 0, "z": 0}))
+    return [o for o in loot() if o.data.GUID not in old]
+new = drop("gold", "3 gold.", 3)
+assert len(new) == 3 and all(o.data.Nickname == "Gold coin" and not o.data.Locked for o in new)
+card = drop("Healing Draught", "a HEALING DRAUGHT!", 0)
 assert len(card) == 1 and card[0].data.Name == "Card" and not card[0].hasTag("gm")
-c.dropLoot("Torch", "a torch.", 0, lua.table_from({"x": 0, "z": 0}))
-torch = [o for o in loot() if o.data.Nickname == "Torch"]
+torch = drop("Torch", "a torch.", 0)
 assert len(torch) == 1 and torch[0].data.Description == "A torch." and "sack" in torch[0].data.CustomMesh.MeshURL and torch[0].data.s is None
+assert drop("Poison Flask", "a POISON FLASK!", 0)[0].data.Name == "Card"
 n = len(loot()); c.dropLoot(None, "Nothing.", 0, lua.table_from({"x": 0, "z": 0})); assert len(loot()) == n
 
 # ---- npc.lua on a giant
@@ -605,7 +608,8 @@ ng.JSON.decode = lambda s: npc.table_from({k: (npc.table_from([npc.table_from(a)
 npc.execute("""
 log, attrs, died, swung = {}, {}, 0, 0
 typed = ""
-Player = setmetatable({}, { __index = function(_, c) return { showInputDialog = function(_, _, cb) cb(typed, c) end } end })
+Player = setmetatable({}, { __index = function(_, c) return { showInputDialog = function(_, _, cb) cb(typed, c) end,
+    showOptionsDialog = function(_, opts, _, cb) cb(opts[picked], picked, c) end } end })
 function damage(color, text) typed = text; menus["Take damage"](color) end
 menus = {}
 self = { getGUID = function() return "npc001" end, addContextMenuItem = function(label, fn) menus[label] = fn end, UI = { setXml = function(x) xml = x end, setAttribute = function(i, k, v) attrs[i .. "." .. k] = tostring(v) end },
@@ -653,6 +657,18 @@ assert {"blood", "puff", "swirl_green", "crit"} <= set(ng.fxlog.values())   # hi
 for n in range(20):
     t, detail = ng.roll("2d8+4")
     assert 6 <= t <= 20 and detail.endswith("+4")
+
+# conditions: GM-only dialog toggles them, shown above the bar; poison bites on the NPC's turn and runs out after 3
+npc.execute("log, picked = {}, 1")
+ng.onLoad(giant["LuaScriptState"])
+ng.menus["Conditions..."]("Red"); assert "Poisoned" not in ng.xml
+ng.menus["Conditions..."]("Black"); assert "Poisoned 3" in ng.xml
+npc.execute("picked = 2"); ng.menus["Conditions..."]("Black"); assert "Frozen 1" in ng.xml
+hp0 = 60   # reloaded from its saved state: full HP
+ng.startTurn(); assert "Poisoned 2" in ng.xml and "Frozen" not in ng.xml and any("poisoned" in m for m in ng.log.values())
+ng.startTurn(); ng.startTurn(); assert "Poisoned" not in ng.xml
+assert 3 <= hp0 - int(ng.attrs["hp.text"].split("/")[0]) <= 18
+npc.execute("picked = 6"); ng.menus["Conditions..."]("Black"); assert ng.condText() == ""   # Clear all
 
 # princess starts lying down at 4 HP; healing stands her up (one die() toggle), not the other way round
 isolde = next(o for s in scenes for o in s["spawns"] if o.get("Nickname") == "Princess Isolde")

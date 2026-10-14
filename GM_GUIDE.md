@@ -6,6 +6,8 @@
 - Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.
 - Right-click an NPC (GM-only entries): *Take damage* (`12` hurts, `-5` heals; or hover and type the number),
   and one entry per attack. Attacks whisper the roll to you (Black); crits add an extra set of damage dice.
+- *Conditions...* on an NPC: Poisoned (3 turns), Frozen, Blinded, Shrunk, Prone (1 turn); pick again to remove.
+  They show above its bar. On its turn (Next turn) poison deals 1d6 by itself; the others whisper you a reminder.
 - Giants also have *Grab nearest hero* (within 6 squares, held up in the fist), then *Throw the hero* (4-6 squares,
   2d6, prone) or *Let go* (they broke free, Might DC 14). Revealing the chainmaster shakes the ground.
 - Fireballs leave scorch marks until the scene changes. A hero's natural 20 / natural 1 on their d20 gets a flourish.

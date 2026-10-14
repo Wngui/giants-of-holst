@@ -549,6 +549,7 @@ LOOT = [   # (weight, text, what turns up on the table: False (nothing), "gold" 
     (5, "a guild token: Vasko's men will take it as a bribe.", "Guild token"),
     (3, "a HEALING DRAUGHT!", "Healing Draught"),
     (3, "a SMOKE EGG!", "Smoke Egg"),
+    (4, "a POISON FLASK!", "Poison Flask"),
 ]
 
 ITEMS = [
@@ -568,6 +569,8 @@ ITEMS = [
      "a huge yellowed giant's tooth carved with swirling spiral patterns hanging from a thick braided rope on dark stone", 1),
     ("Moonstaff Shard", "Once: cast Fireball (3x3 area, 3d6 fire, Agility DC 14 for half).",
      "a broken shard of a silver staff with a glowing crescent moon crystal, sparks of light", 1),
+    ("Poison Flask", "Throw it (range 6): the target takes 1d6 at the start of its next 3 turns, like Poisoned Blade. One use.",
+     "a small cracked clay flask of bubbling green poison with a rag stopper on a dark wooden table, green fumes", 1),
 ]
 # per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
 SKY_STYLE = ("An equirectangular 360 degree panorama, seen from eye level. A painterly dark fantasy illustration "

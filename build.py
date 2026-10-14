@@ -129,6 +129,9 @@ def rules_page(col):
 GOLD = (120, 88, 36)
 
 
+ITEM_ROWS = -(-len(ITEMS) // 4)   # item card sheet: 4 a row
+
+
 def make_item_card(i):
     title, text, _, _ = ITEMS[i]
     im = Image.new("RGB", (500, 700), GOLD)
@@ -216,7 +219,7 @@ def build_images():
         rules_page(RGB[h["color"]]).save(OUT / f"rules_{h['key']}.jpg", quality=90)
         Image.open(RAW / f"portrait_{h['key']}.png").convert("RGB").resize((256, 256)).save(OUT / f"portrait_{h['key']}.jpg")
     Image.open(RAW / "card_back.png").convert("RGB").resize((500, 700)).save(OUT / "card_back.jpg", quality=90)
-    items = Image.new("RGB", (2000, 1400))
+    items = Image.new("RGB", (2000, 700 * ITEM_ROWS))
     for i in range(len(ITEMS)):
         items.paste(make_item_card(i), ((i % 4) * 500, (i // 4) * 700))
     items.save(OUT / "items.jpg", quality=90)
@@ -422,7 +425,7 @@ for f in FX.values():
         f["loop"], f["trig"] = f["trig"] + 2, None
 # cards and items dropped face up on the map: the effect plays where the card lands. Anything unlisted: "swirl_white"
 CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud", "Luck": "swirl_yellow",
-           "Poisoned Blade": "poison", "Cleave": "blood", "Shield Wall": "swirl_blue", "Taunt": "burst_red",
+           "Poisoned Blade": "poison", "Poison Flask": "swirl_green", "Cleave": "blood", "Shield Wall": "swirl_blue", "Taunt": "burst_red",
            "Second Wind": "swirl_green", "Mighty Heave": "puff", "Mending Touch": "swirl_green",
            "Prayer of Light": "burst_yellow", "Blessing": "swirl_yellow", "Sanctuary": "burst_white", "Revive": "burst_yellow",
            "Kind Heart": "swirl_red", "Fireball": "fireball", "Shrink": "swirl_purple", "Levitate": "swirl_white",
@@ -574,7 +577,7 @@ def gm_objects(base):
                        grid={"x": X0 + TRAY[0] - 0.6 + 0.6 * (n % 3), "z": TRAY[1] - 0.45 + 0.9 * (n // 3), "k": "tile",
                              "s": [1, 1, 1], "lift": 1.5}))
     deck = {"FaceURL": f"{base}art/out/items.jpg", "BackURL": f"{base}art/out/card_back.jpg", "NumWidth": 4,
-            "NumHeight": 2, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
+            "NumHeight": ITEM_ROWS, "BackIsHidden": True, "UniqueBack": False, "Type": 0}
     spots = [(X0 + x, z) for x in (1.3, 3.4, 5.5) for z in (3.9, 5.4, 6.9, 8.4)]   # tight block, top right
     cards = [(i, name, text) for i, (name, text, _, k) in enumerate(ITEMS) for _ in range(k)]
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
@@ -655,6 +658,8 @@ def gm_guide():
            "- Players join and click their adventurer on the pick panel. Their seat changes, cards are dealt automatically.",
            "- Right-click an NPC (GM-only entries): *Take damage* (`12` hurts, `-5` heals; or hover and type the number),",
            "  and one entry per attack. Attacks whisper the roll to you (Black); crits add an extra set of damage dice.",
+           "- *Conditions...* on an NPC: Poisoned (3 turns), Frozen, Blinded, Shrunk, Prone (1 turn); pick again to remove.",
+           "  They show above its bar. On its turn (Next turn) poison deals 1d6 by itself; the others whisper you a reminder.",
            "- Giants also have *Grab nearest hero* (within 6 squares, held up in the fist), then *Throw the hero* (4-6 squares,",
            "  2d6, prone) or *Let go* (they broke free, Might DC 14). Revealing the chainmaster shakes the ground.",
            "- Fireballs leave scorch marks until the scene changes. A hero's natural 20 / natural 1 on their d20 gets a flourish.",

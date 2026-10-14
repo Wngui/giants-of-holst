@@ -154,7 +154,7 @@ end
 -- (the "fade" panel's show/hide animations, build.py)
 function fadeToScene(i)
     UI.show("fade")
-    Wait.time(function() setScene(i) end, 0.4)
+    Wait.time(function() setScene(i); viewAll(0) end, 0.4)   -- everyone's camera framed on the new scene, in the dark
     Wait.time(function() UI.hide("fade") end, 1.4)   -- a moment for the new table image and props to load
 end
 
@@ -726,6 +726,11 @@ function nextTurn()
     turn = turn % #order + 1
     drawTurns()
     broadcastToAll(order[turn].name .. "'s turn", { 0.94, 0.85, 0.63 })
+    if not order[turn].hero then   -- NPCs: poison bites, conditions remind and tick down (npc.lua)
+        for _, o in ipairs(order[turn].objs) do
+            if not o.isDestroyed() then o.call("startTurn") end
+        end
+    end
 end
 
 function endFight() order, turn = {}, 0; drawTurns(); musicScene() end   -- back to the scene's music, out of battle
@@ -778,15 +783,17 @@ function tremor(p)
     end
     -- everyone gets the same view: from the south edge between Wren's and Brannoc's seats, over the middle of the map
     for i = 0, 16 do   -- shakes twice (one per thud), dying away
-        Wait.time(function()
-            local k = i == 16 and 0 or (1 - (i % 8) / 8) * CAM.shake * SQ
-            for _, color in ipairs(SHAKE) do
-                if Player[color].seated then
-                    Player[color].lookAt({ position = { T.cx + (math.random() - 0.5) * k, T.top, T.cz + (math.random() - 0.5) * k },
-                                           pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = 0, distance = CAM.distance })
-                end
-            end
-        end, i * 0.11)
+        Wait.time(function() viewAll(i == 16 and 0 or (1 - (i % 8) / 8) * CAM.shake * SQ) end, i * 0.11)
+    end
+end
+
+-- every seated camera to the shared view over the middle of the map, jittered by k (0: steady; scene changes use it)
+function viewAll(k)
+    for _, color in ipairs(SHAKE) do
+        if Player[color].seated then
+            Player[color].lookAt({ position = { T.cx + (math.random() - 0.5) * k, T.top, T.cz + (math.random() - 0.5) * k },
+                                   pitch = CAM.pitch + (math.random() - 0.5) * k, yaw = 0, distance = CAM.distance })
+        end
     end
 end
 
