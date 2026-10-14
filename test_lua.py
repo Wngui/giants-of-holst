@@ -509,9 +509,11 @@ assert (g.looked["Red"].position[1], g.looked["Red"].position[3]) == (0, 0)   # 
 # turn order: one roll per NPC kind ("Giant x2"), seated heroes rolled for when they don't roll in time
 for o in objs:
     o.tags["hidden"] = None
+red_d20 = next(iter(g.getObjectsWithTag("d20_Red").values())); red_d20.value = 17
 c.initiative()
 strip = g.UIattr["turnsText.value"]
-assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip and "waiting" not in strip, strip
+assert to_py(c.DATA.heroes)["Red"]["short"] + " (%d)" % (17 + to_py(c.DATA.heroes)["Red"]["agility"]) in strip, strip
+assert g.UIattr["turns.active"] == "true" and "Giant x2" in strip and to_py(c.DATA.heroes)["Red"]["short"] in strip, strip
 c.nextTurn(); assert "<b>" in g.UIattr["turnsText.value"] and any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false"
 c.setScene(2)

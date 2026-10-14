@@ -26,7 +26,8 @@ HP: track it with the - and + on your HP shield. At 0 you are down; an ally can 
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
-Initiative: when the GM calls it, roll your d20 (+ Agility). The strip on top shows whose turn it is.
+Initiative: roll your d20 when the GM asks; the face it shows (+ Agility) counts when the GM calls it.
+  The strip on top shows whose turn it is.
 Searching: right-click a chest, barrel, crate or sack next to your hero > Search. Once each.
 ```
 

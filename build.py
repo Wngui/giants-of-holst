@@ -513,7 +513,7 @@ def hero_objects(h, n, base):
         sheet,
         obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=False, Tags=["kit", f"hp_{c}"],
             CustomMesh=mesh(base, "hp_plaque"), grid={"role": "hp", "color": c, "max": h["hp"]}),
-        obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
+        obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit", f"d20_{c}"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
         obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
             CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
             grid={"role": "deck", "color": c}),

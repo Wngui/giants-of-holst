@@ -664,12 +664,12 @@ function rest()
 end
 
 -- ---------------------------------------------------------------- turn order
--- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); seated heroes roll
--- their own d20 (+ Agility) within 20 s, or it is rolled for them. The strip on top shows the order, current turn lit
--- (and its figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
-local order, turn, waiting = {}, 0, nil
+-- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); seated heroes take
+-- the face their own d20 shows right now (+ Agility). The strip on top shows the order, current turn lit (and its
+-- figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
+local order, turn = {}, 0
 function initiative()
-    order, turn, waiting = {}, 0, {}
+    order, turn = {}, 0
     local kinds = {}
     for _, o in ipairs(getObjectsWithTag("npc")) do
         local i = not o.hasTag("hidden") and o.call("info")
@@ -684,24 +684,16 @@ function initiative()
         end
     end
     for _, color in ipairs(DATA.colors) do
-        if Player[color].seated then waiting[color] = true end
+        local d = kit("d20_" .. color)
+        if Player[color].seated and d then
+            local h = DATA.heroes[color]
+            table.insert(order, { name = h.short, roll = d.getValue() + h.agility, hero = true, objs = { kit("fig_" .. color) } })
+        end
     end
-    broadcastToAll("Roll initiative! Heroes: roll your d20.", { 0.94, 0.85, 0.63 })
-    drawTurns()
-    local w = waiting   -- a newer Initiative press has its own timer
-    Wait.time(function() if waiting == w then for color in pairs(w) do heroInit(color, math.random(20)) end end end, 20)
-end
-
-function heroInit(color, roll)
-    if not (waiting and waiting[color]) then return end
-    waiting[color] = nil
-    local h = DATA.heroes[color]
-    table.insert(order, { name = h.short, roll = roll + h.agility, hero = true, objs = { kit("fig_" .. color) } })
-    if next(waiting) == nil then waiting = nil end
     drawTurns()
 end
 
--- a hero's d20 landing: initiative if called for; natural 20 bursts, natural 1 fizzles
+-- a hero's d20 landing: natural 20 bursts, natural 1 fizzles
 local rolling = {}
 function onObjectRandomize(o, color)
     if not (o.hasTag("kit") and o.type == "Dice") or rolling[o] then return end
@@ -710,7 +702,6 @@ function onObjectRandomize(o, color)
         rolling[o] = nil
         if o.isDestroyed() then return end
         local v, q = o.getValue(), o.getPosition()
-        if waiting and waiting[color] then heroInit(color, v) end
         local who = DATA.heroes[color] and DATA.heroes[color].short or color
         if v == 20 then
             fxAt("crit", q)
@@ -729,7 +720,7 @@ function nextTurn()
     broadcastToAll(order[turn].name .. "'s turn", { 0.94, 0.85, 0.63 })
 end
 
-function endFight() order, turn, waiting = {}, 0, nil; drawTurns() end
+function endFight() order, turn = {}, 0; drawTurns() end
 
 function drawTurns()
     table.sort(order, function(a, b)
@@ -746,7 +737,6 @@ function drawTurns()
             end
         end
     end
-    if waiting then table.insert(parts, "<i>waiting for d20s...</i>") end
     UI.setValue("turnsText", table.concat(parts, "   "))
     UI.setAttribute("turns", "active", #parts > 0 and "true" or "false")
 end
