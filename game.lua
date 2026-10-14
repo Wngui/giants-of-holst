@@ -871,6 +871,7 @@ function carry(o, f, at, keep)
 end
 
 -- giants with a wicker shield carry it upright on their left, facing forward (the scene destroys it with them).
+-- It has no collider near the table: a carried prop overlapping its giant would shove it around.
 -- ponytail: size and placement eyeballed like the fist
 function giveShield(o)
     local q, s = o.getPosition(), DATA.shield.scale * SQ
@@ -884,6 +885,13 @@ function giveShield(o)
             return { b.center.x + (fwd.x * 0.5 - rt.x * 0.8) * r, b.center.y - b.size.y / 2 + b.size.y * 0.4,
                      b.center.z + (fwd.z * 0.5 - rt.z * 0.8) * r }, { 90, o.getRotation().y, 0 }
         end, function() return true end)
+        -- its collider sits far below the table (build.py), so it can't be clicked: the GM removes it from the giant
+        o.addContextMenuItem("Shield burned", function(c)
+            if c == "Black" and not sh.isDestroyed() then
+                sh.destruct()
+                broadcastToAll("The wicker shield goes up in flames!", { 1, 0.6, 0.2 })
+            end
+        end)
     end })
 end
 

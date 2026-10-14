@@ -526,6 +526,9 @@ sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wi
 holders = [o for o in g.getObjectsWithTag("shield").values()]
 assert len(sh) == len(holders) == 2 and all(o.locked or o.data.Locked for o in sh)
 assert any(abs(o.pos[1] - (h.getPosition().x - 0.72)) < 1e-6 for o in sh for h in holders), [to_py(o.pos) for o in sh]
+assert all(o.data.CustomMesh.ColliderURL.endswith("props/nocollide.obj") for o in sh)
+holders[0].menus["Shield burned"]("Red"); assert all(not o.isDestroyed() for o in sh)
+holders[0].menus["Shield burned"]("Black"); assert sum(o.isDestroyed() for o in sh) == 1
 c.setScene(6)
 assert all(o.invisible for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield")
 # a giant grabs the nearest hero, throws them (on the map, 2-12 damage) or lets go; players can't

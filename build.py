@@ -702,7 +702,7 @@ def main(base):
                 npc_art={t["name"]: f"npc_{k}" for k, t in reversed(NPCS.items()) if t.get("portrait")},   # first per name wins scorch=f"{base}props/scorch.png",
                 shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
-                                               CustomMesh=mesh(base, "wicker_shield"))),
+                                               CustomMesh=mesh(base, "wicker_shield", ColliderURL=f"{base}props/nocollide.obj"))),
                 scenes=[scene_data(s, base, textures) for s in SCENES],
                 battle=dict(url=f"{base}music/{BATTLE_MUSIC}", title="Battle!"))
     # any change to data (incl. npc.lua inside spawns) or to game.lua gives a new version -> clients reinstall
