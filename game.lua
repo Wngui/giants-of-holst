@@ -231,7 +231,6 @@ function hide(o)
 end
 
 function reveal(o)
-    if o.hasTag("npc") then fxAt("puff", o.getPosition()) end   -- out of the dust
     if o.hasTag("boss") and o.hasTag("hidden") then tremor(o.getPosition()) end   -- the chainmaster steps out: the ground shakes
     o.setInvisibleTo({})
     o.removeTag("hidden")
