@@ -387,7 +387,7 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
                   ("chair", 0, -1.1, 0, 1.2), ("throne_dais", 5.0, 0, 270), ("banner", 6.1, 1.4, 90), ("banner", 6.1, -1.4, 90),
                   ("candelabra", -1.7, 1.7), ("candelabra", -1.7, -1.7), ("candelabra", 3.6, 1.3), ("candelabra", 3.6, -1.3),
                   ("torch", -3, 3), ("torch", 3, 3.4), ("torch", -3, -3), ("torch", 3, -3.4),
-                  ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20, 1, {"name": "The Baron's treasure chest", "gm": "Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD."}), ("coins", 5.9, 4.6),
+                  ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20), ("chest_gold", 7.0, 1.9, 250, 1, {"name": "The Baron's treasure chest", "gm": "Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD."}), ("coins", 5.9, 4.6),
                   ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", -6.9, -2.6),
                   ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("chest", -3, -5.3, 10)],
          npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2),
@@ -410,7 +410,7 @@ RAT'S BONES (dice game) - best of 3 rounds:
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
   THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
-TREASURE CHEST (gold chest, south-west corner): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
+TREASURE CHEST (gold chest behind the throne, north side): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
   Opening it under his nose needs a distraction (the dice game is one); the key is on the ring cord around his neck.
   LIGHTNING ROD (magic): chain lightning 2d6 + 1d6 to 2 more enemies, once per fight.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
