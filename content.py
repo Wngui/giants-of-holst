@@ -31,7 +31,7 @@ HEROES = [
          attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing knife", 5, "1d4+3", "range 6")],
          blurb="Quick feet, quicker hands. Nothing stays locked for long.",
          traits=["Sneaky: advantage on sneaking and lockpicking (roll 2 d20, keep the best).",
-                 "Street smart: knows how thieves' guilds think, talk and hide things."],
+                 "Street smart: knows how thieves think, talk and hide things."],
          background="Grew up in the alleys of Aldmere's capital and talked his way into the King's service "
                     "instead of the King's dungeon.",
          gear="Twin daggers, throwing knives, lockpicks, rope, a hooded cloak.",
@@ -40,11 +40,11 @@ HEROES = [
              ("Shadowstep", "Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
               "a hooded rogue melting into deep shadow in a narrow medieval alley between timber-framed houses, lantern light, only glowing eyes visible"),
              ("Backstab", "Play after you hit: add +2d6 damage.",
-              "a dagger striking from behind a pillar, dramatic motion"),
+              "side view of two men: a hooded assassin standing right behind a city guard, his dagger sunk into the guard's back between the shoulder blades, the guard's face twisted in shock, dark alley, dramatic rim light"),
              ("Nimble Fingers", "Auto-succeed one lockpick, pickpocket or trap-disarm check.",
               "delicate hands picking an ornate lock with thin tools, candlelight"),
              ("Smoke Bomb", "Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.",
-              "a burst of thick grey smoke in a narrow street, silhouettes escaping"),
+              "a hooded rogue vanishing in a billowing cloud of thick grey smoke burst at his feet, coughing guards groping around him, narrow torchlit street"),
              ("Luck", "Reroll any one die on the table, yours or anyone else's.",
               "close-up of a single ivory six-sided die with round pips on a worn wooden table, candlelight, blank table surface"),
              ("Poisoned Blade", "Your next hit also deals 1d6 at the start of the target's next 3 turns.",
@@ -54,14 +54,14 @@ HEROES = [
          stats=dict(Might=3, Agility=1, Wits=0),
          attacks=[("Longsword", 5, "1d8+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
          blurb="Veteran of the goblin wars. First in, last out.",
-         traits=["Speaks a little Giant: understands simple words and can say a few. Anything harder: Wits DC 12.",
-                 "Hard to shift: advantage on checks to hold a door, a line or a giant's leash."],
+         traits=["Speaks a little Giant: understands simple words and can say a few.",
+                 "Hard to shift: advantage on checks that would move him against his will."],
          background="Veteran of the goblin wars. Picked up some Giant guarding a captured one for a winter, mostly the rude words.",
          gear="Longsword, dented shield, chainmail, a flask of something strong.",
          portrait="a scarred armoured knight with longsword and dented shield, stern face, stormy sky",
          cards=[
              ("Cleave", "Make one attack roll against every enemy adjacent to you.",
-              "a knight swinging a longsword in a wide arc, sparks flying"),
+              "action shot of a knight swinging his longsword in a wide sweeping arc, a bright curved slash trail of light across the whole frame, motion blur, sparks"),
              ("Shield Wall", "Until your next turn, you and adjacent allies get +3 Defense.",
               "a raised battered shield taking a hail of arrows"),
              ("Taunt", "All enemies that can see you must attack you this round.",
@@ -69,9 +69,9 @@ HEROES = [
              ("Second Wind", "Heal 1d10+5 HP. Free action.",
               "a wounded knight rising to his feet, breathing hard, golden light"),
              ("Mighty Heave", "Throw an object or a human-sized foe up to 4 squares: 2d6 damage to what it hits.",
-              "a knight hurling a heavy barrel at an enemy"),
-             ("Giant-Talk", "Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.",
-              "a scarred knight in chainmail shouting up at a huge bearded hill giant in furs and leather, the giant a big rough man with a wild beard, ruined medieval town street"),
+              "a muscular armoured knight lifting a heavy wooden barrel over his head and hurling it at a charging brute, splinters flying"),
+             ("Speak Giant", "Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.",
+              "a scarred knight in chainmail standing on a broken cart shouting up at a huge brutish pot-bellied hill giant in a ragged loincloth who leans down to listen, ruined town street"),
          ]),
     dict(key="healer", name="Sister Maelis the Healer", color="Green", fig="rpg_WARRIOR", hp=22, defense=13,
          stats=dict(Might=1, Agility=0, Wits=3),
@@ -84,7 +84,7 @@ HEROES = [
          portrait="a stout middle-aged battle priestess in chainmail holding a flanged mace, a golden sun pendant on her chest, kind stern face, braided hair, warm light",
          cards=[
              ("Mending Touch", "Heal an adjacent ally 2d8+3.",
-              "glowing hands pressed on a wounded shoulder, soft golden light"),
+              "two open hands glowing with warm golden healing light, soft rays and motes of light, close-up, dark background"),
              ("Prayer of Light", "Every ally within 6 squares heals 1d8.",
               "a priestess raising a holy symbol, rays of light over a group"),
              ("Blessing", "One ally adds +1d4 to all rolls until the end of the fight.",
@@ -101,14 +101,14 @@ HEROES = [
          attacks=[("Staff", 2, "1d6", "melee"), ("Arcane bolt", 5, "1d10", "range 10")],
          blurb="Royal court wizard. Fragile, clever, and stubborn.",
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
-                 "Old friends: he taught Princess Isolde her first sorcery. She trusts his voice."],
+                 "Old friends: tutored the young princess in magic; she trusts him."],
          background="Royal court wizard. Fragile, clever and stubborn. Tutor to the princess, and not about to lose her.",
          gear="Crooked staff, spellbook, star-embroidered robe, a pipe he is not allowed to light indoors.",
          portrait="an old bearded wizard with a crooked staff and star-embroidered robe, arcane glow",
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
               "a huge fireball exploding in a ruined street, wicker burning"),
-             ("Shrink", "One giant nearby shrinks to human size until the end of its next turn: half damage, and it can be grappled and shoved.",
+             ("Shrink", "One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved.",
               "a tiny bewildered giant the size of a man standing among towering wizard's purple sparkles, an old wizard pointing his staff at it"),
              ("Levitate", "Lift yourself or one ally up to 10 squares straight up, and set them down gently.",
               "an old wizard levitating in mid-air inside a tall dark cave shaft, feet high above the ground, robes billowing, glowing aura"),
@@ -117,7 +117,7 @@ HEROES = [
              ("Frost Nova", "Enemies adjacent to you take 1d6 and can't move on their next turn.",
               "a ring of ice exploding outwards from a wizard, frozen ground"),
              ("Detect Magic", "The GM points out every magic item and magical trap nearby.",
-              "a wizard's eye glowing, hidden objects shining through walls"),
+              "an old bearded wizard peering closely at a glowing magic ring held up between his fingers, violet light on his face, dark study"),
          ]),
 ]
 
@@ -157,7 +157,7 @@ NPCS = {
         ("Club smash", 7, "2d8+4", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
-    "giant_thrower": dict(portrait="a hunched brutish hill giant three times the height of a man, huge round pot belly, long thick muscular arms, sloping shoulders, small head with patchy greasy hair, heavy lumpy deformed brow, crooked yellow teeth bared, dirt-smeared tanned skin, ragged loincloth, crude leather sandals, hefting a broken cart wheel over his head to throw it, terrified townsmen beside him reach only to his knees, ruined town street, smoke", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
+    "giant_thrower": dict(portrait="close-up head and shoulders of a brutish pot-bellied hill giant with patchy greasy hair, a lumpy deformed brow and crooked yellow teeth, snarling as he hurls a big rock toward the viewer, the rock flying at the camera, motion blur, smoke", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
         ("Hurl rubble", 5, "2d6+2", "range 10"),
         ("Hurl cart wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
         ("Club smash", 6, "2d8+2", "melee, reach 2"),
@@ -196,7 +196,7 @@ NPCS = {
         ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
         ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
         ("Lucky Ring reroll", None, "1d6", "extra reroll from the ring, once per round"),
-    ], notes="Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks."),
+    ], notes="Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks."),
     "guard": dict(portrait="a big brutish bandit bodyguard with a broken nose, spiked cudgel and leather armour, candlelit cellar", name="Baron's bruiser", fig="rpg_ORC", hp=20, defense=14, attacks=[
         ("Axe", 4, "1d10+2", "melee"),
     ], notes="Two of them. Loyal while Vasko is winning."),
@@ -210,7 +210,7 @@ NPCS = {
     "dying_giant": dict(portrait="a wounded old hill giantess slumped against cave rock, grey braids, tired sad eyes, dim firelight", name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, move=0, notable=True,
                         hp=6, defense=8, attacks=[
         ("Feeble swipe", 3, "1d6", "only if attacked"),
-    ], notes="Speaks only Giant (Giant-Talk, or Brannoc's few words). See scene notes."),
+    ], notes="Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes."),
     "dead_human": dict(name="Fallen guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
                        dead=True),
     "princess": dict(portrait="a wounded young princess sorceress with a cracked moonstone staff, pale, torn royal robes, determined eyes, dark cave", notable=True, name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
@@ -403,12 +403,12 @@ RAT'S BONES (dice game) - best of 3 rounds:
   THE LOADED GOLD DIE (if they found it in the sewer): always a 6. Swapping it in unseen: Agility DC 13;
     Vasko notices a gold die on Wits DC 12 (he'd know - it's how he'd cheat too).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
-  THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
+  THE RING: Vasko secretly rerolls once more per round with THE BARON'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
     for "fairness" (no more ring rerolls) - and now it's on the table.
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
-  VASKO'S LUCKY RING (magic): once per fight, reroll any die you can see.
+  THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -426,7 +426,7 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
                   ("chest", -2.6, -1.5, 80, 1, {"name": "Old chest", "gm": "Empty: looted long ago."}),
                   # A: old guard post (north, x -3.5)
                   ("chest", -3.5, 6.0, 0, 1, {"name": "Guard post chest", "gm": "Locked (Agility DC 12): 15 gold, a rope. "
-                   "The skeleton beside it still holds the LANTERN OF TRUE SIGHT."}),
+                   "A caged SNIFFER FERRET sits by the skeleton, still alive."}),
                   ("torch", -4.3, 5.4), ("rubble", -2.9, 4.4, 60, 0.6),
                   # B: collapsed stash (south, x 1.5)
                   ("rubble", 1.5, -5.6, 0, 1.1), ("barrel", 0.9, -4.6, 0, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
@@ -460,9 +460,9 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
      Right-click the vent marker > "Release the gas" for the green cloud.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
-  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
-     TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
-     to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
+  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: in a little cage by the skeleton, a
+     SNIFFER FERRET, still alive (the smugglers' pet: once, it finds one hidden person, door or trap) - hint: the
+     princess will be hard to find in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
@@ -514,17 +514,17 @@ After: tracks and blood lead to a cave in the hillside."""),
                ("princess", 0, 6)],
          notes="""Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
-HROTHGA (dying giantess): speaks Giant only. Brannoc's Giant-Talk lets them talk; without it
-he gets a few words (Wits DC 12 for anything more). Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
+HROTHGA (dying giantess): speaks Giant only. Brannoc's Speak Giant card lets them talk; without it
+he gets a few simple words. Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
+  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
-climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
+climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-She keeps a shard of her MOONSTAFF (magic, gift to whoever reached her first: once, cast Fireball).
+She keeps a LIGHTNING ROD (magic, gift to whoever reached her first: once, chain lightning 2d6 + 1d6 to 2 more).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)"""),
 ]
@@ -535,20 +535,21 @@ BATTLE_MUSIC = "battle.mp3"
 # magic items as cards the GM hands out: (name, rules text, card art prompt, copies)
 # what a right-click > Search turns up in a chest/barrel/crate/sack without fixed loot: (weight, text); {gold} = 2-8.
 # Out of 100: gold 15, each item card 1. Weight 3 or less sparkles.
-FOOD = [("an apple.", "Apple"), ("a strip of salted venison.", "Salted venison"), ("a wedge of hard cheese.", "Hard cheese"),
-        ("a heel of rye bread.", "Rye bread"), ("a dried fish.", "Dried fish")]   # food finds use the ration model
+FOOD = [("An apple.", "Apple"), ("A strip of salted venison.", "Salted venison"), ("A wedge of hard cheese.", "Hard cheese"),
+        ("A heel of rye bread.", "Rye bread"), ("A dried fish.", "Dried fish")]   # food finds use the ration model
 LOOT = [   # (weight, [(text, what turns up on the table), ...]: one of the variants at random. On the table: False (nothing),
            # "gold" (that many coins), or an item name: a loot sack, the ration model for FOOD, or a copy of that item card)
-    (30, [("rot, mould and rat droppings. Nothing.", False)]),
-    (6, [("an angry rat! It bites (1 damage) and is gone.", False)]),
-    (8, [("a love letter in Dravic, unsent. Worthless, but touching.", "Love letter (Dravic)")]),
-    (8, [("a cracked mug and a lucky horseshoe nail. Worthless.", "Lucky horseshoe nail")]),
+    (30, [("Rot, mould and rat droppings. Nothing.", False)]),
+    (6, [("An angry rat! It bites (1 damage) and is gone.", False)]),
+    (6, [("A love letter, unsent. Worthless, but touching.", "Love letter")]),
+    (5, [("A cracked mug. Worthless.", "Cracked mug")]),
+    (5, [("A lucky horseshoe nail. Worthless.", "Lucky horseshoe nail")]),
     (15, [("{gold} gold.", "gold")]),
-    (30, FOOD + [("a torch.", "Torch"), ("a coil of rope.", "Rope"),
-                 ("a flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil")]),   # supplies
-    (1, [("a HEALING DRAUGHT!", "Healing Draught")]),
-    (1, [("a SMOKE EGG!", "Smoke Egg")]),
-    (1, [("a POISON FLASK!", "Poison Flask")]),
+    (30, FOOD + [("A torch.", "Torch"), ("A coil of rope.", "Rope"),
+                 ("A flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil")]),   # supplies
+    (1, [("A HEALING DRAUGHT!", "Healing Draught")]),
+    (1, [("A SMOKE EGG!", "Smoke Egg")]),
+    (1, [("A POISON FLASK!", "Poison Flask")]),
 ]
 
 ITEMS = [
@@ -560,16 +561,16 @@ ITEMS = [
      "a small round glass flask of glowing red potion with a cork stopper on a wooden table", 2),
     ("Smoke Egg", "Throw it: works like Smoke Bomb, a 3x3 area is hidden until they act. One use.",
      "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
-    ("Vasko's Lucky Ring", "Once per fight: reroll any die you can see.",
-     "a heavy gold signet ring with a rat crest and a faintly glowing green gem on red velvet", 1),
-    ("Lantern of True Sight", "Once: for an hour, see through illusions and invisibility.",
-     "an old engraved brass lantern glowing with pale blue magical light in a dark stone tunnel", 1),
-    ("Giant's Tooth Amulet", "Once: one Might check automatically succeeds.",
-     "a huge yellowed giant's tooth carved with swirling spiral patterns hanging from a thick braided rope on dark stone", 1),
-    ("Moonstaff Shard", "Once: cast Fireball (3x3 area, 3d6 fire, Agility DC 14 for half).",
-     "a broken shard of a silver staff with a glowing crescent moon crystal, sparks of light", 1),
-    ("Poison Flask", "Throw it (range 6): the target takes 1d6 at the start of its next 3 turns, like Poisoned Blade. One use.",
-     "a small cracked clay flask of bubbling green poison with a rag stopper on a dark wooden table, green fumes", 1),
+    ("Baron's Lucky Ring", "Once per fight: reroll any die you can see.",
+     "a heavy gold signet ring with a rat crest and a glowing green gem resting on a pile of old bone dice and coins on a gambling table, candlelight", 1),
+    ("Sniffer Ferret", "Once: let it loose. It sniffs out one hidden person, door or trap nearby, then comes back for a treat.",
+     "a sly sleek ferret with a tiny leather collar peeking out of a small wooden smuggler's cage, lantern light, stone tunnel", 1),
+    ("Potion of Giantism", "Drink it: you grow to twice your size until the fight ends. Your melee attacks deal +1d4 damage.",
+     "a large bulbous potion bottle of swirling amber liquid with a giant's footprint seal on the cork, on a rough stone ledge", 1),
+    ("Lightning Rod", "Once: chain lightning. 2d6 to one target, then it jumps to up to 2 more enemies within 3 squares for 1d6 each.",
+     "a short iron rod wrapped in copper wire crackling with blue lightning arcs, held up in a dark cave", 1),
+    ("Poison Flask", "Throw it (range 6): the target takes 1d6 at the start of its next 3 turns. One use.",
+     "a small round glass flask of bubbling acid-green poison with a skull scratched into the glass and a wax-sealed cork, wisps of green fumes, dark wooden table", 1),
 ]
 # per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
 SKY_STYLE = ("An equirectangular 360 degree panorama, seen from eye level. A painterly dark fantasy illustration "

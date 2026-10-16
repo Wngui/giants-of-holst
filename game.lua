@@ -56,6 +56,7 @@ function install(sceneIndex)
         spawnObjectData({ data = placed(d), callback_function = function(o)
             if o.hasTag("gm") then gmHide(o) end
             if o.hasTag("gmconsole") then console(o) end
+            if o.hasTag("lootbag") then lootBag(o) end
         end })
     end
     -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
@@ -817,40 +818,61 @@ function search(o, color)
         return
     end
     searched[o.getGUID()] = true
-    local total = 0
-    for _, l in ipairs(DATA.loot) do total = total + l[1] end
-    local r = math.random(total)
+    local item, text, gold, rare = rollLoot(false)
+    broadcastToAll(who .. " searches the " .. (o.getName() ~= "" and o.getName():lower() or "container") .. ": " .. text,
+                   { 0.94, 0.85, 0.63 })
+    if rare then fxAt("burst_yellow", q) end   -- the rare finds sparkle
+    -- the find itself, on the floor between the container and the hero: players drag it to their side of the table
+    local f = fig and fig.getPosition() or { x = q.x + SQ, z = q.z }
+    local d = math.sqrt((f.x - q.x) ^ 2 + (f.z - q.z) ^ 2)
+    dropLoot(item, text, gold, d > 0.01 and { x = q.x + (f.x - q.x) / d * SQ, z = q.z + (f.z - q.z) / d * SQ } or { x = q.x + SQ, z = q.z })
+end
+
+-- one roll on the loot table (content.LOOT): item (false = nothing), announcement text, gold amount, rare?
+-- something: reroll the "nothing" results (the GM's loot bag)
+function rollLoot(something)
+    local pool, total = {}, 0
     for _, l in ipairs(DATA.loot) do
+        if not something or l[2][1][2] then pool[#pool + 1] = l; total = total + l[1] end
+    end
+    local r = math.random(total)
+    for _, l in ipairs(pool) do
         r = r - l[1]
         if r <= 0 then
             local v, gold = l[2][math.random(#l[2])], math.random(2, 8)   -- one of the entry's variants
-            local text = v[1]:gsub("{gold}", tostring(gold))
-            broadcastToAll(who .. " searches the " .. (o.getName() ~= "" and o.getName():lower() or "container") .. ": " .. text,
-                           { 0.94, 0.85, 0.63 })
-            if l[1] <= 3 then fxAt("burst_yellow", q) end   -- the rare finds sparkle
-            -- the find itself, on the floor between the container and the hero: players drag it to their side of the table
-            local f = fig and fig.getPosition() or { x = q.x + SQ, z = q.z }
-            local d = math.sqrt((f.x - q.x) ^ 2 + (f.z - q.z) ^ 2)
-            local at = d > 0.01 and { x = q.x + (f.x - q.x) / d * SQ, z = q.z + (f.z - q.z) / d * SQ } or { x = q.x + SQ, z = q.z }
-            dropLoot(v[2], text, gold, at)
-            return
+            return v[2], (v[1]:gsub("{gold}", tostring(gold))), gold, l[1] <= 3
         end
     end
+end
+
+-- the GM's loot bag (GM desk): Draw loot puts a random find from the search pool (never nothing) beside it, still
+-- GM-only like everything on the desk; dragged off the desk it shows up for the players
+function lootBag(o)
+    _G.drawLoot = function(_, color)
+        if color ~= "Black" then return end
+        local item, text, gold = rollLoot(true)
+        local q = o.getPosition()
+        broadcastToColor("Loot bag: " .. text, "Black", { 0.94, 0.85, 0.63 })
+        dropLoot(item, text, gold, { x = q.x - SQ, z = q.z }, true)
+    end
+    o.createButton({ click_function = "drawLoot", function_owner = self, label = "Draw loot", position = { 0, 1.4, 0 },
+                     rotation = { 0, 90, 0 }, width = 1.6 * BTN, height = 0.5 * BTN, font_size = 0.3 * BTN,
+                     color = BROWN, font_color = CREAM })
 end
 
 -- what a search turns up, as a thing on the table: gold = the GM pouch's coins, an item card's name = a copy of that
 -- card, anything else = a small loot sack (food: the ration model) named after it. Tagged "loot": players can
 -- handle it and it doesn't count as scenery.
-function dropLoot(item, text, gold, at)
+function dropLoot(item, text, gold, at, gm)   -- gm: on the GM desk, hidden from players like the rest of it
     if not item then return end
     local function spawn(src, scale, y, name, desc)
         local d = {}
         for k, v in pairs(src) do d[k] = v end
-        d.GUID, d.Tags, d.Locked, d.Nickname, d.Description = nil, { "loot" }, false, name or src.Nickname, desc or src.Description
+        d.GUID, d.Tags, d.Locked, d.Nickname, d.Description = nil, { "loot", gm and "gm" or nil }, false, name or src.Nickname, desc or src.Description
         d.s = nil
         d.Transform = { posX = at.x + (math.random() - 0.5) * SQ * 0.4, posY = T.top + y, posZ = at.z + (math.random() - 0.5) * SQ * 0.4,
                         rotX = 0, rotY = math.random(360), rotZ = 0, scaleX = scale, scaleY = scale, scaleZ = scale }
-        spawnObjectData({ data = d })
+        spawnObjectData({ data = d, callback_function = function(o) if gm then gmHide(o) end end })
     end
     if item == "gold" then
         local coin

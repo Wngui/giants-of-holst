@@ -430,8 +430,8 @@ CARD_FX = {"Shadowstep": "puff", "Backstab": "blood", "Smoke Bomb": "smoke_cloud
            "Prayer of Light": "burst_yellow", "Blessing": "swirl_yellow", "Sanctuary": "burst_white", "Revive": "burst_yellow",
            "Kind Heart": "swirl_red", "Fireball": "fireball", "Shrink": "swirl_purple", "Levitate": "swirl_white",
            "Mirror Image": "swirl_purple", "Frost Nova": "burst_blue", "Detect Magic": "swirl_blue",
-           "Healing Draught": "swirl_green", "Smoke Egg": "smoke_cloud", "Vasko's Lucky Ring": "swirl_yellow",
-           "Lantern of True Sight": "swirl_blue", "Moonstaff Shard": "burst_white"}
+           "Healing Draught": "swirl_green", "Smoke Egg": "smoke_cloud", "Baron's Lucky Ring": "swirl_yellow", "Potion of Giantism": "burst_red",
+           "Sniffer Ferret": "puff", "Lightning Rod": "burst_blue"}
 def fx_obj(name, x, z, n, scene, base, lift=0.0):
     f = FX[name]
     url = f["url"] if f["url"].startswith("http") else base + f["url"]
@@ -583,6 +583,10 @@ def gm_objects(base):
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
         out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
                        GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
+    out.append(model("sack", GUID=guid("gm", "lootbag"), Nickname="Loot bag", Locked=True, Tags=["gm", "lootbag"],
+                     Description="Draw loot: a random find from the search pool (never nothing), dropped here on your desk. "
+                                 "Drag it off the desk to hand it out.",
+                     grid={"x": X0 + 7.8, "z": 4.4, "k": "model", "s": [0.8, 0.8, 0.8], "lift": 0}))
     coin = model("coin", Nickname="Gold coin", Hands=True)
     out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.",

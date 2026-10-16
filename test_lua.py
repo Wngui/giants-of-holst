@@ -441,7 +441,7 @@ c.setScene(5)
 objs = list(g.getObjectsWithTag("scene").values())
 traps = [o for o in objs if (o.data.Nickname or "").startswith("Trap ")]
 assert len(traps) == 4 and all(o.invisible and o.tint.a < 1 and "DC" in o.data.GMNotes for o in traps)
-assert any("LANTERN OF TRUE SIGHT" in (o.data.GMNotes or "") for o in objs)
+assert any("SNIFFER FERRET" in (o.data.GMNotes or "") for o in objs)
 vent = next(o for o in traps if "poison gas" in o.data.Nickname)
 g.spawned = None; vent.menu("Red"); assert g.spawned is None                    # players can't set it off
 vent.menu("Black"); assert g.spawned.CustomAssetbundle.LoopingEffectIndex == 6  # green smoke
@@ -597,6 +597,17 @@ torch = drop("Torch", "a torch.", 0)
 assert len(torch) == 1 and torch[0].data.Description == "A torch." and "sack" in torch[0].data.CustomMesh.MeshURL and torch[0].data.s is None
 assert drop("Poison Flask", "a POISON FLASK!", 0)[0].data.Name == "Card"
 assert "ration" in drop("Salted venison", "a strip of salted venison.", 0)[0].data.CustomMesh.MeshURL   # food: ration model
+# the GM's loot bag: never nothing, the find lands on the GM desk hidden from players; players can't draw
+bag = next(iter(g.getObjectsWithTag("lootbag").values()))
+assert bag.buttons and bag.buttons[1].label == "Draw loot"
+fn = getattr(c, bag.buttons[1].click_function)
+before = {o.data.GUID for o in loot()}
+fn(bag, "Red"); assert {o.data.GUID for o in loot()} == before
+for _ in range(20):
+    fn(bag, "Black")
+drawn = [o for o in loot() if o.data.GUID not in before]
+assert len(drawn) >= 20 and all(o.hasTag("gm") and o.invisible for o in drawn)
+assert all(o.getPosition().x > ART[0] for o in drawn)                                  # on the GM side, off the map
 n = len(loot()); c.dropLoot(None, "Nothing.", 0, lua.table_from({"x": 0, "z": 0})); assert len(loot()) == n
 
 # ---- npc.lua on a giant

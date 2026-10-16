@@ -49,7 +49,7 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 - Card *Taunt*: All enemies that can see you must attack you this round.
 - Card *Second Wind*: Heal 1d10+5 HP. Free action.
 - Card *Mighty Heave*: Throw an object or a human-sized foe up to 4 squares: 2d6 damage to what it hits.
-- Card *Giant-Talk*: Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.
+- Card *Speak Giant*: Understand and speak Giant for one whole conversation. +5 to persuade or intimidate a giant.
 
 **Sister Maelis the Healer** (Green) HP 22, Def 13, Might +1, Agility +0, Wits +3
 - Card *Mending Touch*: Heal an adjacent ally 2d8+3.
@@ -61,7 +61,7 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 
 **Aldric the Wizard** (Purple) HP 16, Def 11, Might +0, Agility +1, Wits +3
 - Card *Fireball*: 3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.
-- Card *Shrink*: One giant nearby shrinks to human size until the end of its next turn: half damage, and it can be grappled and shoved.
+- Card *Shrink*: One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved.
 - Card *Levitate*: Lift yourself or one ally up to 10 squares straight up, and set them down gently.
 - Card *Mirror Image*: Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.
 - Card *Frost Nova*: Enemies adjacent to you take 1d6 and can't move on their next turn.
@@ -80,11 +80,11 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
 - **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
 - **Giant rat carcass** HP 1, Def 1. . Food.
-- **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears VASKO'S LUCKY RING (see notes). Laughs a lot, never blinks.
+- **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks.
 - **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
 - **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
-- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giant (Giant-Talk, or Brannoc's few words). See scene notes.
+- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes.
 - **Fallen guildsman** HP 1, Def 1. . Died fighting.
 - **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.
 - **Giant rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
@@ -158,12 +158,12 @@ RAT'S BONES (dice game) - best of 3 rounds:
   THE LOADED GOLD DIE (if they found it in the sewer): always a 6. Swapping it in unseen: Agility DC 13;
     Vasko notices a gold die on Wits DC 12 (he'd know - it's how he'd cheat too).
   Stakes: party loses -> hand over all food and gold. Party wins -> he talks.
-  THE RING: Vasko secretly rerolls once more per round with VASKO'S LUCKY RING (use its button).
+  THE RING: Vasko secretly rerolls once more per round with THE BARON'S LUCKY RING (use its button).
     Wits DC 14 to notice his ring glowing when he rerolls. Calling it out: he laughs, sets it aside
     for "fairness" (no more ring rerolls) - and now it's on the table.
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
-  VASKO'S LUCKY RING (magic): once per fight, reroll any die you can see.
+  THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -188,9 +188,9 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
      Right-click the vent marker > "Release the gas" for the green cloud.
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
-  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: the skeleton has a LANTERN OF
-     TRUE SIGHT (magic: once, see through illusions/invisibility for an hour) - hint: the princess will be hard
-     to see in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
+  A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: in a little cage by the skeleton, a
+     SNIFFER FERRET, still alive (the smugglers' pet: once, it finds one hidden person, door or trap) - hint: the
+     princess will be hard to find in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
@@ -222,17 +222,17 @@ After: tracks and blood lead to a cave in the hillside.
 ```
 Read aloud: "The cave stinks of blood and smoke. The guild made their last stand here -
 three bodies around a burnt-out fire. In the corner, leaning against the rock, a giantess. Still breathing."
-HROTHGA (dying giantess): speaks Giant only. Brannoc's Giant-Talk lets them talk; without it
-he gets a few words (Wits DC 12 for anything more). Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
+HROTHGA (dying giantess): speaks Giant only. Brannoc's Speak Giant card lets them talk; without it
+he gets a few simple words. Kind Heart makes her trust them. She is not hostile, just dying. What she knows:
   - "The little thieves took the Hearthstone from our mountain. Our shrine is cold. We came for it."
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a GIANT'S TOOTH AMULET (magic: once, Might check auto-succeeds) and gives it if treated kindly.
+  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
-climber, or LEVITATE. The LANTERN OF TRUE SIGHT shows her hiding place (otherwise Wits DC 14).
+climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-She keeps a shard of her MOONSTAFF (magic, gift to whoever reached her first: once, cast Fireball).
+She keeps a LIGHTNING ROD (magic, gift to whoever reached her first: once, chain lightning 2d6 + 1d6 to 2 more).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)
 ```
