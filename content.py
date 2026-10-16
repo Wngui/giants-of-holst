@@ -387,7 +387,7 @@ REST here is allowed (press REST): full HP, all cards back to hand."""),
                   ("chair", 0, -1.1, 0, 1.2), ("throne_dais", 5.0, 0, 270), ("banner", 6.1, 1.4, 90), ("banner", 6.1, -1.4, 90),
                   ("candelabra", -1.7, 1.7), ("candelabra", -1.7, -1.7), ("candelabra", 3.6, 1.3), ("candelabra", 3.6, -1.3),
                   ("torch", -3, 3), ("torch", 3, 3.4), ("torch", -3, -3), ("torch", 3, -3.4),
-                  ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20), ("coins", 5.9, 4.6),
+                  ("hoard", 7.2, 3.4, 200), ("hoard_b", 7.2, -3.4, 330), ("chest_gold", -6, -4.2, 20, 1, {"name": "The Baron's treasure chest", "gm": "Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD."}), ("coins", 5.9, 4.6),
                   ("keg", -7.3, 2, 90), ("keg", -7.6, 0.8, 90), ("crates", -6.9, -2.6),
                   ("barrel", -4.5, 5.2), ("barrel", -4, 5.5), ("chest", -3, -5.3, 10)],
          npcs=[("rat_count", 3.4, 0), ("guard", 5, 2), ("guard", 5, -2), ("street_kid", 2, 2), ("street_kid", 2, -2),
@@ -410,6 +410,9 @@ RAT'S BONES (dice game) - best of 3 rounds:
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
   THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
+TREASURE CHEST (gold chest, south-west corner): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
+  Opening it under his nose needs a distraction (the dice game is one); the key is on the ring cord around his neck.
+  LIGHTNING ROD (magic): chain lightning 2d6 + 1d6 to 2 more enemies, once per fight.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -435,7 +438,7 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
                   ("crate", 1.9, -3.4, 15, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
                   # C: rats' nest (north, x 6)
                   ("bed", 5.6, 4.6, 20), ("bed", 6.4, 4.0, 110),
-                  ("sack", 6.6, 4.9, 70, 1, {"name": "Rats' nest", "gm": "A gnawed purse in the bedding: 8 gold, and a LIGHTNING ROD."}),
+                  ("sack", 6.6, 4.9, 70, 1, {"name": "Rats' nest", "gm": "A gnawed purse in the bedding: 8 gold."}),
                   ("rubble", 5.4, 3.4, 140, 0.5),
                   # the four traps: GM-only markers (players never see them; the GM can reveal one once it's found)
                   ("trap_plate", -6, 0, 0, 1, {"name": "Trap 1: dart plate", "hidden": True, "gm": "Wits DC 13 to spot, "
@@ -468,8 +471,7 @@ SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
-     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold, and
-     tangled in the bedding a LIGHTNING ROD (smuggled wizard's rod: chain lightning 2d6 + 1d6 to 2 more, once per fight).
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
 
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True, hidden=True,
@@ -526,7 +528,6 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-If the party skipped the rats' nest, she has the LIGHTNING ROD instead (took it from the thieves; gift to whoever reached her first).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)"""),
 ]
