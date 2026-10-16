@@ -165,6 +165,9 @@ RAT'S BONES (dice game) - best of 3 rounds:
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
   THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
+TREASURE CHEST (gold chest, south-west corner): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
+  Opening it under his nose needs a distraction (the dice game is one); the key is on the ring cord around his neck.
+  LIGHTNING ROD (magic): chain lightning 2d6 + 1d6 to 2 more enemies, once per fight.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
   Shadow Hands. They meant to ransom her to your king. Took her out by cart, north road, three days ago."
   He whistles; a kid leads them to the hidden door (east wall): the old smugglers' passage.
@@ -196,8 +199,7 @@ SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
-     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold, and
-     tangled in the bedding a LIGHTNING ROD (smuggled wizard's rod: chain lightning 2d6 + 1d6 to 2 more, once per fight).
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud.
 ```
 
@@ -234,7 +236,6 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-If the party skipped the rats' nest, she has the LIGHTNING ROD instead (took it from the thieves; gift to whoever reached her first).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)
 ```
