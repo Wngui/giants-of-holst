@@ -165,7 +165,7 @@ RAT'S BONES (dice game) - best of 3 rounds:
   STEALING THE RING (optional heist): Agility DC 16 while he's rolling (Nimble Fingers auto-succeeds,
     Smoke Bomb or a distraction gives +5). Caught -> the bruisers attack, kids scatter.
   THE BARON'S LUCKY RING (magic): once per fight, reroll any die you can see.
-TREASURE CHEST (gold chest, south-west corner): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
+TREASURE CHEST (gold chest behind the throne, north side): Locked (Agility DC 15 to pick, Might DC 16 to smash - loud, the bruisers come). Inside: 20 gold and a LIGHTNING ROD.
   Opening it under his nose needs a distraction (the dice game is one); the key is on the ring cord around his neck.
   LIGHTNING ROD (magic): chain lightning 2d6 + 1d6 to 2 more enemies, once per fight.
 IF THEY WIN: "The girl? Yes, I kept her. A princess eats a lot. Sold her to the guild boys, the
