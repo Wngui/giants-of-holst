@@ -3,7 +3,7 @@ e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/ou
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, SKIES, LOOT, FOOD
+from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, ITEM_USE, SKIES, LOOT, FOOD
 
 ROOT = Path(__file__).parent
 CONTROLLER = "901d00"       # GUID of the hidden object that runs game.lua
@@ -141,7 +141,7 @@ def make_item_card(i):
     im.paste(Image.open(RAW / f"item_{i}.png").convert("RGB").resize((460, 383)), (20, 82))
     d.rectangle((20, 82, 480, 465), outline=GOLD, width=3)
     wrap(d, (32, 482), text, 24, 34)
-    d.text((250, 668), "magic item", font=font(18), fill=(110, 90, 60), anchor="mm")
+    d.text((250, 664), ITEM_USE[title], font=font(24, True), fill=(110, 90, 60), anchor="mm")
     return im
 
 
@@ -160,7 +160,7 @@ def screen_panels():
     foes = "\n".join(f"{t['name']}: HP {t['hp']}, Def {t['defense']}. " +
                      "; ".join(f"{a} {'+%d' % b if b is not None else ''} {c or ''}".replace("  ", " ") for a, b, c, _ in t["attacks"])
                      for t in NPCS.values() if t["attacks"])
-    items = "\n".join(f"{n}{' (x%d)' % k if k > 1 else ''}: {x}" for n, x, _, k in ITEMS)
+    items = "\n".join(f"{n}{' (x%d)' % k if k > 1 else ''} ({ITEM_USE[n]}): {x}" for n, x, _, k in ITEMS)
     return [("How to play", rules, 36), ("Foes", foes, 33), ("Magic items", items, 36)]
 
 

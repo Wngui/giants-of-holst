@@ -27,6 +27,7 @@ Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thi
 HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
+Items: the bottom line says if it costs your action or is free, and if it is used up (hand it to the GM) or comes back.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
 Initiative: roll your d20 when the GM asks; the face it shows (+ Agility) counts when the GM calls it.
   The strip on top shows whose turn it is.
@@ -195,7 +196,8 @@ SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
-     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold, and
+     tangled in the bedding a LIGHTNING ROD (smuggled wizard's rod: chain lightning 2d6 + 1d6 to 2 more, once per fight).
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud.
 ```
 
@@ -232,7 +234,7 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-She keeps a LIGHTNING ROD (magic, gift to whoever reached her first: once, chain lightning 2d6 + 1d6 to 2 more).
+If the party skipped the rats' nest, she has the LIGHTNING ROD instead (took it from the thieves; gift to whoever reached her first).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)
 ```

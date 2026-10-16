@@ -129,6 +129,7 @@ Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thi
 HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
 Cards: play any time it makes sense (most are an action). Each card works once,
   then comes back to your hand when the GM calls a REST.
+Items: the bottom line says if it costs your action or is free, and if it is used up (hand it to the GM) or comes back.
 Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
 Initiative: roll your d20 when the GM asks; the face it shows (+ Agility) counts when the GM calls it.
   The strip on top shows whose turn it is.
@@ -434,7 +435,7 @@ If paid the kids earlier: Vasko starts friendly and the first round is given to 
                   ("crate", 1.9, -3.4, 15, 1, {"name": "Smugglers' stash", "gm": "Wits DC 12: the ceiling is loose. Digging out carelessly brings it down (1d6, Agility DC 12 halves). Inside: 3 rations and a SMOKE EGG."}),
                   # C: rats' nest (north, x 6)
                   ("bed", 5.6, 4.6, 20), ("bed", 6.4, 4.0, 110),
-                  ("sack", 6.6, 4.9, 70, 1, {"name": "Rats' nest", "gm": "A gnawed purse in the bedding: 8 gold."}),
+                  ("sack", 6.6, 4.9, 70, 1, {"name": "Rats' nest", "gm": "A gnawed purse in the bedding: 8 gold, and a LIGHTNING ROD."}),
                   ("rubble", 5.4, 3.4, 140, 0.5),
                   # the four traps: GM-only markers (players never see them; the GM can reveal one once it's found)
                   ("trap_plate", -6, 0, 0, 1, {"name": "Trap 1: dart plate", "hidden": True, "gm": "Wits DC 13 to spot, "
@@ -467,7 +468,8 @@ SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
      Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
-     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
+     The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold, and
+     tangled in the bedding a LIGHTNING ROD (smuggled wizard's rod: chain lightning 2d6 + 1d6 to 2 more, once per fight).
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
 
     dict(key="cart", title="5. The Broken Cart", fog=True, music="cart.mp3", battle=True, hidden=True,
@@ -524,7 +526,7 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
-She keeps a LIGHTNING ROD (magic, gift to whoever reached her first: once, chain lightning 2d6 + 1d6 to 2 more).
+If the party skipped the rats' nest, she has the LIGHTNING ROD instead (took it from the thieves; gift to whoever reached her first).
 Read aloud: "A pale young woman in torn blue silk opens her eyes. 'Took you long enough.'"
 THE END. (Optional epilogue: she promises to return the Hearthstone and renew the Pact.)"""),
 ]
@@ -553,25 +555,31 @@ LOOT = [   # (weight, [(text, what turns up on the table), ...]: one of the vari
 ]
 
 ITEMS = [
-    ("Warren Whistle", "Blow it once: 1d4 street kids turn up to help or cause a distraction.",
+    ("Warren Whistle", "Blow it: 1d4 street kids turn up to help or cause a distraction.",
      "a small carved bone whistle on a leather cord lying on worn cobblestones, warm candlelight", 1),
-    ("Wolf-tooth Charm", "Once: reroll a failed Agility or Might check.",
+    ("Wolf-tooth Charm", "Reroll a failed Agility or Might check.",
      "a necklace of wolf teeth and leather strips with a carved bone bead on rough dark wood", 1),
-    ("Healing Draught", "Drink (an action): heal 2d8+2 HP. One use.",
+    ("Healing Draught", "Drink it: heal 2d8+2 HP.",
      "a small round glass flask of glowing red potion with a cork stopper on a wooden table", 2),
-    ("Smoke Egg", "Throw it: a 3x3 area fills with smoke for one round. Everyone inside is hidden and can't be targeted. One use.",
+    ("Smoke Egg", "Throw it: a 3x3 area fills with smoke for one round. Everyone inside is hidden and can't be targeted.",
      "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
-    ("Baron's Lucky Ring", "Once per fight: reroll any die you can see.",
+    ("Baron's Lucky Ring", "Reroll any die you can see.",
      "a heavy gold signet ring with a rat crest and a glowing green gem resting on a pile of old bone dice and coins on a gambling table, candlelight", 1),
     ("Sniffer Ferret", "Let it loose. It sniffs out one hidden person, loot, door or trap nearby, then comes back for a treat.",
      "a sly sleek ferret with a tiny leather collar peeking out of a small wooden smuggler's cage, lantern light, stone tunnel", 1),
     ("Potion of Giantism", "Drink it: grow to twice your size until the fight ends. +1d4 melee damage and advantage on Might checks.",
      "a large bulbous potion bottle of swirling amber liquid with a giant's footprint seal on the cork, on a rough stone ledge", 1),
-    ("Lightning Rod", "Once: chain lightning. 2d6 to one target, then it jumps to up to 2 more enemies within 3 squares for 1d6 each.",
+    ("Lightning Rod", "Chain lightning: 2d6 to one target, then it jumps to up to 2 more enemies within 3 squares for 1d6 each.",
      "a short iron rod wrapped in copper wire crackling with blue lightning arcs, held up in a dark cave", 1),
-    ("Poison Flask", "Throw it (range 6): the target takes 1d6 at the start of its next 3 turns. One use.",
+    ("Poison Flask", "Throw it (range 6): the target takes 1d6 at the start of its next 3 turns.",
      "a small round glass flask of bubbling acid-green poison with a skull scratched into the glass and a wax-sealed cork, wisps of green fumes, dark wooden table", 1),
 ]
+# item card footer: does it cost your action, and how often
+ITEM_USE = {"Warren Whistle": "Action - one use", "Wolf-tooth Charm": "Free - one use",
+            "Healing Draught": "Action - one use", "Smoke Egg": "Action - one use",
+            "Baron's Lucky Ring": "Free - once per fight", "Sniffer Ferret": "Action - once per scene",
+            "Potion of Giantism": "Action - one use", "Lightning Rod": "Action - once per fight",
+            "Poison Flask": "Action - one use"}
 # per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
 SKY_STYLE = ("An equirectangular 360 degree panorama, seen from eye level. A painterly dark fantasy illustration "
              "in muted earthy colours with soft atmospheric light.")
