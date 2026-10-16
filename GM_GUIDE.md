@@ -61,7 +61,7 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 
 **Aldric the Wizard** (Purple) HP 16, Def 11, Might +0, Agility +1, Wits +3
 - Card *Fireball*: 3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.
-- Card *Shrink*: One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved.
+- Card *Shrink*: One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved with advantage.
 - Card *Levitate*: Lift yourself or one ally up to 10 squares straight up, and set them down gently.
 - Card *Mirror Image*: Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.
 - Card *Frost Nova*: Enemies adjacent to you take 1d6 and can't move on their next turn.
@@ -189,11 +189,11 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: in a little cage by the skeleton, a
-     SNIFFER FERRET, still alive (the smugglers' pet: once, it finds one hidden person, door or trap) - hint: the
+     SNIFFER FERRET, still alive (the smugglers' pet: it finds one hidden person, hidden loot, door or trap) - hint: the
      princess will be hard to find in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
-     Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
+     Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
      The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud.
@@ -228,7 +228,7 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage) and gives it if treated kindly.
+  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage, advantage on Might checks) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).

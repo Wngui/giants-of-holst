@@ -108,7 +108,7 @@ HEROES = [
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
               "a huge fireball exploding in a ruined street, wicker burning"),
-             ("Shrink", "One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved.",
+             ("Shrink", "One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved with advantage.",
               "a tiny bewildered giant the size of a man standing among towering wizard's purple sparkles, an old wizard pointing his staff at it"),
              ("Levitate", "Lift yourself or one ally up to 10 squares straight up, and set them down gently.",
               "an old wizard levitating in mid-air inside a tall dark cave shaft, feet high above the ground, robes billowing, glowing aura"),
@@ -461,11 +461,11 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: in a little cage by the skeleton, a
-     SNIFFER FERRET, still alive (the smugglers' pet: once, it finds one hidden person, door or trap) - hint: the
+     SNIFFER FERRET, still alive (the smugglers' pet: it finds one hidden person, hidden loot, door or trap) - hint: the
      princess will be hard to find in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
-     Inside: 3 rations and a SMOKE EGG (magic: works like Smoke Bomb, once).
+     Inside: 3 rations and a SMOKE EGG (throw it: a 3x3 area is hidden in smoke for one round).
   C. RATS' NEST (north, column +6): the 2 giant rats sleep on stolen bedding. Sneaking past: Agility DC 11.
      The bell tripwire (trap 4) wakes them. In the nest: a gnawed purse, 8 gold.
 Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks in the mud."""),
@@ -520,7 +520,7 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage) and gives it if treated kindly.
+  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage, advantage on Might checks) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
@@ -559,13 +559,13 @@ ITEMS = [
      "a necklace of wolf teeth and leather strips with a carved bone bead on rough dark wood", 1),
     ("Healing Draught", "Drink (an action): heal 2d8+2 HP. One use.",
      "a small round glass flask of glowing red potion with a cork stopper on a wooden table", 2),
-    ("Smoke Egg", "Throw it: works like Smoke Bomb, a 3x3 area is hidden until they act. One use.",
+    ("Smoke Egg", "Throw it: a 3x3 area fills with smoke for one round. Everyone inside is hidden and can't be targeted. One use.",
      "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
     ("Baron's Lucky Ring", "Once per fight: reroll any die you can see.",
      "a heavy gold signet ring with a rat crest and a glowing green gem resting on a pile of old bone dice and coins on a gambling table, candlelight", 1),
-    ("Sniffer Ferret", "Once: let it loose. It sniffs out one hidden person, door or trap nearby, then comes back for a treat.",
+    ("Sniffer Ferret", "Let it loose. It sniffs out one hidden person, hidden loot, door or trap nearby, then comes back for a treat.",
      "a sly sleek ferret with a tiny leather collar peeking out of a small wooden smuggler's cage, lantern light, stone tunnel", 1),
-    ("Potion of Giantism", "Drink it: you grow to twice your size until the fight ends. Your melee attacks deal +1d4 damage.",
+    ("Potion of Giantism", "Drink it: grow to twice your size until the fight ends. +1d4 melee damage and advantage on Might checks.",
      "a large bulbous potion bottle of swirling amber liquid with a giant's footprint seal on the cork, on a rough stone ledge", 1),
     ("Lightning Rod", "Once: chain lightning. 2d6 to one target, then it jumps to up to 2 more enemies within 3 squares for 1d6 each.",
      "a short iron rod wrapped in copper wire crackling with blue lightning arcs, held up in a dark cave", 1),

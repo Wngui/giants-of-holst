@@ -17,7 +17,7 @@ COND = {
     { "Poisoned", 3, "takes 1d6 poison" },                           -- Poisoned Blade, the poison flask
     { "Frozen", 1, "can't move this turn" },                         -- Frost Nova
     { "Blinded", 1, "misses its attacks this turn" },                -- a blinding trick
-    { "Shrunk", 1, "human-sized: half damage, can be grappled" },    -- Shrink
+    { "Shrunk", 1, "a third of its size: half damage, grappled and shoved with advantage" },    -- Shrink
     { "Prone", 1, "stands up, using half its move" },                -- Stomp, Kick, a throw
 }
 
