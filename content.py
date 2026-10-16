@@ -461,7 +461,7 @@ Disarm: Agility DC 13 (Nimble Fingers auto). Triggered effects:
   4. BELL TRIPWIRE (column +8): harmless... unless it rings: the 2 giant rats in their nest (C) attack.
 SIDE PASSAGES (optional, each off the main tunnel; hover a chest/barrel/sack for its loot):
   A. OLD GUARD POST (north, column -3.5): a skeleton slumped by a chest. LOOT: in a little cage by the skeleton, a
-     SNIFFER FERRET, still alive (the smugglers' pet: it finds one hidden person, hidden loot, door or trap) - hint: the
+     SNIFFER FERRET, still alive (the smugglers' pet: it finds one hidden person, loot, door or trap) - hint: the
      princess will be hard to find in the cave. The chest is locked (Agility DC 12): 15 gold, a rope.
   B. COLLAPSED STASH (south, column +1.5): smugglers' goods half buried under a roof fall. Wits DC 12 notices the
      ceiling is loose; digging out the barrel without care brings more down (1d6, Agility DC 12 halves).
@@ -563,7 +563,7 @@ ITEMS = [
      "a grey clay egg-shaped bomb with a short smouldering fuse, wisps of smoke curling from it", 2),
     ("Baron's Lucky Ring", "Once per fight: reroll any die you can see.",
      "a heavy gold signet ring with a rat crest and a glowing green gem resting on a pile of old bone dice and coins on a gambling table, candlelight", 1),
-    ("Sniffer Ferret", "Let it loose. It sniffs out one hidden person, hidden loot, door or trap nearby, then comes back for a treat.",
+    ("Sniffer Ferret", "Let it loose. It sniffs out one hidden person, loot, door or trap nearby, then comes back for a treat.",
      "a sly sleek ferret with a tiny leather collar peeking out of a small wooden smuggler's cage, lantern light, stone tunnel", 1),
     ("Potion of Giantism", "Drink it: grow to twice your size until the fight ends. +1d4 melee damage and advantage on Might checks.",
      "a large bulbous potion bottle of swirling amber liquid with a giant's footprint seal on the cork, on a rough stone ledge", 1),
