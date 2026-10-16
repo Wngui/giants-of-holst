@@ -578,7 +578,7 @@ ITEMS = [
 # item card footer: does it cost your action, and how often
 ITEM_USE = {"Warren Whistle": "Action - one use", "Wolf-tooth Charm": "Free - one use",
             "Healing Draught": "Action - one use", "Smoke Egg": "Action - one use",
-            "Baron's Lucky Ring": "Free - once per fight", "Sniffer Ferret": "Action - once per scene",
+            "Baron's Lucky Ring": "Free - once per fight", "Sniffer Ferret": "Action - once per day",
             "Potion of Giantism": "Action - one use", "Lightning Rod": "Action - once per fight",
             "Poison Flask": "Action - one use"}
 # per scene: 360 backdrop around the table (prompt) and the mood light (colour, brightness x the default)
