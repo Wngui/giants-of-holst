@@ -40,7 +40,7 @@ HEROES = [
              ("Shadowstep", "Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
               "a hooded rogue melting into deep shadow in a narrow medieval alley between timber-framed houses, lantern light, only glowing eyes visible"),
              ("Backstab", "Play after you hit: add +2d6 damage.",
-              "side view of two men: a hooded assassin standing right behind a city guard, his dagger sunk into the guard's back between the shoulder blades, the guard's face twisted in shock, dark alley, dramatic rim light"),
+              "a city guard hunched over in pain with a dagger stuck in his back, dark shadows closing in around him, dim alley, dramatic rim light"),
              ("Nimble Fingers", "Auto-succeed one lockpick, pickpocket or trap-disarm check.",
               "delicate hands picking an ornate lock with thin tools, candlelight"),
              ("Smoke Bomb", "Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.",
