@@ -56,7 +56,7 @@ HEROES = [
          blurb="Veteran of the goblin wars. First in, last out.",
          traits=["Speaks a little Giant: understands simple words and can say a few.",
                  "Hard to shift: advantage on checks that would move him against his will."],
-         background="Veteran of the goblin wars. Picked up some Giant guarding a captured one for a winter, mostly the rude words.",
+         background="Veteran of the goblin wars. His grandmother's grandmother was a giant: he got the shoulders, the appetite and a few words of Giant.",
          gear="Longsword, dented shield, chainmail, a flask of something strong.",
          portrait="a scarred armoured knight with longsword and dented shield, stern face, stormy sky",
          cards=[
@@ -79,8 +79,8 @@ HEROES = [
          blurb="Battle priest of the Dawn. Keeps everyone breathing.",
          traits=["Healer: stabilising a downed ally is automatic for her (no roll), and still just one action.",
                  "Dawn lore: knows the dying, the undead and what holy symbols mean."],
-         background="Battle priest of the Dawn. Keeps everyone breathing, whether they like it or not.",
-         gear="Flanged mace, sun pendant, bandages, a small pot of honey for bribing children.",
+         background="Battle priest of the Dawn. Swore an oath at the Dawn altar never to leave a wounded soul behind.",
+         gear="Flanged mace, sun pendant, bandages.",
          portrait="a stout middle-aged battle priestess in chainmail holding a flanged mace, a golden sun pendant on her chest, kind stern face, braided hair, warm light",
          cards=[
              ("Mending Touch", "Heal an adjacent ally 2d8+3.",
@@ -103,7 +103,7 @@ HEROES = [
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
                  "Old friends: tutored the young princess in magic; she trusts him."],
          background="Royal court wizard. Fragile, clever and stubborn. Tutor to the princess, and not about to lose her.",
-         gear="Crooked staff, spellbook, star-embroidered robe, a pipe he is not allowed to light indoors.",
+         gear="Crooked staff, spellbook, star-embroidered robe, a pipe.",
          portrait="an old bearded wizard with a crooked staff and star-embroidered robe, arcane glow",
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
