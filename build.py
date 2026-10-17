@@ -114,50 +114,50 @@ def badge(d, cx, cy, r, value, label, col):
 
 def make_sheet(hero):
     """Page 1 (front): the character. Page 2 (tile back, flip it): the D20 LITE rules."""
+    im = Image.new("RGB", (1500, 1000), PAPER)
+    d = ImageDraw.Draw(im)
     col = RGB[hero["color"]]
-    im, d = parchment(col)
-    # left column: portrait, then HP/Defense and the three stats as badges
-    im.paste(Image.open(RAW / f"portrait_{hero['key']}.png").convert("RGB").resize((410, 410)), (70, 70))
-    d.rectangle((62, 62, 488, 488), outline=col, width=8)
-    d.rectangle((54, 54, 496, 496), outline=col, width=2)
-    badge(d, 170, 600, 78, str(hero["hp"]), "HP", col)
-    badge(d, 385, 600, 78, str(hero["defense"]), "DEFENSE", col)
-    for n, (k, v) in enumerate(hero["stats"].items()):
-        badge(d, 135 + n * 140, 790, 60, f"{v:+d}", k.upper(), col)
-    d.text((280, 920), "Flip for the rules", font=font(20), fill=(110, 80, 45), anchor="mm")
-    # right column: name, quote, then ribbon boxes
-    x, w, f, fb, lh = 540, 900, font(26), font(26, True), 36
-    d.text((x + w // 2, 92), hero["name"], font=font(56, True), fill=col, anchor="mm")
-    d.text((x + w // 2, 150), "\u201c" + hero["blurb"] + "\u201d", font=font(24), fill=(110, 80, 45), anchor="mm")
-    y = 190
-    by = ribbon_box(d, x, y, w, 62 + 40 * len(hero["attacks"]) + 6, "Attacks", col)
+    ink = (30, 20, 10)
+    f, fb = font(27), font(27, True)
+    d.rectangle((0, 0, 1499, 999), outline=col, width=16)
+    im.paste(Image.open(RAW / f"portrait_{hero['key']}.png").convert("RGB").resize((430, 430)), (36, 36))
+    d.rectangle((36, 36, 466, 466), outline=col, width=4)
+    d.text((500, 40), hero["name"], font=font(54, True), fill=col)
+    wrap(d, (500, 112), "\u201c" + hero["blurb"] + "\u201d", 27, 64, fill=(90, 70, 50))
+    boxes = [("HP", str(hero["hp"]), 190), ("DEFENSE", str(hero["defense"]), 190)] + \
+            [(k.upper(), f"{v:+d}", 150) for k, v in hero["stats"].items()]
+    x = 500
+    for label, val, w in boxes:
+        d.rounded_rectangle((x, 180, x + w, 300), 14, outline=col, width=5)
+        d.text((x + w // 2, 205), label, font=font(22, True), fill=col, anchor="mm")
+        d.text((x + w // 2, 262), val, font=font(50, True), fill=ink, anchor="mm")
+        x += w + 18
+    d.text((500, 330), "ATTACKS", font=font(26, True), fill=col)
     for n, (name, bonus, dmg, note) in enumerate(hero["attacks"]):
-        d.text((x + 24, by + n * 40), name, font=fb, fill=INK)
-        for cx, t in ((x + 290, f"{bonus:+d} to hit"), (x + 445, dmg), (x + 580, note)):
-            d.text((cx, by + n * 40), t, font=f, fill=INK)
-    y = by + 40 * len(hero["attacks"]) + 26
-    rows = []   # traits: bold name, then the rule
-    for t in hero["traits"]:
-        head, _, rest = t.partition(": ")
-        hw = d.textlength(head + ": ", font=fb)
-        rows.append((head + ": ", hw, wrap_px(d, rest, f, w - 48, int(hw))))
-    h = 62 + sum(len(r[2]) for r in rows) * lh + 10 * len(rows)
-    by = ribbon_box(d, x, y, w, h, "Traits", col)
-    for head, hw, lines in rows:
-        d.text((x + 24, by), head, font=fb, fill=INK)
-        d.text((x + 24 + hw, by), lines[0], font=f, fill=INK)
-        for n, l in enumerate(lines[1:], 1):
-            d.text((x + 24, by + n * lh), l, font=f, fill=INK)
-        by += len(lines) * lh + 10
-    y += h + 20
-    half = (w - 20) // 2
-    texts = [(t, wrap_px(d, hero[k], f, half - 48)) for t, k in (("Background", "background"), ("Gear", "gear"))]
-    h = 62 + max(len(l) for _, l in texts) * lh + 10
-    for n, (t, lines) in enumerate(texts):
-        bx = x + n * (half + 20)
-        by = ribbon_box(d, bx, y, half, h, t, col)
-        d.multiline_text((bx + 24, by), "\n".join(lines), font=f, fill=INK, spacing=lh - 26)
-    assert y + h < 960, (hero["name"], y + h)
+        d.text((500, 368 + n * 40), name + ":", font=font(24, True), fill=ink)
+        d.text((500 + d.textlength(name + ": ", font=font(24, True)), 368 + n * 40),
+               f"{bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=ink)
+    y = 500
+    for title, body in (("TRAITS", None), ("BACKGROUND", hero["background"]), ("GEAR", hero["gear"])):
+        d.text((40, y), title, font=font(28, True), fill=col)
+        y += 40
+        if body is None:   # each trait: bullet + bold name, then the rule
+            for t in hero["traits"]:
+                head, _, rest = t.partition(": ")
+                head = "\u2022 " + head + ": "
+                hw = d.textlength(head, font=fb)
+                lines = wrap_px(d, rest, f, 1400, int(hw))
+                d.text((40, y), head, font=fb, fill=ink)
+                d.text((40 + hw, y), lines[0], font=f, fill=ink)
+                for n, l in enumerate(lines[1:], 1):
+                    d.text((68, y + n * 37), l, font=f, fill=ink)
+                y += len(lines) * 37
+        else:
+            lines = textwrap.wrap(body, 92)
+            d.multiline_text((40, y), "\n".join(lines), font=f, fill=ink, spacing=9)
+            y += len(lines) * 37
+        y += 30
+    d.text((750, 968), "Flip the sheet for the D20 LITE rules", font=font(20), fill=(110, 90, 60), anchor="mm")
     return im
 
 
