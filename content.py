@@ -122,18 +122,18 @@ HEROES = [
 ]
 
 RULES = """D20 LITE - HOW TO PLAY
-Check or attack: roll d20 + stat. Meet or beat the target.
-  Attacks vs the enemy's Defense.  Checks: easy 10, hard 14, heroic 18.
+Roll: d20 + your stat. Meet or beat the number. Attacks must beat the enemy's Defense.
   Natural 20: double damage dice. Natural 1: something goes wrong.
-Your turn: move 6 squares + 1 action (attack, play a card, use an item, do a thing).
-HP: track it with the - and + on your HP shield. At 0 you are down; an ally can spend an action to stabilise you.
-Cards: play any time it makes sense (most are an action). Each card works once,
-  then comes back to your hand when the GM calls a REST.
-Items: the bottom line says if it costs your action or is free, and if it is used up (hand it to the GM) or comes back.
-Stats: Might (force, climbing, lifting), Agility (sneak, dodge, lockpick), Wits (notice, know, talk).
-Initiative: roll your d20 when the GM asks; the face it shows (+ Agility) counts when the GM calls it.
-  The strip on top shows whose turn it is.
-Searching: right-click a chest, barrel, crate or sack next to your hero > Search. Once each."""
+Difficulty: easy 10, hard 14, heroic 18.
+Your turn: move 6 squares, then take 1 action: attack, play a card, use an item or try something.
+HP: use - and + on your HP shield. At 0 you are down. An ally can spend an action to stabilise you.
+Cards: most cost your action. Each works once, then comes back when the GM calls a REST.
+Items: the bottom line says if it costs your action or is free, and if it is used up (give it to the GM).
+Stats: Might: force, climb, lift.
+  Agility: sneak, dodge, pick locks.
+  Wits: notice, know, talk.
+Initiative: roll your d20 when the GM asks. Its face + Agility sets your place. The strip on top shows whose turn it is.
+Search: right-click a chest, barrel, crate or sack next to your hero, then Search. Once each."""
 
 # ---------------------------------------------------------------- npcs
 # Animated townsfolk from the Steam workshop packs "Male Human Commoners" (2960527540) and "Female Human

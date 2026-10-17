@@ -2,7 +2,7 @@
 e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/out/*, Holst.json, GM_GUIDE.md"""
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
-from PIL import Image, ImageChops, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, ITEM_USE, SKIES, LOOT, FOOD
 
 ROOT = Path(__file__).parent
@@ -85,8 +85,7 @@ def make_sheet(hero):
     for n, (name, bonus, dmg, note) in enumerate(hero["attacks"]):
         d.text((500, 368 + n * 40), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=ink)
     y = 500
-    for title, body in (("TRAITS", "\n".join("\u2022 " + t for t in hero["traits"])), ("BACKGROUND", hero["background"]),
-                        ("GEAR", hero["gear"])):
+    for title, body in (("TRAITS", "\n".join("\u2022 " + t for t in hero["traits"])), ("GEAR", hero["gear"])):
         d.text((40, y), title, font=font(28, True), fill=col)
         lines = [l for para in body.split("\n") for l in textwrap.wrap(para, 92, subsequent_indent="  " if title == "TRAITS" else "")]
         d.multiline_text((40, y + 40), "\n".join(lines), font=font(27), fill=ink, spacing=9)
@@ -97,32 +96,57 @@ def make_sheet(hero):
 
 def rules_page(col):
     """The sheet's back: D20 LITE rules laid out as headed boxes, plus the difficulty badges."""
-    im = Image.new("RGB", (1500, 1000), (236, 222, 190))
+    W, H, ink, paper = 1500, 1000, (35, 25, 15), (236, 222, 190)
+    # parchment: soft noise and a dark vignette at the edges
+    noise = Image.effect_noise((W, H), 18).filter(ImageFilter.GaussianBlur(2))
+    im = Image.composite(Image.new("RGB", (W, H), (222, 204, 166)), Image.new("RGB", (W, H), paper), noise)
+    mask = Image.new("L", (W, H), 255)
+    ImageDraw.Draw(mask).rounded_rectangle((60, 60, W - 60, H - 60), 80, fill=0)
+    im = Image.composite(Image.new("RGB", (W, H), (150, 115, 70)), im, mask.filter(ImageFilter.GaussianBlur(60)))
     d = ImageDraw.Draw(im)
-    ink = (30, 20, 10)
-    d.rectangle((0, 0, 1499, 999), outline=col, width=16)
-    d.text((750, 70), "D20 LITE", font=font(72, True), fill=col, anchor="mm")
-    d.text((750, 128), "how to play", font=font(28), fill=(110, 90, 60), anchor="mm")
+    d.rectangle((10, 10, W - 11, H - 11), outline=col, width=12)
+    d.rectangle((30, 30, W - 31, H - 31), outline=col, width=2)
+    for cx, cy in ((30, 30), (W - 31, 30), (30, H - 31), (W - 31, H - 31)):   # corner studs
+        d.regular_polygon((cx, cy, 16), 4, fill=col)
+    d.text((W // 2, 78), "D20 LITE", font=font(68, True), fill=col, anchor="mm")
+    for sx in (-1, 1):   # flourish lines either side of the subtitle
+        d.line((W // 2 + sx * 110, 132, W // 2 + sx * 330, 132), fill=col, width=3)
+        d.regular_polygon((W // 2 + sx * 340, 132, 8), 4, fill=col)
+    d.text((W // 2, 132), "how to play", font=font(28), fill=(110, 80, 45), anchor="mm")
     sections = []
     for line in RULES.splitlines()[1:]:
         if line.startswith(" ") and sections:
-            sections[-1][1] += " " + line.strip()
+            sections[-1][1] += "\n" + line.strip()
         else:
             head, _, body = line.partition(":")
             sections.append([head.strip(), body.strip()])
+    bw, bh, gap, top = 440, 245, 18, 168
+    f = font(23)
     for n, (head, body) in enumerate(sections):
-        x, y = (60 if n % 2 == 0 else 770), 180 + (n // 2) * 245
-        d.rounded_rectangle((x, y, x + 670, y + 225), 16, outline=col, width=3, fill=(244, 236, 214))
-        d.text((x + 24, y + 18), head.upper(), font=font(28, True), fill=col)
-        wrap(d, (x + 24, y + 62), body[:1].upper() + body[1:], 24, 52, fill=ink, spacing=7)
-    x0 = 770 if len(sections) % 2 else 60   # free slot: the difficulty badges
-    y0 = 180 + (len(sections) // 2) * 245
-    d.text((x0 + 24, y0 + 18), "DIFFICULTY", font=font(28, True), fill=col)
-    for n, (label, dc) in enumerate((("Easy", 10), ("Hard", 14), ("Heroic", 18))):
-        cx = x0 + 110 + n * 220
-        d.ellipse((cx - 70, y0 + 66, cx + 70, y0 + 206), outline=col, width=6, fill=(244, 236, 214))
-        d.text((cx, y0 + 125), str(dc), font=font(56, True), fill=ink, anchor="mm")
-        d.text((cx, y0 + 178), label, font=font(22, True), fill=col, anchor="mm")
+        x, y = (W - 3 * bw - 2 * gap) // 2 + (n % 3) * (bw + gap), top + (n // 3) * (bh + gap)
+        d.rounded_rectangle((x, y, x + bw, y + bh), 14, outline=col, width=3, fill=(246, 238, 218))
+        d.rounded_rectangle((x, y, x + bw, y + 50), 14, fill=col)
+        d.rectangle((x, y + 30, x + bw, y + 50), fill=col)
+        d.text((x + bw // 2, y + 26), head.upper(), font=font(26, True), fill=paper, anchor="mm")
+        if head == "Difficulty":
+            for k, (label, dc) in enumerate((("Easy", 10), ("Hard", 14), ("Heroic", 18))):
+                cx, cy = x + 80 + k * 140, y + 145
+                d.ellipse((cx - 58, cy - 58, cx + 58, cy + 58), outline=col, width=6, fill=paper)
+                d.text((cx, cy - 8), str(dc), font=font(46, True), fill=ink, anchor="mm")
+                d.text((cx, cy + 30), label, font=font(19, True), fill=col, anchor="mm")
+            continue
+        lines = []   # wrap by pixel width so nothing runs past the box
+        for para in (body[:1].upper() + body[1:]).split("\n"):
+            cur = ""
+            for w in para.split():
+                if cur and d.textlength(cur + " " + w, font=f) > bw - 40:
+                    lines.append(cur)
+                    cur = w
+                else:
+                    cur = (cur + " " + w).strip()
+            lines.append(cur)
+        assert len(lines) <= 6, (head, lines)
+        d.multiline_text((x + 20, y + 66), "\n".join(lines), font=f, fill=ink, spacing=9)
     return im
 
 
