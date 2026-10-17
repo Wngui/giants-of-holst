@@ -660,7 +660,7 @@ for junk in ("abc", "", " ", "--3"):                                # ignored, n
 ng.damage("Black", "+4")
 assert ng.attrs["hp.text"] == "6/60"
 desc = giant["Description"]
-assert desc.startswith("Def 12   Move 8   HP 60") and "Club smash: +7, 2d8+4, melee, reach 2" in desc
+assert desc.startswith("Def 12   Move 8   HP 60") and "Club smash: +6, 2d8+2, melee, reach 2" in desc
 for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())

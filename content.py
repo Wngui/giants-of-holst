@@ -37,22 +37,22 @@ HEROES = [
          gear="Twin daggers, throwing knives, lockpicks, rope, a hooded cloak.",
          portrait="a hooded young rogue man with twin daggers, sly smile, short stubble, leather armour, city rooftops at dusk",
          cards=[
-             ("Shadowstep", "Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
+             ("Shadowstep", "Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
               "a hooded rogue melting into deep shadow in a narrow medieval alley between timber-framed houses, lantern light, only glowing eyes visible"),
-             ("Backstab", "Play after you hit: add +2d6 damage.",
+             ("Backstab", "Free action, after you hit: add +2d6 damage.",
               "a hooded rogue seen from behind stalking down a narrow sunlit alley, blade held low"),   # picked render: ComfyUI output tabletop_00508
              ("Nimble Fingers", "Auto-succeed one lockpick, pickpocket or trap-disarm check.",
               "delicate hands picking an ornate lock with thin tools, candlelight"),
              ("Smoke Bomb", "Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.",
               "a hooded rogue vanishing in a billowing cloud of thick grey smoke burst at his feet, coughing guards groping around him, narrow torchlit street"),
-             ("Luck", "Reroll any one die on the table, yours or anyone else's.",
+             ("Luck", "Free action, any time: reroll any one die on the table, yours or anyone else's.",
               "close-up of a single ivory six-sided die with round pips on a worn wooden table, candlelight, blank table surface"),
-             ("Poisoned Blade", "Your next hit also deals 1d6 at the start of the target's next 3 turns.",
+             ("Poisoned Blade", "Free action: your next hit also deals 1d6 at the start of the target's next 3 turns.",
               "a dagger dripping green poison over a vial"),
          ]),
     dict(key="fighter", name="Brannoc the Fighter", color="Blue", fig="rpg_KNIGHT", hp=30, defense=15,
          stats=dict(Might=3, Agility=1, Wits=0),
-         attacks=[("Longsword", 5, "1d8+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
+         attacks=[("Longsword", 5, "1d10+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
          blurb="Veteran of the goblin wars. First in, last out.",
          traits=["Speaks a little Giant: understands simple words and can say a few.",
                  "Hard to shift: advantage on checks that would move him against his will."],
@@ -62,7 +62,7 @@ HEROES = [
          cards=[
              ("Cleave", "Make one attack roll against every enemy adjacent to you.",
               "action shot of a knight swinging his longsword in a wide sweeping arc, a bright curved slash trail of light across the whole frame, motion blur, sparks"),
-             ("Shield Wall", "Until your next turn, you and adjacent allies get +3 Defense.",
+             ("Shield Wall", "Free action: until your next turn, you and adjacent allies get +3 Defense.",
               "a raised battered shield taking a hail of arrows"),
              ("Taunt", "All enemies that can see you must attack you this round.",
               "a knight banging sword on shield, roaring a challenge"),
@@ -108,7 +108,7 @@ HEROES = [
          cards=[
              ("Fireball", "3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.",
               "a huge fireball exploding in a ruined street, wicker burning"),
-             ("Shrink", "One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved with advantage.",
+             ("Shrink", "One creature nearby shrinks to a third of its size until the end of its next turn: it deals half damage, and it can be grappled and shoved with advantage.",
               "a tiny bewildered giant the size of a man standing among towering wizard's purple sparkles, an old wizard pointing his staff at it"),
              ("Levitate", "Lift yourself or one ally up to 10 squares straight up, and set them down gently.",
               "an old wizard levitating in mid-air inside a tall dark cave shaft, feet high above the ground, robes billowing, glowing aura"),
@@ -155,7 +155,7 @@ COMMONERS = [
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
     "giant_club": dict(portrait="a hunched brutish hill giant three times the height of a man, huge round pot belly, long thick muscular arms, sloping shoulders, small head with patchy greasy hair, heavy lumpy deformed brow, slack-jawed snarl with crooked yellow teeth, dirt-smeared tanned skin, ragged loincloth, crude leather sandals, dragging a thick rough wooden club, a big round wicker shield, terrified townsmen beside him reach only to his knees, ruined town street, smoke", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
-        ("Club smash", 7, "2d8+4", "melee, reach 2"),
+        ("Club smash", 6, "2d8+2", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
     "giant_thrower": dict(portrait="close-up head and shoulders of a brutish pot-bellied hill giant with patchy greasy hair, a lumpy deformed brow and crooked yellow teeth, snarling as he hurls a big rock toward the viewer, the rock flying at the camera, motion blur, smoke", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
@@ -164,7 +164,7 @@ NPCS = {
         ("Club smash", 6, "2d8+2", "melee, reach 2"),
     ], notes="Hangs back and throws whatever the street offers. Moves 8."),
     "giant_eye": dict(shield=True, name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
-        ("Club smash", 7, "2d8+4", "melee, reach 2"),
+        ("Club smash", 6, "2d8+2", "melee, reach 2"),
         ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
     "giant_troll": dict(portrait="a towering scarred hill giant chieftain in iron-studded leather, heavy chains wrapped around its fists, cruel grin, burning town behind", boss=True, name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
@@ -192,18 +192,18 @@ NPCS = {
     ], notes="Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. "
              "Trade food for their Wolf-tooth Charm."),
     "carcass": dict(name="Giant rat carcass", fig="rpg_RAT", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
-    "rat_count": dict(portrait="a sly grinning bandit baron in a faded velvet coat, rat-crest gold signet ring with a green gem, candlelit gambling den", notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", hp=25, defense=13, attacks=[
+    "rat_count": dict(portrait="a sly grinning bandit baron in a faded velvet coat, rat-crest gold signet ring with a green gem, candlelit gambling den", notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", hp=35, defense=13, attacks=[
         ("Rapier", 5, "1d8+2", "melee"),
         ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
         ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
         ("Lucky Ring reroll", None, "1d6", "extra reroll from the ring, once per round"),
-    ], notes="Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks."),
-    "guard": dict(portrait="a big brutish bandit bodyguard with a broken nose, spiked cudgel and leather armour, candlelit cellar", name="Baron's bruiser", fig="rpg_ORC", hp=20, defense=14, attacks=[
-        ("Axe", 4, "1d10+2", "melee"),
+    ], notes="Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks. Fights to the end, no surrender."),
+    "guard": dict(portrait="a big brutish bandit bodyguard with a broken nose, spiked cudgel and leather armour, candlelit cellar", name="Baron's bruiser", fig="rpg_ORC", hp=30, defense=14, attacks=[
+        ("Axe", 5, "1d10+3", "melee"),
     ], notes="Two of them. Loyal while Vasko is winning."),
     "log_giant": dict(name="Giant", fig="rpg_CYCLOP", hp=70, defense=12, attacks=[
         ("Log throw", None, "3d6", "2x2 area, Agility DC 14 for half; opening move"),
-        ("Club smash", 7, "2d8+4", "melee, reach 2"),
+        ("Club smash", 6, "2d8+2", "melee, reach 2"),
         ("Roar", None, None, "all heroes within 6: Wits DC 12 or lose next move"),
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
     "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
@@ -492,8 +492,8 @@ Exit (far east): a hatch into a ditch well outside the city walls. Cart tracks i
 left of it. It's been stamped flat. So have the men who drove it."
 INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the cart - empty, bent
 OUTWARD, scorched. Something burned its way out. Giant footprints lead north-east.
-GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
-(magic: works like Smoke Bomb, once).
+GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2), a SMOKE EGG (3x3 smoke for one round)
+and a POTION OF GIANTISM (twice your size until the fight ends, +1d4 melee damage, advantage on Might checks).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
 opens the fight (2x2 on the cart). Select the giants and TOGGLE VISIBILITY (all start hidden), then press INITIATIVE. 3 giants.
 CHAINMASTER (north-west, with 3 thralls): only if he survived Holst City. Otherwise leave him and his thralls hidden.
@@ -524,7 +524,6 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage, advantage on Might checks) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).

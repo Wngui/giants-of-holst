@@ -37,16 +37,16 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 ## Heroes
 
 **Wren the Thief** (Red) HP 18, Def 13, Might +0, Agility +3, Wits +2
-- Card *Shadowstep*: Move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.
-- Card *Backstab*: Play after you hit: add +2d6 damage.
+- Card *Shadowstep*: Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.
+- Card *Backstab*: Free action, after you hit: add +2d6 damage.
 - Card *Nimble Fingers*: Auto-succeed one lockpick, pickpocket or trap-disarm check.
 - Card *Smoke Bomb*: Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.
-- Card *Luck*: Reroll any one die on the table, yours or anyone else's.
-- Card *Poisoned Blade*: Your next hit also deals 1d6 at the start of the target's next 3 turns.
+- Card *Luck*: Free action, any time: reroll any one die on the table, yours or anyone else's.
+- Card *Poisoned Blade*: Free action: your next hit also deals 1d6 at the start of the target's next 3 turns.
 
 **Brannoc the Fighter** (Blue) HP 30, Def 15, Might +3, Agility +1, Wits +0
 - Card *Cleave*: Make one attack roll against every enemy adjacent to you.
-- Card *Shield Wall*: Until your next turn, you and adjacent allies get +3 Defense.
+- Card *Shield Wall*: Free action: until your next turn, you and adjacent allies get +3 Defense.
 - Card *Taunt*: All enemies that can see you must attack you this round.
 - Card *Second Wind*: Heal 1d10+5 HP. Free action.
 - Card *Mighty Heave*: Throw an object or a human-sized foe up to 4 squares: 2d6 damage to what it hits.
@@ -62,7 +62,7 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 
 **Aldric the Wizard** (Purple) HP 16, Def 11, Might +0, Agility +1, Wits +3
 - Card *Fireball*: 3x3 area: 3d6 fire, Agility DC 14 for half. Burns wicker shields to ash.
-- Card *Shrink*: One creature nearby shrinks to a third of its size until the end of its next turn: half damage, and it can be grappled and shoved with advantage.
+- Card *Shrink*: One creature nearby shrinks to a third of its size until the end of its next turn: it deals half damage, and it can be grappled and shoved with advantage.
 - Card *Levitate*: Lift yourself or one ally up to 10 squares straight up, and set them down gently.
 - Card *Mirror Image*: Until the fight ends, every attack against you: roll a d6, on 1-3 it hits an illusion instead.
 - Card *Frost Nova*: Enemies adjacent to you take 1d6 and can't move on their next turn.
@@ -70,9 +70,9 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 
 ## NPCs
 
-- **Giant** HP 60, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
+- **Giant** HP 60, Def 12. Club smash (+6, 2d8+2, melee, reach 2); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
 - **Giant thrower** HP 50, Def 12. Hurl rubble (+5, 2d6+2, range 10); Hurl cart wheel (no roll, 2d8, a line 6 long, Agility DC 13 for half); Club smash (+6, 2d8+2, melee, reach 2). Hangs back and throws whatever the street offers. Moves 8.
-- **Giant** HP 55, Def 12. Club smash (+7, 2d8+4, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
+- **Giant** HP 55, Def 12. Club smash (+6, 2d8+2, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
 - **Giant chainmaster** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Crack the chains (no roll, -, every thrall moves 3 and makes a free Rusty knife attack); Reel in (+6, -, range 6: target is dragged next to him and held, Might DC 14 to break free). Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6.
 - **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off.
 - **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Works for the Bandit Baron.
@@ -81,9 +81,9 @@ Searching: right-click a chest, barrel, crate or sack next to your hero > Search
 - **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
 - **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
 - **Giant rat carcass** HP 1, Def 1. . Food.
-- **Vasko, the Bandit Baron** HP 25, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks.
-- **Baron's bruiser** HP 20, Def 14. Axe (+4, 1d10+2, melee). Two of them. Loyal while Vasko is winning.
-- **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+7, 2d8+4, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
+- **Vasko, the Bandit Baron** HP 35, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks. Fights to the end, no surrender.
+- **Baron's bruiser** HP 30, Def 14. Axe (+5, 1d10+3, melee). Two of them. Loyal while Vasko is winning.
+- **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+6, 2d8+2, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
 - **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
 - **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes.
 - **Fallen guildsman** HP 1, Def 1. . Died fighting.
@@ -210,8 +210,8 @@ Read aloud: "The tracks lead north into the pines. An hour later you find the ca
 left of it. It's been stamped flat. So have the men who drove it."
 INVESTIGATE (Wits DC 12): guild tokens (a black hand), a broken iron cage in the cart - empty, bent
 OUTWARD, scorched. Something burned its way out. Giant footprints lead north-east.
-GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2) and a SMOKE EGG
-(magic: works like Smoke Bomb, once).
+GUILD LOCKBOX (under the cart, Agility DC 13 or cart keys): HEALING DRAUGHT (2d8+2), a SMOKE EGG (3x3 smoke for one round)
+and a POTION OF GIANTISM (twice your size until the fight ends, +1d4 melee damage, advantage on Might checks).
 AMBUSH: when they're busy at the cart, a whole tree trunk flies out of the woods. the biggest giant's LOG THROW
 opens the fight (2x2 on the cart). Select the giants and TOGGLE VISIBILITY (all start hidden), then press INITIATIVE. 3 giants.
 CHAINMASTER (north-west, with 3 thralls): only if he survived Holst City. Otherwise leave him and his thralls hidden.
@@ -232,7 +232,6 @@ he gets a few simple words. Kind Heart makes her trust them. She is not hostile,
   - "We found the little witch in the thieves' cage. She is the Pact-maker. We wanted her to speak for us."
   - "The thieves fought. She... became a bird. White bird. Flew up." (points up the shaft to the north)
   - If healed/fed: "Tell your king: give back the Hearthstone and the mountains are quiet again."
-  - She carries a POTION OF GIANTISM (drink: twice your size until the fight ends, +1d4 melee damage, advantage on Might checks) and gives it if treated kindly.
 THE SHAFT (north, where the light comes in): 10 squares straight up. Might DC 15 climb (fail: 1d6, try again), rope + one
 climber, or LEVITATE. The SNIFFER FERRET finds her hiding place (otherwise Wits DC 14).
 ISOLDE: in a ledge up the shaft, human again, wounded but alive. Heal her or give her food (she stands).
