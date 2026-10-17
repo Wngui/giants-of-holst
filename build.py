@@ -1,5 +1,6 @@
 """Build the TTS save.  python build.py <asset base url>
 e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/out/*, Holst.json, GM_GUIDE.md"""
+import random
 import hashlib, json, math, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -85,7 +86,8 @@ def make_sheet(hero):
     for n, (name, bonus, dmg, note) in enumerate(hero["attacks"]):
         d.text((500, 368 + n * 40), f"{name}: {bonus:+d} to hit, {dmg} damage  ({note})", font=font(24), fill=ink)
     y = 500
-    for title, body in (("TRAITS", "\n".join("\u2022 " + t for t in hero["traits"])), ("GEAR", hero["gear"])):
+    for title, body in (("TRAITS", "\n".join("\u2022 " + t for t in hero["traits"])), ("BACKGROUND", hero["background"]),
+                        ("GEAR", hero["gear"])):
         d.text((40, y), title, font=font(28, True), fill=col)
         lines = [l for para in body.split("\n") for l in textwrap.wrap(para, 92, subsequent_indent="  " if title == "TRAITS" else "")]
         d.multiline_text((40, y + 40), "\n".join(lines), font=font(27), fill=ink, spacing=9)
@@ -98,7 +100,7 @@ def rules_page(col):
     """The sheet's back: D20 LITE rules laid out as headed boxes, plus the difficulty badges."""
     W, H, ink, paper = 1500, 1000, (35, 25, 15), (236, 222, 190)
     # parchment: soft noise and a dark vignette at the edges
-    noise = Image.effect_noise((W, H), 18).filter(ImageFilter.GaussianBlur(2))
+    noise = Image.frombytes("L", (W, H), random.Random(7).randbytes(W * H)).point(lambda v: 128 + (v - 128) // 7).filter(ImageFilter.GaussianBlur(2))
     im = Image.composite(Image.new("RGB", (W, H), (222, 204, 166)), Image.new("RGB", (W, H), paper), noise)
     mask = Image.new("L", (W, H), 255)
     ImageDraw.Draw(mask).rounded_rectangle((60, 60, W - 60, H - 60), 80, fill=0)
