@@ -56,7 +56,7 @@ HEROES = [
          blurb="Veteran of the goblin wars. First in, last out.",
          traits=["Speaks a little Giant: understands simple words and can say a few.",
                  "Hard to shift: advantage on checks that would move him against his will."],
-         background="Veteran of the goblin wars. His grandmother's grandmother was a giant: he got the shoulders, the appetite and a few words of Giant.",
+         background="Veteran of the goblin wars. His lineage is known for its giant blood - every generation, one is born too big for the door.",
          gear="Longsword, dented shield, chainmail, a flask of something strong.",
          portrait="a scarred armoured knight with longsword and dented shield, stern face, stormy sky",
          cards=[
