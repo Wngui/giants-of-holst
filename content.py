@@ -79,7 +79,7 @@ HEROES = [
          blurb="Battle priest of the Dawn. Keeps everyone breathing.",
          traits=["Healer: stabilising a downed ally is automatic for her (no roll), and still just one action.",
                  "Dawn lore: knows the dying, the undead and what holy symbols mean."],
-         background="Battle priest of the Dawn. Swore an oath at the Dawn altar never to leave a wounded soul behind.",
+         background="Battle priest of the Dawn. Swore an oath to never leave a wounded soul behind.",
          gear="Flanged mace, sun pendant, bandages.",
          portrait="a stout middle-aged battle priestess in chainmail holding a flanged mace, a golden sun pendant on her chest, kind stern face, braided hair, warm light",
          cards=[
