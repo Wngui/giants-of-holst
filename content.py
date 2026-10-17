@@ -28,16 +28,16 @@ MAP_STYLE = ("top-down orthographic battle map for a tabletop rpg, seen from dir
 HEROES = [
     dict(key="thief", name="Wren the Thief", color="Red", fig="rpg_THIEF", hp=18, defense=13,
          stats=dict(Might=0, Agility=3, Wits=2),
-         attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing knife", 5, "1d4+3", "range 6")],
+         attacks=[("Dagger", 5, "1d6+3", "melee"), ("Throwing Knife", 5, "1d4+3", "range 6")],
          blurb="Quick feet, quicker hands. Nothing stays locked for long.",
-         traits=["Sneaky: advantage on sneaking and lockpicking (roll 2 d20, keep the best).",
+         traits=["Sneaky: advantage on sneaking and lockpicking (roll 2d20, keep the best).",
                  "Street smart: knows how thieves think, talk and hide things."],
          background="Grew up in the alleys of Aldmere's capital and talked his way into the King's service "
                     "instead of the King's dungeon.",
          gear="Twin daggers, throwing knives, lockpicks, rope, a hooded cloak.",
          portrait="a hooded young rogue man with twin daggers, sly smile, short stubble, leather armour, city rooftops at dusk",
          cards=[
-             ("Shadowstep", "Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.",
+             ("Shadowstep", "Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2d20, keep the best.",
               "a hooded rogue melting into deep shadow in a narrow medieval alley between timber-framed houses, lantern light, only glowing eyes visible"),
              ("Backstab", "Free action, after you hit: add +2d6 damage.",
               "a hooded rogue seen from behind stalking down a narrow sunlit alley, blade held low"),   # picked render: ComfyUI output tabletop_00508
@@ -52,7 +52,7 @@ HEROES = [
          ]),
     dict(key="fighter", name="Brannoc the Fighter", color="Blue", fig="rpg_KNIGHT", hp=30, defense=15,
          stats=dict(Might=3, Agility=1, Wits=0),
-         attacks=[("Longsword", 5, "1d10+3", "melee"), ("Shield bash", 5, "1d4+3", "melee, push 1 square")],
+         attacks=[("Longsword", 5, "1d10+3", "melee"), ("Shield Bash", 5, "1d4+3", "melee, push 1 square")],
          blurb="Veteran of the goblin wars. First in, last out.",
          traits=["Speaks a little Giant: understands simple words and can say a few.",
                  "Hard to shift: advantage on checks that would move him against his will."],
@@ -75,7 +75,7 @@ HEROES = [
          ]),
     dict(key="healer", name="Sister Maelis the Healer", color="Green", fig="rpg_WARRIOR", hp=22, defense=13,
          stats=dict(Might=1, Agility=0, Wits=3),
-         attacks=[("Mace", 3, "1d6+1", "melee"), ("Sacred flame", 5, "1d8+1", "range 8, ignores shields")],
+         attacks=[("Mace", 3, "1d6+1", "melee"), ("Sacred Flame", 5, "1d8+1", "range 8, ignores shields")],
          blurb="Battle priest of the Dawn. Keeps everyone breathing.",
          traits=["Healer: stabilising a downed ally is automatic for her (no roll), and still just one action.",
                  "Dawn lore: knows the dying, the undead and what holy symbols mean."],
@@ -98,7 +98,7 @@ HEROES = [
          ]),
     dict(key="wizard", name="Aldric the Wizard", color="Purple", fig="rpg_MAGE", hp=16, defense=11,
          stats=dict(Might=0, Agility=1, Wits=3),
-         attacks=[("Staff", 2, "1d6", "melee"), ("Arcane bolt", 5, "1d10", "range 10")],
+         attacks=[("Staff", 2, "1d6", "melee"), ("Arcane Bolt", 5, "1d10", "range 10")],
          blurb="Royal court wizard. Fragile, clever, and stubborn.",
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
                  "Old friends: tutored the young princess in magic; she trusts him."],
@@ -122,7 +122,7 @@ HEROES = [
 ]
 
 RULES = """D20 LITE - HOW TO PLAY
-Roll: d20 + your stat. Meet or beat the number. Attacks must beat the enemy's Defense.
+Roll: roll a d20 and add your stat. Meet or beat the number. Attacks must beat the enemy's Defense.
   Natural 20: double damage dice. Natural 1: something goes wrong.
 Difficulty: easy 10, hard 14, heroic 18.
 Your turn: move 6 squares, then take 1 action: attack, play a card, use an item or try something.
@@ -132,7 +132,7 @@ Items: the bottom line says if it costs your action or is free, and if it is use
 Stats: Might: force, climb, lift.
   Agility: sneak, dodge, pick locks.
   Wits: notice, know, talk.
-Initiative: roll your d20 when the GM asks. Its face + Agility sets your place. The strip on top shows whose turn it is.
+Initiative: roll your d20 when the GM asks. Your Agility is added for you. The strip on top shows whose turn it is.
 Search: right-click a chest, barrel, crate or sack next to your hero, then Search. Once each."""
 
 # ---------------------------------------------------------------- npcs
@@ -155,70 +155,70 @@ COMMONERS = [
 # attacks: (name, to-hit bonus or None, damage dice or None, note). Attack buttons roll these.
 NPCS = {
     "giant_club": dict(portrait="a hunched brutish hill giant three times the height of a man, huge round pot belly, long thick muscular arms, sloping shoulders, small head with patchy greasy hair, heavy lumpy deformed brow, slack-jawed snarl with crooked yellow teeth, dirt-smeared tanned skin, ragged loincloth, crude leather sandals, dragging a thick rough wooden club, a big round wicker shield, terrified townsmen beside him reach only to his knees, ruined town street, smoke", shield=True, name="Giant", fig="rpg_CYCLOP", hp=60, defense=12, attacks=[
-        ("Club smash", 6, "2d8+2", "melee, reach 2"),
+        ("Club Smash", 6, "2d8+2", "melee, reach 2"),
         ("Stomp", None, "1d8", "all adjacent: Agility DC 13 or take it and fall prone"),
     ], notes="WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8."),
-    "giant_thrower": dict(portrait="close-up head and shoulders of a brutish pot-bellied hill giant with patchy greasy hair, a lumpy deformed brow and crooked yellow teeth, snarling as he hurls a big rock toward the viewer, the rock flying at the camera, motion blur, smoke", name="Giant thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
-        ("Hurl rubble", 5, "2d6+2", "range 10"),
-        ("Hurl cart wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
-        ("Club smash", 6, "2d8+2", "melee, reach 2"),
+    "giant_thrower": dict(portrait="close-up head and shoulders of a brutish pot-bellied hill giant with patchy greasy hair, a lumpy deformed brow and crooked yellow teeth, snarling as he hurls a big rock toward the viewer, the rock flying at the camera, motion blur, smoke", name="Giant Thrower", fig="rpg_CYCLOP", scale=0.9, hp=50, defense=12, attacks=[
+        ("Hurl Rubble", 5, "2d6+2", "range 10"),
+        ("Hurl Cart Wheel", None, "2d8", "a line 6 long, Agility DC 13 for half"),
+        ("Club Smash", 6, "2d8+2", "melee, reach 2"),
     ], notes="Hangs back and throws whatever the street offers. Moves 8."),
     "giant_eye": dict(shield=True, name="Giant", fig="rpg_CYCLOP", hp=55, defense=12, attacks=[
-        ("Club smash", 6, "2d8+2", "melee, reach 2"),
+        ("Club Smash", 6, "2d8+2", "melee, reach 2"),
         ("Kick", 6, "1d10+2", "melee, target flies 3 squares and falls prone"),
     ], notes="WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn."),
-    "giant_troll": dict(portrait="a towering scarred hill giant chieftain in iron-studded leather, heavy chains wrapped around its fists, cruel grin, burning town behind", boss=True, name="Giant chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
+    "giant_troll": dict(portrait="a towering scarred hill giant chieftain in iron-studded leather, heavy chains wrapped around its fists, cruel grin, burning town behind", boss=True, name="Giant Chainmaster", fig="rpg_CYCLOP", scale=1.2, move=6, base=(0.2, 0.45, 0.15), hp=65, defense=11,
                         attacks=[
         ("Fist", 6, "2d6+4", "melee, reach 2"),
-        ("Crack the chains", None, None, "every thrall moves 3 and makes a free Rusty knife attack"),
+        ("Crack the Chains", None, None, "every thrall moves 3 and makes a free Rusty Knife attack"),
         ("Reel in", 6, None, "range 6: target is dragged next to him and held, Might DC 14 to break free"),
     ], notes="Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow "
              "instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6."),
-    "thrall": dict(portrait="a gaunt frightened man in rags with an iron collar and a chain leash, holding a rusty knife, dirty face, smoke", name="Leashed thrall", fig="rpg_GHOUL", hp=8, defense=11, attacks=[
-        ("Rusty knife", 3, "1d6", "melee"),
+    "thrall": dict(portrait="a gaunt frightened man in rags with an iron collar and a chain leash, holding a rusty knife, dirty face, smoke", name="Leashed Thrall", fig="rpg_GHOUL", hp=8, defense=11, attacks=[
+        ("Rusty Knife", 3, "1d6", "melee"),
     ], notes="Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off."),
-    "street_kid": dict(portrait="a scrappy grinning street urchin boy in a patched hood holding a small knife, sooty face, dark alley", name="Street kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
+    "street_kid": dict(portrait="a scrappy grinning street urchin boy in a patched hood holding a small knife, sooty face, dark alley", name="Street Kid", fig="rpg_KOBOLD", hp=5, defense=12, attacks=[
         ("Pickpocket", 6, None, "steals 1 gold if it beats the target's Defense"),
     ], notes="Works for the Bandit Baron."),
     "refugee": dict(name="Refugee", bundles=[COMMONERS[i] for i in (0, 4, 1, 8, 5, 2, 9, 6, 7)], hp=6, defense=10,
                     attacks=[], notes="Hungry and scared."),
-    "merchant": dict(notable=True, name="Old Pell (merchant)", bundles=[COMMONERS[3]], hp=8, defense=10, attacks=[],
+    "merchant": dict(notable=True, name="Old Pell (Merchant)", bundles=[COMMONERS[3]], hp=8, defense=10, attacks=[],
                      notes="Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. "
                            "Out of food. Knows the Bandit Baron's men buy his best wine every night."),
-    "noble": dict(notable=True, name="Lady Oriska (noble)", fig="rpg_MAGE", hp=10, defense=12, attacks=[],
+    "noble": dict(notable=True, name="Lady Oriska (Noble)", fig="rpg_MAGE", hp=10, defense=12, attacks=[],
                   notes="Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food."),
     "hunter": dict(portrait="a rough proud woodland hunter with a longbow and a fur cloak, weathered face, torchlit sewer camp", name="Hunter", fig="rpg_RANGER", hp=14, defense=13, attacks=[
-        ("Short bow", 4, "1d8", "range 10"),
+        ("Short Bow", 4, "1d8", "range 10"),
     ], notes="Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. "
              "Trade food for their Wolf-tooth Charm."),
-    "carcass": dict(name="Giant rat carcass", fig="rpg_RAT", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
+    "carcass": dict(name="Giant Rat Carcass", fig="rpg_RAT", hp=1, defense=1, attacks=[], notes="Food.", dead=True),
     "rat_count": dict(portrait="a sly grinning bandit baron in a faded velvet coat, rat-crest gold signet ring with a green gem, candlelit gambling den", notable=True, name="Vasko, the Bandit Baron", fig="rpg_THIEF", hp=35, defense=13, attacks=[
         ("Rapier", 5, "1d8+2", "melee"),
-        ("Baron's Bones: roll 3d6", None, "3d6", "dice game roll"),
-        ("Baron's Bones: reroll 1 die", None, "1d6", "his free reroll each round (ring or rules)"),
-        ("Lucky Ring reroll", None, "1d6", "extra reroll from the ring, once per round"),
+        ("Baron's Bones: Roll 3d6", None, "3d6", "dice game roll"),
+        ("Baron's Bones: Reroll 1 Die", None, "1d6", "his free reroll each round (ring or rules)"),
+        ("Lucky Ring Reroll", None, "1d6", "extra reroll from the ring, once per round"),
     ], notes="Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks. Fights to the end, no surrender."),
-    "guard": dict(portrait="a big brutish bandit bodyguard with a broken nose, spiked cudgel and leather armour, candlelit cellar", name="Baron's bruiser", fig="rpg_ORC", hp=30, defense=14, attacks=[
+    "guard": dict(portrait="a big brutish bandit bodyguard with a broken nose, spiked cudgel and leather armour, candlelit cellar", name="Baron's Bruiser", fig="rpg_ORC", hp=30, defense=14, attacks=[
         ("Axe", 5, "1d10+3", "melee"),
     ], notes="Two of them. Loyal while Vasko is winning."),
     "log_giant": dict(name="Giant", fig="rpg_CYCLOP", hp=70, defense=12, attacks=[
-        ("Log throw", None, "3d6", "2x2 area, Agility DC 14 for half; opening move"),
-        ("Club smash", 6, "2d8+2", "melee, reach 2"),
+        ("Log Throw", None, "3d6", "2x2 area, Agility DC 14 for half; opening move"),
+        ("Club Smash", 6, "2d8+2", "melee, reach 2"),
         ("Roar", None, None, "all heroes within 6: Wits DC 12 or lose next move"),
     ], notes="Leader of the ambush. Wicker shield: ranged -5."),
-    "dead_thug": dict(name="Trampled guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
+    "dead_thug": dict(name="Trampled Guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[],
                       notes="Thieves' guild. Search: 3 gold, a guild token, cart keys.", dead=True),
-    "dying_giant": dict(portrait="a wounded old hill giantess slumped against cave rock, grey braids, tired sad eyes, dim firelight", name="Hrothga, dying giantess", fig="rpg_CYCLOP", scale=0.85, move=0, notable=True,
+    "dying_giant": dict(portrait="a wounded old hill giantess slumped against cave rock, grey braids, tired sad eyes, dim firelight", name="Hrothga, Dying Giantess", fig="rpg_CYCLOP", scale=0.85, move=0, notable=True,
                         hp=6, defense=8, attacks=[
-        ("Feeble swipe", 3, "1d6", "only if attacked"),
+        ("Feeble Swipe", 3, "1d6", "only if attacked"),
     ], notes="Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes."),
-    "dead_human": dict(name="Fallen guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
+    "dead_human": dict(name="Fallen Guildsman", fig="rpg_THIEF", hp=1, defense=1, attacks=[], notes="Died fighting.",
                        dead=True),
     "princess": dict(portrait="a wounded young princess sorceress with a cracked moonstone staff, pale, torn royal robes, determined eyes, dark cave", notable=True, name="Princess Isolde", fig="rpg_MAGE", hp=20, defense=12, attacks=[
         ("Moonfire", 6, "2d6", "range 10 (once she's healed)"),
     ], notes="Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.",
         dead=True, start_hp=4),
-    "giant_rat": dict(portrait="a huge mangy giant rat with red eyes and yellow teeth snarling in a dark tunnel", name="Giant rat", fig="rpg_RAT", hp=6, defense=12, attacks=[
+    "giant_rat": dict(portrait="a huge mangy giant rat with red eyes and yellow teeth snarling in a dark tunnel", name="Giant Rat", fig="rpg_RAT", hp=6, defense=12, attacks=[
         ("Bite", 4, "1d6", "melee"),
     ], notes="Only attacks if the bell trap rings or it's cornered."),
 }
@@ -549,9 +549,9 @@ LOOT = [   # (weight, [(text, what turns up on the table), ...]: one of the vari
     (15, [("{gold} gold.", "gold")]),
     (30, FOOD + [("A torch.", "Torch"), ("A coil of rope.", "Rope"),
                  ("A flask of lamp oil (thrown: 1d6 fire, once).", "Lamp oil")]),   # supplies
-    (1, [("A HEALING DRAUGHT!", "Healing Draught")]),
-    (1, [("A SMOKE EGG!", "Smoke Egg")]),
-    (1, [("A POISON FLASK!", "Poison Flask")]),
+    (1, [("A Healing Draught!", "Healing Draught")]),
+    (1, [("A Smoke Egg!", "Smoke Egg")]),
+    (1, [("A Poison Flask!", "Poison Flask")]),
 ]
 
 ITEMS = [

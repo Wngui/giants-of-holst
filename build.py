@@ -59,7 +59,7 @@ def make_card(hero, i):
     im.paste(art, (20, 82))
     d.rectangle((20, 82, 480, 465), outline=col, width=3)
     wrap(d, (32, 482), text, 24, 34)
-    d.text((250, 668), "once per rest", font=font(18), fill=(110, 90, 60), anchor="mm")
+    d.text((250, 668), "Once per rest", font=font(18), fill=(110, 90, 60), anchor="mm")
     return im
 
 
@@ -509,13 +509,13 @@ def scene_data(s, base, textures):
         # the house's wonky dice for the players: lopsided and stained, hidden until the GM reveals them
         wonky = [((1.6, 1.0, 1.2), (0.78, 0.7, 0.45)), ((1.0, 1.5, 0.9), (0.55, 0.62, 0.38)), ((0.6, 0.6, 0.6), (0.7, 0.4, 0.3))]   # the third: just small, not squashed
         spawns += [obj("Die_6", tf(ry=50.0 * i), GUID=guid("den", "wonky", i), Tags=["scene", "hidden", "manual"],
-                       Nickname="Wonky stained dice", Description="Lopsided, chipped and sticky. The house dice, for guests.",
+                       Nickname="Wonky Stained Dice", Description="Lopsided, chipped and sticky. The house dice, for guests.",
                        ColorDiffuse=dict(zip("rgb", rgb)),
                        grid={"x": -1.6, "z": -0.6 + 0.6 * i, "k": "fig", "s": list(sc), "lift": 4})
                    for i, (sc, rgb) in enumerate(wonky)]
     if s["key"] == "sewer":   # loot: the loaded gold die on Old Pell's barrel, hidden until the GM reveals it
         spawns.append(obj("Die_6", tf(ry=15.0), GUID=guid("sewer", "loaded"), Tags=["scene", "hidden", "manual"],
-                          Nickname="Loaded gold die", Description="Heavy for its size. It always lands on 6.",
+                          Nickname="Loaded Gold Die", Description="Heavy for its size. It always lands on 6.",
                           ColorDiffuse={"r": 0.85, "g": 0.65, "b": 0.15}, LuaScript=LOADED_LUA,
                           grid={"x": 7.6, "z": 4.6, "k": "fig", "s": [1.0, 1.0, 1.0], "lift": 2.5}))
     _, rgb, bright = SKIES[s["key"]]
@@ -590,7 +590,7 @@ def gm_objects(base):
                  grid={"x": X0 + 5.2, "z": 0, "k": "model", "lift": -0.02}),            # a hair low: no flicker at the seam
            model("gm_screen", GUID=guid("gm", "screen"), Nickname="GM screen", Locked=True, Tags=["gmscreen"],
                  grid={"x": X0 + 1.0, "z": 0, "k": "model", "lift": 0}),
-           model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice tray", Locked=True, convex=False,
+           model("dice_tray", GUID=guid("gm", "tray"), Nickname="Dice Tray", Locked=True, convex=False,
                  Tags=["gm", "gmconsole"], grid={"x": X0 + TRAY[0], "z": TRAY[1], "k": "model", "lift": 0}),
            model("gm_board", GUID=guid("gm", "board"), Nickname="GM controls", Locked=True, **gm,
                  grid={"x": X0 + PANEL_X0 + ROW * (len(SCENES) + 4) / 2, "z": PANEL_Z, "k": "model", "lift": 0}),
@@ -609,12 +609,12 @@ def gm_objects(base):
     for n, ((i, name, text), (x, z)) in enumerate(zip(cards, spots)):
         out.append(obj("Card", tf(ry=90.0), CardID=900 + i, Nickname=name, Description=text, CustomDeck={"9": deck},
                        GUID=guid("gm", "item", n), Hands=True, **gm, grid={"x": x, "z": z, "k": "tile", "s": [1, 1, 1]}))
-    out.append(model("sack", GUID=guid("gm", "lootbag"), Nickname="Loot bag", Locked=True, Tags=["gm", "lootbag"],
+    out.append(model("sack", GUID=guid("gm", "lootbag"), Nickname="Loot Bag", Locked=True, Tags=["gm", "lootbag"],
                      Description="Draw loot: a random find from the search pool (never nothing), dropped here on your desk. "
                                  "Drag it off the desk to hand it out.",
                      grid={"x": X0 + 7.8, "z": 4.4, "k": "model", "s": [0.8, 0.8, 0.8], "lift": 0}))
-    coin = model("coin", Nickname="Gold coin", Hands=True)
-    out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
+    coin = model("coin", Nickname="Gold Coin", Hands=True)
+    out.append(obj("Infinite_Bag", tf(), GUID=guid("gm", "gold"), Nickname="Gold Pouch", ColorDiffuse={"r": 0.45, "g": 0.3, "b": 0.18},
                    Description="Endless gold. Hover and press a number: that many coins go to your hand.",
                    Tags=["gm", "goldpouch"], LuaScript=POUCH_LUA,
                    ContainedObjects=[coin], grid={"x": X0 + 7.8, "z": 6.9, "k": "tile", "s": [1.8, 1.8, 1.8], "inner": 1.0}))
@@ -737,7 +737,7 @@ def main(base):
                 scorch=f"{base}props/scorch.png",
                 loot_models={k: obj("Custom_Model", tf(), Tags=["loot"], CustomMesh=mesh(base, m), s=sc)
                              for k, (m, sc) in ({"default": ("sack", 0.5)} | {n: ("ration", 1.2) for _, n in FOOD}).items()},
-                shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker shield", Tags=["scene"], Locked=True,
+                shield=dict(scale=0.6, obj=obj("Custom_Model", tf(), Nickname="Wicker Shield", Tags=["scene"], Locked=True,
                                                Description="Ranged attacks at the giant: -5 unless the shield is burned.",
                                                CustomMesh=mesh(base, "wicker_shield", ColliderURL=f"{base}props/nocollide.obj"))),
                 scenes=[scene_data(s, base, textures) for s in SCENES],

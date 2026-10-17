@@ -852,7 +852,7 @@ function lootBag(o)
         if color ~= "Black" then return end
         local item, text, gold = rollLoot(true)
         local q = o.getPosition()
-        broadcastToColor("Loot bag: " .. text, "Black", { 0.94, 0.85, 0.63 })
+        broadcastToColor("Loot Bag: " .. text, "Black", { 0.94, 0.85, 0.63 })
         dropLoot(item, text, gold, { x = q.x - SQ, z = q.z }, true)
     end
     o.createButton({ click_function = "drawLoot", function_owner = self, label = "Draw loot", position = { 0, 1.4, 0 },
@@ -876,7 +876,7 @@ function dropLoot(item, text, gold, at, gm)   -- gm: on the GM desk, hidden from
     end
     if item == "gold" then
         local coin
-        for _, g in ipairs(DATA.gm) do if g.Nickname == "Gold pouch" then coin = g.ContainedObjects[1] end end
+        for _, g in ipairs(DATA.gm) do if g.Nickname == "Gold Pouch" then coin = g.ContainedObjects[1] end end
         for n = 1, gold do spawn(coin, SQ, 1 + n * 0.3) end
         return
     end

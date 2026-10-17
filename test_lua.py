@@ -285,7 +285,7 @@ if os.environ.get("DUMP"):
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 giants = [o for o in objs if o.data.Name == "rpg_CYCLOP"]
-kids = [o for o in objs if o.data.Nickname == "Street kid"]
+kids = [o for o in objs if o.data.Nickname == "Street Kid"]
 gm_bar = 'visibility="Black"><ProgressBar'
 assert giants and kids and all(o.invisible and o.tint.a < 1 and not o.lit and gm_bar in o.xml for o in giants + kids)
 hero = list(g.getObjectsWithTag("fig_Red").values())[0]
@@ -423,7 +423,7 @@ assert len(isl) == 1 and isl[0].invisible and isl[0].hasTag("manual")
 c.revealAll(); assert isl[0].invisible
 # sewer: the loaded gold die lies hidden on Old Pell's barrel
 c.setScene(3)
-gold = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Loaded gold die"]
+gold = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Loaded Gold Die"]
 assert len(gold) == 1 and gold[0].invisible and gold[0].hasTag("manual")
 gold[0].env.onPickUp("Red")                       # a player takes it: party loot, survives scene changes, never piled
 gold[0].pos = lua.table_from([1, TOP, 1])
@@ -433,8 +433,8 @@ assert not gold[0].isDestroyed() and gold[0].hasTag("loot") and gold[0].pos[1] =
 # every brazier carries a flame
 c.setScene(4)
 objs = list(g.getObjectsWithTag("scene").values())
-assert sum(o.data.Nickname == "Street kid" for o in objs) == 5
-wonky = [o for o in objs if o.data.Nickname == "Wonky stained dice"]
+assert sum(o.data.Nickname == "Street Kid" for o in objs) == 5
+wonky = [o for o in objs if o.data.Nickname == "Wonky Stained Dice"]
 assert len(wonky) == 3 and all(o.invisible and o.hasTag("manual") for o in wonky)
 c.revealAll(); assert all(o.invisible for o in wonky)        # only the GM's toggle shows them
 c.setScene(5)
@@ -471,7 +471,7 @@ g.spawned = None; c.onObjectDrop("Purple", other); assert fx() is None          
 other.zones = None
 g.spawned = None; c.onObjectDrop("Purple", other); assert fx() == data_fx["swirl_purple"]["url"]
 # scene change: loose things on the map go to a pile on the east border; hero figures and scenery stay
-coin = g.makeObj(lua.table_from({"Name": "Custom_Model", "Nickname": "Gold coin", "Transform": lua.table_from(
+coin = g.makeObj(lua.table_from({"Name": "Custom_Model", "Nickname": "Gold Coin", "Transform": lua.table_from(
     {"posX": 1, "posY": TOP, "posZ": 1, "scaleX": 1, "scaleY": 1, "scaleZ": 1})}))
 c.setScene(3)
 assert coin.pos and coin.pos[1] > ART[0] and abs(coin.pos[3]) < 3 * SQ
@@ -500,7 +500,7 @@ assert all(abs(c.Transform.scaleX - item.data.Transform.scaleX) < 1e-9 for o in 
 c.setScene(2)
 objs = list(g.getObjectsWithTag("scene").values())
 boss = [o for o in objs if o.hasTag("boss")]
-assert len(boss) == 1 and boss[0].data.Nickname == "Giant chainmaster"
+assert len(boss) == 1 and boss[0].data.Nickname == "Giant Chainmaster"
 other = next(o for o in objs if o.hasTag("npc") and not o.hasTag("boss"))
 other.tags["hidden"] = True; c.reveal(other); assert len(g.looked) == 0
 boss[0].tags["hidden"] = True; c.reveal(boss[0])
@@ -528,7 +528,7 @@ assert any(o.lit for o in g.getObjects().values())
 c.endFight(); assert g.UIattr["turns.active"] == "false" and g.MusicPlayer.url == scenes[1]["music"]["url"]
 c.setScene(2)
 # the club and one-eyed giants carry a wicker shield on their left, hidden while they are
-sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield"]
+sh = [o for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker Shield"]
 holders = [o for o in g.getObjectsWithTag("shield").values()]
 assert len(sh) == len(holders) == 2 and all(o.locked or o.data.Locked for o in sh)
 assert any(abs(o.pos[1] - (h.getPosition().x - 0.72)) < 1e-6 and abs(o.pos[3] - (h.getPosition().z + 0.9)) < 1e-6
@@ -537,7 +537,7 @@ assert all(o.data.CustomMesh.ColliderURL.endswith("props/nocollide.obj") for o i
 holders[0].menus["Shield burned"]("Red"); assert all(not o.isDestroyed() for o in sh)
 holders[0].menus["Shield burned"]("Black"); assert sum(o.isDestroyed() for o in sh) == 1
 c.setScene(6)
-assert all(o.invisible for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker shield")
+assert all(o.invisible for o in g.getObjectsWithTag("scene").values() if o.data.Nickname == "Wicker Shield")
 # a giant grabs the nearest hero, throws them (on the map, 2-12 damage) or lets go; players can't
 c.setScene(2)
 giants = [o for o in g.getObjectsWithTag("giant").values()]
@@ -590,7 +590,7 @@ def drop(item, text, gold):   # just what this drop spawned (the search above ma
     c.dropLoot(item, text, gold, lua.table_from({"x": 0, "z": 0}))
     return [o for o in loot() if o.data.GUID not in old]
 new = drop("gold", "3 gold.", 3)
-assert len(new) == 3 and all(o.data.Nickname == "Gold coin" and not o.data.Locked for o in new)
+assert len(new) == 3 and all(o.data.Nickname == "Gold Coin" and not o.data.Locked for o in new)
 card = drop("Healing Draught", "a HEALING DRAUGHT!", 0)
 assert len(card) == 1 and card[0].data.Name == "Card" and not card[0].hasTag("gm")
 torch = drop("Torch", "a torch.", 0)
@@ -641,8 +641,8 @@ end
 npc.execute(giant["LuaScript"])
 ng.onLoad(giant["LuaScriptState"])
 assert "ProgressBar" in ng.xml and "<Button" not in ng.xml              # attacks live in the right-click menu
-ng.menus["Club smash"]("Red"); assert ng.swung == 0                    # players can't
-ng.menus["Club smash"]("Black"); assert ng.swung == 1 and "Club smash" in list(ng.log.values())[-1]
+ng.menus["Club Smash"]("Red"); assert ng.swung == 0                    # players can't
+ng.menus["Club Smash"]("Black"); assert ng.swung == 1 and "Club Smash" in list(ng.log.values())[-1]
 npc.execute("log, swung = {}, 0")
 assert 'rotation="90 -90 90"' in ng.xml            # upright bar facing the way the figure faces
 assert 'active="false"' in ng.xml and "InputField" not in ng.xml   # bars hidden out of battle, no damage box
@@ -660,7 +660,7 @@ for junk in ("abc", "", " ", "--3"):                                # ignored, n
 ng.damage("Black", "+4")
 assert ng.attrs["hp.text"] == "6/60"
 desc = giant["Description"]
-assert desc.startswith("Def 12   Move 8   HP 60") and "Club smash: +6, 2d8+2, melee, reach 2" in desc
+assert desc.startswith("Def 12   Move 8   HP 60") and "Club Smash: +6, 2d8+2, melee, reach 2" in desc
 for _ in range(200):
     ng.attack(npc.table_from({"color": "Black"}), None, "a1")
 msgs = list(ng.log.values())

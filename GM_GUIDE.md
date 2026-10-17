@@ -20,7 +20,7 @@
 
 ```
 D20 LITE - HOW TO PLAY
-Roll: d20 + your stat. Meet or beat the number. Attacks must beat the enemy's Defense.
+Roll: roll a d20 and add your stat. Meet or beat the number. Attacks must beat the enemy's Defense.
   Natural 20: double damage dice. Natural 1: something goes wrong.
 Difficulty: easy 10, hard 14, heroic 18.
 Your turn: move 6 squares, then take 1 action: attack, play a card, use an item or try something.
@@ -30,14 +30,14 @@ Items: the bottom line says if it costs your action or is free, and if it is use
 Stats: Might: force, climb, lift.
   Agility: sneak, dodge, pick locks.
   Wits: notice, know, talk.
-Initiative: roll your d20 when the GM asks. Its face + Agility sets your place. The strip on top shows whose turn it is.
+Initiative: roll your d20 when the GM asks. Your Agility is added for you. The strip on top shows whose turn it is.
 Search: right-click a chest, barrel, crate or sack next to your hero, then Search. Once each.
 ```
 
 ## Heroes
 
 **Wren the Thief** (Red) HP 18, Def 13, Might +0, Agility +3, Wits +2
-- Card *Shadowstep*: Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2 d20, keep the best.
+- Card *Shadowstep*: Instead of your move: move up to 6 squares unseen. Your next attack this turn rolls 2d20, keep the best.
 - Card *Backstab*: Free action, after you hit: add +2d6 damage.
 - Card *Nimble Fingers*: Auto-succeed one lockpick, pickpocket or trap-disarm check.
 - Card *Smoke Bomb*: Everyone in a 3x3 area is hidden until they act. Enemies can't target allies inside.
@@ -70,25 +70,25 @@ Search: right-click a chest, barrel, crate or sack next to your hero, then Searc
 
 ## NPCs
 
-- **Giant** HP 60, Def 12. Club smash (+6, 2d8+2, melee, reach 2); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
-- **Giant thrower** HP 50, Def 12. Hurl rubble (+5, 2d6+2, range 10); Hurl cart wheel (no roll, 2d8, a line 6 long, Agility DC 13 for half); Club smash (+6, 2d8+2, melee, reach 2). Hangs back and throws whatever the street offers. Moves 8.
-- **Giant** HP 55, Def 12. Club smash (+6, 2d8+2, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
-- **Giant chainmaster** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Crack the chains (no roll, -, every thrall moves 3 and makes a free Rusty knife attack); Reel in (+6, -, range 6: target is dragged next to him and held, Might DC 14 to break free). Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6.
-- **Leashed thrall** HP 8, Def 11. Rusty knife (+3, 1d6, melee). Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off.
-- **Street kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Works for the Bandit Baron.
+- **Giant** HP 60, Def 12. Club Smash (+6, 2d8+2, melee, reach 2); Stomp (no roll, 1d8, all adjacent: Agility DC 13 or take it and fall prone). WICKER SHIELD: ranged attacks against it get -5 unless the shield is burned. Moves 8.
+- **Giant Thrower** HP 50, Def 12. Hurl Rubble (+5, 2d6+2, range 10); Hurl Cart Wheel (no roll, 2d8, a line 6 long, Agility DC 13 for half); Club Smash (+6, 2d8+2, melee, reach 2). Hangs back and throws whatever the street offers. Moves 8.
+- **Giant** HP 55, Def 12. Club Smash (+6, 2d8+2, melee, reach 2); Kick (+6, 1d10+2, melee, target flies 3 squares and falls prone). WICKER SHIELD: ranged -5. One eye: a blinding trick (sand, light) makes it miss next turn.
+- **Giant Chainmaster** HP 65, Def 11. Fist (+6, 2d6+4, melee, reach 2); Crack the Chains (no roll, -, every thrall moves 3 and makes a free Rusty Knife attack); Reel in (+6, -, range 6: target is dragged next to him and held, Might DC 14 to break free). Holds all the thralls' chains. THRALL SHIELD: when he is hit, an adjacent thrall can take the blow instead. Kill or drop him and the chains go slack: every thrall flees. Slow, moves 6.
+- **Leashed Thrall** HP 8, Def 11. Rusty Knife (+3, 1d6, melee). Captured looter on the Chainmaster's chain. Cutting the leash (Agility DC 12) and the thrall runs off.
+- **Street Kid** HP 5, Def 12. Pickpocket (+6, -, steals 1 gold if it beats the target's Defense). Works for the Bandit Baron.
 - **Refugee** HP 6, Def 10. . Hungry and scared.
-- **Old Pell (merchant)** HP 8, Def 10. . Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. Out of food. Knows the Bandit Baron's men buy his best wine every night.
-- **Lady Oriska (noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
-- **Hunter** HP 14, Def 13. Short bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
-- **Giant rat carcass** HP 1, Def 1. . Food.
-- **Vasko, the Bandit Baron** HP 35, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: reroll 1 die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks. Fights to the end, no surrender.
-- **Baron's bruiser** HP 30, Def 14. Axe (+5, 1d10+3, melee). Two of them. Loyal while Vasko is winning.
-- **Giant** HP 70, Def 12. Log throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club smash (+6, 2d8+2, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
-- **Trampled guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
-- **Hrothga, dying giantess** HP 6, Def 8. Feeble swipe (+3, 1d6, only if attacked). Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes.
-- **Fallen guildsman** HP 1, Def 1. . Died fighting.
+- **Old Pell (Merchant)** HP 8, Def 10. . Sells from his pack and the barrels behind him: rope, torches, lamp oil, chalk, 1 gold each. Out of food. Knows the Bandit Baron's men buy his best wine every night.
+- **Lady Oriska (Noble)** HP 10, Def 12. . Pays 5 gold per carcass. Has a fat purse and a Healing Draught she'll trade for food.
+- **Hunter** HP 14, Def 13. Short Bow (+4, 1d8, range 10). Rough, proud. They hunt the woods outside the walls and bring the game down here to sell. Trade food for their Wolf-tooth Charm.
+- **Giant Rat Carcass** HP 1, Def 1. . Food.
+- **Vasko, the Bandit Baron** HP 35, Def 13. Rapier (+5, 1d8+2, melee); Baron's Bones: Roll 3d6 (no roll, 3d6, dice game roll); Baron's Bones: Reroll 1 Die (no roll, 1d6, his free reroll each round (ring or rules)); Lucky Ring Reroll (no roll, 1d6, extra reroll from the ring, once per round). Wears THE BARON'S LUCKY RING (see notes). Laughs a lot, never blinks. Fights to the end, no surrender.
+- **Baron's Bruiser** HP 30, Def 14. Axe (+5, 1d10+3, melee). Two of them. Loyal while Vasko is winning.
+- **Giant** HP 70, Def 12. Log Throw (no roll, 3d6, 2x2 area, Agility DC 14 for half; opening move); Club Smash (+6, 2d8+2, melee, reach 2); Roar (no roll, -, all heroes within 6: Wits DC 12 or lose next move). Leader of the ambush. Wicker shield: ranged -5.
+- **Trampled Guildsman** HP 1, Def 1. . Thieves' guild. Search: 3 gold, a guild token, cart keys.
+- **Hrothga, Dying Giantess** HP 6, Def 8. Feeble Swipe (+3, 1d6, only if attacked). Speaks only Giant (Speak Giant, or Brannoc's few words). See scene notes.
+- **Fallen Guildsman** HP 1, Def 1. . Died fighting.
 - **Princess Isolde** HP 20, Def 12. Moonfire (+6, 2d6, range 10 (once she's healed)). Wounded (lying down, 4 HP). Heal her with the damage box (e.g. -8) and she stands up.
-- **Giant rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
+- **Giant Rat** HP 6, Def 12. Bite (+4, 1d6, melee). Only attacks if the bell trap rings or it's cornered.
 
 ## The Giants of Holst
 
