@@ -102,7 +102,7 @@ HEROES = [
          blurb="Royal court wizard. Fragile, clever, and stubborn.",
          traits=["Arcane lore: recognises magic items, runes and spells on sight.",
                  "Old friends: tutored the young princess in magic; she trusts him."],
-         background="Royal court wizard. Fragile, clever and stubborn. Tutor to the princess, and not about to lose her.",
+         background="Court wizard to three kings of Aldmere, and suspiciously no older than when he started. Tutor to the princess and not about to lose a talented student.",
          gear="Crooked staff, spellbook, star-embroidered robe, a pipe.",
          portrait="an old bearded wizard with a crooked staff and star-embroidered robe, arcane glow",
          cards=[
