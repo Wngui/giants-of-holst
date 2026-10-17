@@ -30,7 +30,7 @@ Items: the bottom line says if it costs your action or is free, and if it is use
 Stats: Might: force, climb, lift.
   Agility: sneak, dodge, pick locks.
   Wits: notice, know, talk.
-Initiative: roll your d20 when the GM asks. Your Agility is added for you. The strip on top shows whose turn it is.
+Initiative: roll your d20 when the GM asks. Its face + Agility sets your place. The strip on top shows whose turn it is.
 Search: right-click a chest, barrel, crate or sack next to your hero, then Search. Once each.
 ```
 
