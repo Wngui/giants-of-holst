@@ -409,6 +409,7 @@ assert g.getObjectFromGUID(CTL).marker == "original"
 # ---- loading a save (or Ctrl+Z, which reloads the table): buttons and menus come back, turn order kept
 c.setScene(3)
 c.initiative(); c.nextTurn()
+g.MusicPlayer.url, g.Grid.show_lines = None, False   # TTS may not bring them back
 names = [g.UIattr["tn%d.value" % k] for k in range(1, 4)]
 state = c.onSave()
 for o in list(g.objects.values()):
@@ -425,6 +426,7 @@ assert list(g.getObjectsWithTag("gmconsole").values())[0].buttons
 assert [g.UIattr["tn%d.value" % k] for k in range(1, 4)] == names and g.UIattr["ts1.color"] == "#d9a633"
 assert all(o.menus and "Search" in o.menus for o in g.getObjectsWithTag("search").values())
 assert all(o.invisible for o in g.getObjectsWithTag("hidden").values())
+assert g.MusicPlayer.url == c.DATA.battle.url and g.Grid.show_lines is True   # battle music and grid back on
 c.endFight()
 
 # ---- new version pushed: controller replaced, scene kept, kits respawned, Red re-dealt, no duplicates

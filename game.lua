@@ -6,6 +6,7 @@ VERSION = DATA.version
 
 local scene, setupDone, hp = 1, {}, {}
 local order, turn, searched = {}, 0, {}   -- initiative strip; containers already searched (by GUID)
+local music, fighting = nil, false   -- the track playing; battle mode (grid, NPC bars, battle music)
 local tints = {}   -- hidden objects' own tint (hide() makes them see-through for the GM)
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
@@ -25,6 +26,7 @@ function start(s)
     measure()
     if s.version == VERSION then
         scene, setupDone, hp, turn, searched = s.scene, s.setupDone, s.hp or {}, s.turn or 0, s.searched or {}
+        music, fighting = s.music, s.fighting or false
         Wait.frames(function() restore(s.order or {}) end, 10)   -- once every object has loaded
     else
         install(s.scene or 1)
@@ -43,7 +45,7 @@ function onSave()
         saved[#saved + 1] = { name = e.name, roll = e.roll, hero = e.hero, art = e.art, guids = guids }
     end
     return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp, order = saved, turn = turn,
-                         searched = searched })
+                         searched = searched, music = music, fighting = fighting })
 end
 
 -- Buttons, right-click menus and script visibility aren't kept in a save. Loading one (Ctrl+Z reloads the table too)
@@ -60,6 +62,8 @@ function restore(saved)
             o.setInvisibleTo(PLAYERS)
         end
     end
+    if music then play(music) end
+    battle(fighting)
     order = {}
     for _, e in ipairs(saved) do
         e.objs = {}
@@ -630,6 +634,7 @@ end
 
 -- ---------------------------------------------------------------- music
 function play(track)
+    music = track
     MusicPlayer.setCurrentAudioclip({ url = track.url, title = track.title })
     Wait.condition(function() MusicPlayer.play() end, function() return MusicPlayer.player_status == "Ready" end, 20)
 end
@@ -639,6 +644,7 @@ function musicBattle() play(DATA.battle); battle(true) end
 
 -- battle mode: grid on the map and NPC health bars on
 function battle(on)
+    fighting = on
     showGrid(on)
     for _, o in ipairs(getObjectsWithTag("npc")) do o.call("setBattle", { on = on }) end
 end
