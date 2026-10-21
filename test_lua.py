@@ -211,7 +211,8 @@ c = ctl.env
 assert 'onClick="%s/pick"' % CTL in g.UIxml
 assert len(list(g.tabs.values())) == 1 + len(c.DATA.scenes)
 count = lambda tag: len(list(g.getObjectsWithTag(tag).values()))
-assert count("scene") == 0 and count("kit") == 20, (count("scene"), count("kit"))   # title: no props, 4 hero kits
+assert count("scene") == 0 and count("kit") == 36, (count("scene"), count("kit"))   # title: no props, 4 hero kits (5 + 4 extra dice each)
+assert sorted(o.data.Name for o in g.getObjectsWithTag("dice_Red").values()) == ["Die_20", "Die_4", "Die_6", "Die_6"]   # Wren: 2d20, 2d6, 1d4
 assert g.tableURL.endswith("table_title.jpg") and g.tableName == "Table_Custom"
 W, D, TOP = 70, 41, 1.0
 L = to_py(c.DATA.layout)
@@ -435,7 +436,7 @@ g.loader.onLoad("")
 ctl2 = g.getObjectFromGUID(CTL)
 assert ctl2.marker is None and ctl2.getVar("VERSION") == "newer"
 assert g.UIattr["sceneTitle.text"] == scenes[2]["title"]
-assert count("kit") == 25 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 20 - 1 + 6
+assert count("kit") == 41 and hand("Red") == 6 and count("card_Red") == 6, (count("kit"), hand("Red"))  # Red deck dealt: 36 - 1 + 6
 assert len(g.handzones) == 5   # the GM's spawned hand zone is reused, not duplicated
 assert len(list(g.tabs.values())) == 1 + len(scenes)
 

@@ -172,6 +172,9 @@ function placed(d)
         local spots = { sheet = { 0, zs, 0.2 }, deck = { -4 * k, zr, 1 }, hp = { 0, zr, 0.3 },
                         d20 = { 4 * k, zr, 1 } }
         local s = spots[g.role]
+        if g.role == "die" then   -- a row between the HP plaque and the sheet
+            s = { (g.i - (g.n - 1) / 2) * 0.8 * SQ, T.cz + c.sz * T.d * L.dice_z, 1 }
+        end
         p = { c.x + c.right * s[1], T.top + s[3], s[2] }
         t.rotY = c.ry
         if g.role == "deck" then                      -- same size as the GM's item cards (grid "tile" units: SQ / 2)
@@ -183,6 +186,7 @@ function placed(d)
         if g.role == "d20" then                       -- players' own die: big enough to grab and read
             t.scaleX, t.scaleY, t.scaleZ = 1.8, 1.8, 1.8
         end
+        if g.role == "die" then t.scaleX, t.scaleY, t.scaleZ = 1.3, 1.3, 1.3 end
         if g.role == "hp" then                        -- plaque 2.6 squares wide, turned to read from the seat
             t.scaleX, t.scaleY, t.scaleZ, t.rotY = SQ, SQ, SQ, c.ry + 180
         end
@@ -754,7 +758,9 @@ end
 -- a hero's d20 landing: natural 20 bursts, natural 1 fizzles
 local rolling = {}
 function onObjectRandomize(o, color)
-    if not (o.hasTag("kit") and o.type == "Dice") or rolling[o] then return end
+    local d20 = false
+    for _, c in ipairs(DATA.colors) do d20 = d20 or o.hasTag("d20_" .. c) end
+    if not d20 or rolling[o] then return end   -- the other dice: a 1 on a d6 is no fumble
     rolling[o] = true   -- shaking fires this again and again: one reaction per landing
     Wait.condition(function()
         rolling[o] = nil
@@ -788,7 +794,8 @@ function endFight() order, turn = {}, 0; drawTurns(); musicScene() end   -- back
 function drawTurns()
     table.sort(order, function(a, b)
         if a.roll ~= b.roll then return a.roll > b.roll end
-        return a.hero and not b.hero
+        if (a.hero or false) ~= (b.hero or false) then return a.hero or false end
+        return a.name < b.name   -- a fixed order for ties: the strip must not reshuffle when redrawn
     end)
     for i, e in ipairs(order) do
         for _, o in ipairs(e.objs) do

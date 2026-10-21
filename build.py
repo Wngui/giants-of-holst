@@ -1,7 +1,7 @@
 """Build the TTS save.  python build.py <asset base url>
 e.g. https://raw.githubusercontent.com/<user>/<repo>/<commit>/  -> writes art/out/*, Holst.json, GM_GUIDE.md"""
 import random
-import hashlib, json, math, subprocess, sys, textwrap
+import hashlib, json, math, re, subprocess, sys, textwrap
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 from content import HEROES, NPCS, SCENES, RULES, BATTLE_MUSIC, ITEMS, ITEM_USE, SKIES, LOOT, FOOD
@@ -27,7 +27,7 @@ TABLE_PX = (3400, 2000)     # custom rectangle table images are 17:10
 ART_FRAC = 0.64             # share of the table width the scene art covers; the wooden border holds the player kits
 # measured-at-load layout knobs, passed to game.lua (fractions of the table's measured width/depth)
 LAYOUT = {"cols": COLS, "rows": ROWS, "art_w": ART_FRAC, "surface": 1.0,
-          "kit_x": 0.41, "reveal": 7, "sheet_z": 0.30, "row_z": 0.12, "sheet_w": 0.16, "tile_unit": 2.0,
+          "kit_x": 0.41, "reveal": 7, "sheet_z": 0.30, "row_z": 0.12, "dice_z": 0.165, "sheet_w": 0.16, "tile_unit": 2.0,
           "gm_hand": 12.5}   # GM hand zone, squares past the table's east edge (beyond the GM table)
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSerif{}.ttf"
 RGB = {"Red": (150, 35, 35), "Blue": (35, 70, 150), "Green": (35, 115, 55), "Purple": (100, 45, 135)}
@@ -578,6 +578,12 @@ def hero_objects(h, n, base):
     sheet = tile(f"{base}art/out/sheet_{h['key']}.jpg", tf(), GUID=guid(c, "sheet"), Nickname=h["name"], Locked=False,
                  Tags=["kit", f"sheet_{c}"], grid={"role": "sheet", "color": c})
     sheet["CustomImage"]["ImageSecondaryURL"] = f"{base}art/out/rules_{h['key']}.jpg"   # flip: page 2
+    # the dice their attacks and cards roll ("2d6" -> two d6), besides the d20 they already have
+    need = {}
+    for k, s in re.findall(r"\b(\d*)d(\d+)\b", repr(h)):
+        need[int(s)] = max(need.get(int(s), 0), int(k or 1))
+    need[20] = need.get(20, 1) - 1
+    dice = [s for s in sorted(need) for _ in range(need[s])]
     return [
         obj(h["fig"], tf(), GUID=guid(c, "fig"), Nickname=h["name"], Tags=["kit", f"fig_{c}"],
             ColorDiffuse=dict(zip("rgb", [round(min(1, v / 255 * 1.4), 2) for v in RGB[c]])),   # base in seat colour
@@ -586,6 +592,8 @@ def hero_objects(h, n, base):
         obj("Custom_Model", tf(), GUID=guid(c, "hp"), Nickname=f"{h['name']} HP", Locked=False, Tags=["kit", f"hp_{c}"],
             CustomMesh=mesh(base, "hp_plaque"), grid={"role": "hp", "color": c, "max": h["hp"]}),
         obj("Die_20", tf(), GUID=guid(c, "d20"), Tags=["kit", f"d20_{c}"], ColorDiffuse=colour, grid={"role": "d20", "color": c}),
+        *[obj(f"Die_{s}", tf(), GUID=guid(c, "die", i), Tags=["kit", f"dice_{c}"], ColorDiffuse=colour,
+              grid={"role": "die", "color": c, "i": i, "n": len(dice)}) for i, s in enumerate(dice)],
         obj("Deck", tf(rz=180.0), GUID=guid(c, "deck"), Nickname=f"{h['name']} cards", DeckIDs=ids,
             CustomDeck={str(n + 1): cdeck}, ContainedObjects=cards, Tags=["kit", f"card_{c}"], Hands=True,
             grid={"role": "deck", "color": c}),
