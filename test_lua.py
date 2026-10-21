@@ -132,6 +132,7 @@ function makeObj(d)
   function o.highlightOff() o.lit = false end
   function o.getLuaScript() return d.LuaScript or "" end
   function o.getRotation() return {x = 0, y = d.Transform and d.Transform.rotY or 0, z = 0} end
+  function o.clearButtons() o.buttons = nil end
   function o.createButton(b) o.buttons = o.buttons or {}; o.buttons[#o.buttons + 1] = b end
   function o.editButton(e) for k, v in pairs(e) do if k ~= "index" then o.buttons[e.index + 1][k] = v end end end
   function o.getScale() local t = d.Transform or {} return {x = t.scaleX or 1, y = t.scaleY or 1, z = t.scaleZ or 1} end
@@ -168,6 +169,7 @@ function makeObj(d)
 end
 function spawnObjectData(p) local o = makeObj(p.data); spawned = p.data; if p.callback_function then p.callback_function(o) end; return o end
 function getObjectFromGUID(g) return objects[g] end
+function getAllObjects() local r = {} for _, o in pairs(objects) do r[#r+1] = o end return r end
 function getObjects() local r = {} for _, o in pairs(objects) do r[#r+1] = o end return r end
 function getObjectsWithTag(t) local r = {} for _, o in pairs(objects) do if o.hasTag(t) then r[#r+1] = o end end return r end
 hotkeys = {}
@@ -402,6 +404,27 @@ assert "HP back to full" in g.log[len(g.log)]
 ctl.marker = "original"
 g.loader.onLoad("")
 assert g.getObjectFromGUID(CTL).marker == "original"
+
+# ---- loading a save (or Ctrl+Z, which reloads the table): buttons and menus come back, turn order kept
+c.setScene(3)
+c.initiative(); c.nextTurn()
+names = [g.UIattr["tn%d.value" % k] for k in range(1, 4)]
+state = c.onSave()
+for o in list(g.objects.values()):
+    o.buttons, o.menus = None, None
+code = ctl.data.LuaScript
+ctl.destruct()
+g.UIattr = to_lua({})
+ctl = g.makeObj(to_lua({"Name": "BlockSquare", "GUID": CTL, "LuaScript": code, "LuaScriptState": state}))
+c = ctl.env
+for color in ("Red", "Blue", "Green", "Purple"):
+    shield = list(g.getObjectsWithTag("hp_" + color).values())[0]
+    assert len(list(shield.buttons.values())) == 3, color          # [-] HP [+], not doubled
+assert list(g.getObjectsWithTag("gmconsole").values())[0].buttons
+assert [g.UIattr["tn%d.value" % k] for k in range(1, 4)] == names and g.UIattr["ts1.color"] == "#d9a633"
+assert all(o.menus and "Search" in o.menus for o in g.getObjectsWithTag("search").values())
+assert all(o.invisible for o in g.getObjectsWithTag("hidden").values())
+c.endFight()
 
 # ---- new version pushed: controller replaced, scene kept, kits respawned, Red re-dealt, no duplicates
 c.setScene(3)

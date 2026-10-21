@@ -5,6 +5,8 @@ DATA = {} --@DATA@
 VERSION = DATA.version
 
 local scene, setupDone, hp = 1, {}, {}
+local order, turn, searched = {}, 0, {}   -- initiative strip; containers already searched (by GUID)
+local tints = {}   -- hidden objects' own tint (hide() makes them see-through for the GM)
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
 function onLoad(saved)
@@ -22,7 +24,8 @@ end
 function start(s)
     measure()
     if s.version == VERSION then
-        scene, setupDone, hp = s.scene, s.setupDone, s.hp or {}
+        scene, setupDone, hp, turn, searched = s.scene, s.setupDone, s.hp or {}, s.turn or 0, s.searched or {}
+        Wait.frames(function() restore(s.order or {}) end, 10)   -- once every object has loaded
     else
         install(s.scene or 1)
     end
@@ -33,7 +36,65 @@ function start(s)
 end
 
 function onSave()
-    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp })
+    local saved = {}
+    for _, e in ipairs(order) do
+        local guids = {}
+        for _, o in ipairs(e.objs) do if not o.isDestroyed() then guids[#guids + 1] = o.getGUID() end end
+        saved[#saved + 1] = { name = e.name, roll = e.roll, hero = e.hero, art = e.art, guids = guids }
+    end
+    return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp, order = saved, turn = turn,
+                         searched = searched })
+end
+
+-- Buttons, right-click menus and script visibility aren't kept in a save. Loading one (Ctrl+Z reloads the table too)
+-- leaves objects bare, so they are put back on every object here, and the turn strip is redrawn.
+function restore(saved)
+    for _, o in ipairs(getObjectsWithTag("scene")) do
+        if o.getName() == "Wicker Shield" then o.destruct() end   -- giveShield makes a fresh one that follows its giant
+    end
+    for _, o in ipairs(getAllObjects()) do
+        decorate(o)
+        if o.hasTag("hidden") then
+            local t = o.getColorTint()
+            tints[o.getGUID()] = { r = t.r, g = t.g, b = t.b, a = 1 }
+            o.setInvisibleTo(PLAYERS)
+        end
+    end
+    order = {}
+    for _, e in ipairs(saved) do
+        e.objs = {}
+        for _, g in ipairs(e.guids) do e.objs[#e.objs + 1] = getObjectFromGUID(g) end
+        e.guids = nil
+        order[#order + 1] = e
+    end
+    -- the loader resets the UI XML when its download lands: draw again for a few seconds
+    -- ponytail: 10 s covers a slow GitHub fetch; a later fetch would blank the strip until the next turn
+    Wait.time(function()
+        refreshPick()
+        drawTurns()
+        UI.setAttribute("sceneTitle", "text", DATA.scenes[scene].title)
+    end, 1, 10)
+end
+
+-- what each kind of object gets from the script when it spawns, and again after a reload
+function decorate(o)
+    if o.hasTag("trapgas") then                             -- the poison gas trap: the GM sets it off by hand
+        o.addContextMenuItem("Release the gas", function(color)
+            if color == "Black" then fxAt("gas_cloud", o.getPosition()) end
+        end)
+    end
+    if o.hasTag("giant") then giantMenu(o) end
+    if o.hasTag("shield") then giveShield(o) end
+    if o.hasTag("search") then o.addContextMenuItem("Search", function(color) search(o, color) end) end
+    if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
+    if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
+    if o.hasTag("fxclear") then clearCube(o) end
+    if o.hasTag("gm") then gmHide(o) end
+    if o.hasTag("gmconsole") then console(o) end
+    if o.hasTag("lootbag") then lootBag(o) end
+    for _, color in ipairs(DATA.colors) do
+        if o.hasTag("hp_" .. color) then hpShield(o, color, DATA.heroes[color].hp) end
+    end
 end
 
 -- First load or a new version: fresh hero kits and notebook, same scene, re-deal to seated players.
@@ -42,7 +103,7 @@ function install(sceneIndex)
     for _, d in ipairs(DATA.kits) do
         local g = d.grid
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if g.role == "hp" then hpShield(o, g.color, g.max) end
+            decorate(o)
             -- the RPG thief spawns in its crouched sneak pose, which reads as stuck sitting: switch to its other mode
             -- ponytail: guess at what the mode toggle does; remove if the thief still (or now) sits
             if d.Name == "rpg_THIEF" and o.RPGFigurine then pcall(function() o.RPGFigurine.changeMode() end) end
@@ -54,9 +115,7 @@ function install(sceneIndex)
     end
     for _, d in ipairs(DATA.gm) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if o.hasTag("gm") then gmHide(o) end
-            if o.hasTag("gmconsole") then console(o) end
-            if o.hasTag("lootbag") then lootBag(o) end
+            decorate(o)
         end })
     end
     -- the GM's hand: at the far side of the GM table, so "hover a bag/deck + number key" lands with the GM
@@ -169,17 +228,7 @@ function setScene(i)
     Tables.setCustomURL(s.table)
     for _, d in ipairs(s.spawns) do
         spawnObjectData({ data = placed(d), callback_function = function(o)
-            if o.hasTag("trapgas") then                             -- the poison gas trap: the GM sets it off by hand
-                o.addContextMenuItem("Release the gas", function(color)
-                    if color == "Black" then fxAt("gas_cloud", o.getPosition()) end
-                end)
-            end
-            if o.hasTag("giant") then giantMenu(o) end
-            if o.hasTag("shield") then giveShield(o) end
-            if o.hasTag("search") then o.addContextMenuItem("Search", function(color) search(o, color) end) end
-            if o.hasTag("fx") then o.interactable = false end      -- effects: no hover, no grabbing
-            if o.hasTag("fxhide") then o.setInvisibleTo(ALL) end   -- sound-only effect: hide its carrier cube
-            if o.hasTag("fxclear") then clearCube(o) end
+            decorate(o)
             if o.hasTag("hidden") then
                 o.setInvisibleTo(PLAYERS)
                 Wait.frames(function() hide(o) end, 5)   -- tint/outline/bar once the figure and its script have loaded
@@ -229,7 +278,6 @@ end
 PLAYERS = { "White", "Brown", "Red", "Orange", "Yellow", "Green", "Teal", "Blue", "Purple", "Pink", "Grey" }
 
 -- Hidden from players; for the GM it turns see-through so it reads as hidden at a glance (no outline).
-local tints = {}
 function hide(o)
     o.setInvisibleTo(PLAYERS)
     o.addTag("hidden")
@@ -432,6 +480,7 @@ end)
 
 function console(o)
     panel = o
+    o.clearButtons()
     for i, b in ipairs(DATA.gm_buttons) do
         local fn = "noop"
         if b.kind ~= "title" then
@@ -463,6 +512,7 @@ end
 local shields = {}
 function hpShield(o, color, max)
     shields[color] = o
+    o.clearButtons()
     hp[color] = hp[color] or max
     o.createButton({ click_function = "noop", function_owner = self, label = tostring(hp[color]),
                      position = { 0, 0.12, 0 }, width = 0, height = 0, font_size = 0.5 * BTN, font_color = { 1, 0.95, 0.85 } })
@@ -674,7 +724,6 @@ end
 -- GM "Initiative": each kind of visible, standing NPC that can fight rolls one d20 ("Giant x3"); all four heroes take
 -- the face their own d20 shows right now (+ Agility). The strip on top shows the order, current turn lit (and its
 -- figures highlighted); "Next turn" moves on, "End fight" clears it. Ties go to the heroes.
-local order, turn = {}, 0
 function initiative()
     musicBattle()   -- battle mode: battle music, grid, NPC health bars
     order, turn = {}, 0
@@ -800,7 +849,6 @@ end
 
 -- ---------------------------------------------------------------- searching
 -- Chests, barrels, crates and sacks without fixed loot: right-click > Search, once each, with the hero beside it.
-local searched = {}
 function search(o, color)
     if o.isDestroyed() then return end
     local who = color == "Black" and "The GM" or (DATA.heroes[color] and DATA.heroes[color].short)
@@ -855,6 +903,7 @@ function lootBag(o)
         broadcastToColor("Loot Bag: " .. text, "Black", { 0.94, 0.85, 0.63 })
         dropLoot(item, text, gold, { x = q.x - SQ, z = q.z }, true)
     end
+    o.clearButtons()
     o.createButton({ click_function = "drawLoot", function_owner = self, label = "Draw loot", position = { 0, 1.4, 0 },
                      rotation = { 0, 90, 0 }, width = 1.6 * BTN, height = 0.5 * BTN, font_size = 0.3 * BTN,
                      color = BROWN, font_color = CREAM })
@@ -963,6 +1012,7 @@ function giveShield(o)
         o.addContextMenuItem("Shield burned", function(c)
             if c == "Black" and not sh.isDestroyed() then
                 sh.destruct()
+                o.removeTag("shield")   -- a reload must not give it a new one
                 broadcastToAll("The wicker shield goes up in flames!", { 1, 0.6, 0.2 })
             end
         end)
