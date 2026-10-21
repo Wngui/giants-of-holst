@@ -410,6 +410,8 @@ assert g.getObjectFromGUID(CTL).marker == "original"
 c.setScene(3)
 c.initiative(); c.nextTurn()
 g.MusicPlayer.url, g.Grid.show_lines = None, False   # TTS may not bring them back
+npc0 = next(iter(g.getObjectsWithTag("npc").values()))
+c.held[npc0.getGUID()] = "Red"                          # a hero in a giant's fist
 names = [g.UIattr["tn%d.value" % k] for k in range(1, 4)]
 state = c.onSave()
 for o in list(g.objects.values()):
@@ -427,6 +429,8 @@ assert [g.UIattr["tn%d.value" % k] for k in range(1, 4)] == names and g.UIattr["
 assert all(o.menus and "Search" in o.menus for o in g.getObjectsWithTag("search").values())
 assert all(o.invisible for o in g.getObjectsWithTag("hidden").values())
 assert g.MusicPlayer.url == c.DATA.battle.url and g.Grid.show_lines is True   # battle music and grid back on
+assert c.held[npc0.getGUID()] == "Red" and list(g.getObjectsWithTag("fig_Red").values())[0].getLock()
+c.letGo(npc0)
 c.endFight()
 
 # ---- new version pushed: controller replaced, scene kept, kits respawned, Red re-dealt, no duplicates

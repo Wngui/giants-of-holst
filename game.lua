@@ -8,6 +8,8 @@ local scene, setupDone, hp = 1, {}, {}
 local order, turn, searched = {}, 0, {}   -- initiative strip; containers already searched (by GUID)
 local music, fighting = nil, false   -- the track playing; battle mode (grid, NPC bars, battle music)
 local tints = {}   -- hidden objects' own tint (hide() makes them see-through for the GM)
+local played = {}  -- cards whose effect has gone off (until REST), by GUID
+local light0      -- the table's own light intensity; each scene dims it by its own factor
 local T, SQ   -- measured table: centre/top/width/depth, and world units per grid square
 
 function onLoad(saved)
@@ -26,7 +28,8 @@ function start(s)
     measure()
     if s.version == VERSION then
         scene, setupDone, hp, turn, searched = s.scene, s.setupDone, s.hp or {}, s.turn or 0, s.searched or {}
-        music, fighting = s.music, s.fighting or false
+        music, fighting, played, light0 = s.music, s.fighting or false, s.played or {}, s.light0
+        held = s.held or {}
         Wait.frames(function() restore(s.order or {}) end, 10)   -- once every object has loaded
     else
         install(s.scene or 1)
@@ -45,7 +48,8 @@ function onSave()
         saved[#saved + 1] = { name = e.name, roll = e.roll, hero = e.hero, art = e.art, guids = guids }
     end
     return JSON.encode({ version = VERSION, scene = scene, setupDone = setupDone, hp = hp, order = saved, turn = turn,
-                         searched = searched, music = music, fighting = fighting })
+                         searched = searched, music = music, fighting = fighting, played = played, light0 = light0,
+                         held = held })
 end
 
 -- Buttons, right-click menus and script visibility aren't kept in a save. Loading one (Ctrl+Z reloads the table too)
@@ -64,6 +68,11 @@ function restore(saved)
     end
     if music then play(music) end
     battle(fighting)
+    backdrop(DATA.scenes[scene])
+    for g, color in pairs(held) do   -- a hero still in a giant's fist stays there
+        local o = getObjectFromGUID(g)
+        if o then hold(o, color) else held[g] = nil end
+    end
     order = {}
     for _, e in ipairs(saved) do
         e.objs = {}
@@ -451,7 +460,6 @@ function fx(p)
 end
 
 -- a hero card or item put face up on the map plays its effect there, once until REST picks it up again
-local played = {}
 function cardPlayed(o)
     if o.type ~= "Card" or o.is_face_down or played[o.getGUID()] or o.hasTag("gm") then return end
     Wait.frames(function()   -- once it has settled: a card dropped into a hand (rearranging it) plays nothing
@@ -621,7 +629,6 @@ end
 
 -- ---------------------------------------------------------------- mood: 360 backdrop + light colour per scene
 -- pcall: these TTS calls can't be tested here; a failure must never stop the scene switch
-local light0
 function backdrop(s)
     pcall(function() Backgrounds.setCustomURL(s.sky) end)
     pcall(function()
@@ -979,15 +986,20 @@ function grab(o)
     if not best then return broadcastToColor("No hero within 6 squares.", "Black", { 1, 0.6, 0.2 }) end
     for _, c in pairs(held) do if c == best then return end end   -- already in another giant's fist
     held[o.getGUID()] = best
-    local f, g = kit("fig_" .. best), o.getGUID()
+    hold(o, best)
+    fxAt("swipe", p)
+    broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
+end
+
+-- held: the hero stays in the fist, facing the giant, wherever the GM moves or turns it
+function hold(o, color)
+    local f, g = kit("fig_" .. color), o.getGUID()
+    if not f then return end
     local fb = f.getBounds()
     local fr = math.max(fb.size.x, fb.size.z) / 2   -- the hero's own radius: held clear of the giant's body
     f.setLock(true)
     f.setPosition(fist(o, fr))   -- straight there: a smooth move could drag it through the giant
-    fxAt("swipe", p)
-    broadcastToAll(o.getName() .. " grabs " .. DATA.heroes[best].short .. "! Might DC 14 to break free.", { 0.9, 0.4, 0.3 })
-    -- held: the hero stays in the fist, facing the giant, wherever the GM moves or turns it
-    carry(o, f, function() return fist(o, fr), { 0, o.getRotation().y + 180, 0 } end, function() return held[g] == best end)
+    carry(o, f, function() return fist(o, fr), { 0, o.getRotation().y + 180, 0 } end, function() return held[g] == color end)
 end
 
 -- keeps f at at() (position, rotation) on holder o, 20 times a second, while keep() holds and both exist.
